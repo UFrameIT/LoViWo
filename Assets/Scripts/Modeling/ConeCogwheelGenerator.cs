@@ -163,6 +163,13 @@ public class ConeCogwheelGenerator : MonoBehaviour
         for (float x = negAngle; x < posAngle; x += angleAccuracy)
         {
             float nextAngle;
+            int times;
+
+            if (x % angleAccuracy != 0.0f)
+            {
+                times = (int) Math.Round((double)(x / angleAccuracy), MidpointRounding.ToEven);
+                x = angleAccuracy * (float)times;
+            }
 
             if (x + angleAccuracy > posAngle)
                 nextAngle = posAngle;
