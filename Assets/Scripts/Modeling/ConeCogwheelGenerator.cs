@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter))]
-public class ConeCogwheelGenerator : MonoBehaviour
+public class ConeCogwheelGenerator : MonoBehaviour, CogwheelGenerator
 {
     private Mesh mesh;
     private float angle = 360.0f;
@@ -31,12 +31,6 @@ public class ConeCogwheelGenerator : MonoBehaviour
 
     //Default: Every 0.5° of the circle segment, there starts a new triangle
     private float angleAccuracy = 0.5f;
-
-    public void Start()
-    {
-        //Testing
-        setCogwheelValues(1f,20, 4f);
-    }
 
     public void setCogwheelValues(float height, int cogCount, float radius)
     {

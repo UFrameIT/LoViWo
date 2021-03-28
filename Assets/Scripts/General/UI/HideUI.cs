@@ -1,11 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static CommunicationEvents;
 
 public class HideUI : MonoBehaviour
 {
 
-    public KeyCode Key = KeyCode.Tab;
+    public KeyCode Key = KeyCode.LeftShift;
     //public KeyCode ScreenshotKey = KeyCode.F2;
     
     public bool LockOnly = true;
@@ -44,6 +45,8 @@ public class HideUI : MonoBehaviour
                 UICanvas.enabled = !UICanvas.enabled;
                 CamControl.enabled = camActive;
                 PlayerControl.enabled = camActive;
+                if (!UICanvas.enabled)
+                    CommunicationEvents.closeWindowEvent.Invoke();
             }
 
 
