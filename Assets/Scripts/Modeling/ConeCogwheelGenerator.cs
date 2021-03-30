@@ -32,6 +32,10 @@ public class ConeCogwheelGenerator : MonoBehaviour, CogwheelGenerator
     //Default: Every 0.5° of the circle segment, there starts a new triangle
     private float angleAccuracy = 0.5f;
 
+    public float getHeight() {
+        return this.height;
+    }
+
     public void setCogwheelValues(float height, int cogCount, float radius)
     {
         if (height <= 0 || cogCount <= 1 || radius <= 0)
@@ -358,6 +362,7 @@ public class ConeCogwheelGenerator : MonoBehaviour, CogwheelGenerator
         mesh.vertices = verticeList.ToArray();
         mesh.triangles = triangleList.ToArray();
         GetComponent<MeshFilter>().mesh = mesh;
+        GetComponent<MeshCollider>().sharedMesh = mesh;
         mesh.RecalculateNormals();
     }
 }

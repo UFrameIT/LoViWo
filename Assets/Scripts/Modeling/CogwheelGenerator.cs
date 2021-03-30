@@ -5,4 +5,6 @@ using UnityEngine;
 public interface CogwheelGenerator
 {
     void setCogwheelValues(float height, int cogCount, float radius);
+
+    float getHeight();
 }

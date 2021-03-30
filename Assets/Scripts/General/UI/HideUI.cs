@@ -46,7 +46,7 @@ public class HideUI : MonoBehaviour
                 CamControl.enabled = camActive;
                 PlayerControl.enabled = camActive;
                 if (!UICanvas.enabled)
-                    CommunicationEvents.closeWindowEvent.Invoke();
+                    CommunicationEvents.closeUIEvent.Invoke();
             }
 
 

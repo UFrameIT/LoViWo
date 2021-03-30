@@ -20,8 +20,12 @@ public class CreateCogwheel : MonoBehaviour
             float.TryParse(heightInput.text, out height))
         {
             GameObject cogwheel = Instantiate(cogwheelGeneratorPrefab);
+            cogwheel.gameObject.layer = LayerMask.NameToLayer("CurrentlyEdited");
             cogwheel.GetComponentInChildren<CogwheelGenerator>().setCogwheelValues(height, cogCount, radius);
+
+            //TODO: Remove
             cogwheel.transform.position = new Vector3(20, (float)(radius * 2 + 0.5), 0);
+            CommunicationEvents.positionCogwheelEvent.Invoke(cogwheel);
         }
         else
             Debug.Log("Inputs for height, cogCount or radius could not be parsed correctly!");

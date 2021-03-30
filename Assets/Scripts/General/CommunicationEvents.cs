@@ -7,5 +7,10 @@ public static class CommunicationEvents
 {
     public class SignalEvent : UnityEvent {}
 
-    public static SignalEvent closeWindowEvent = new SignalEvent();
+    public class AnimationEvent : UnityEvent<GameObject>{}
+    
+    public static SignalEvent closeUIEvent = new SignalEvent();
+    public static SignalEvent openUIEvent = new SignalEvent();
+    public static SignalEvent openPanelEvent = new SignalEvent();
+    public static AnimationEvent positionCogwheelEvent = new AnimationEvent();
 }
