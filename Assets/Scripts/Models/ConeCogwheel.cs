@@ -52,6 +52,10 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
         return this.cogAngle;
     }
 
+    public float getPitchDiameter() {
+        return this.pitchDiameter;
+    }
+
     public void generateMesh(float height, int cogCount, float radius)
     {
         if (height <= 0 || cogCount <= 1 || radius <= 0)
@@ -84,7 +88,8 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
     {
         float radius = this.pitchDiameter/2;
 
-        for (int i = 0; i < this.cogCount; i++) {
+        for (float i = 0.5f; i < this.cogCount; i += 1f)
+        {
             float currentAngle = i * this.cogAngle;
             float pointX = radius * Mathf.Cos(currentAngle * Mathf.Deg2Rad);
             float pointZ = radius * Mathf.Sin(currentAngle * Mathf.Deg2Rad);

@@ -58,13 +58,14 @@ public class MoveTool : MonoBehaviour
                     Vector3 currentPosition = Hit.point;
                     GameObject otherCogwheel = Hit.collider.gameObject;
                     Vector3 otherPosition = otherCogwheel.transform.position;
+                    float otherPitchDiameter = otherCogwheel.GetComponentInChildren<Cogwheel>().getPitchDiameter();
                     List<Vector3> otherRelativeVectors = otherCogwheel.GetComponentInChildren<Cogwheel>().getRelativeCogInputVectors();
                     otherRelativeVectors.Sort((x,y) => Math.Abs(Vector3.Distance(currentPosition, otherPosition + (otherCogwheel.transform.rotation * x))).CompareTo(Math.Abs(Vector3.Distance(currentPosition, otherPosition + (otherCogwheel.transform.rotation * y)))));
 
-                    float movingObjectCogAngle = movingObject.GetComponentInChildren<Cogwheel>().getCogAngle();
-                    movingObject.transform.up = Hit.normal;
-                    movingObject.transform.position = otherPosition + (2 * (otherCogwheel.transform.rotation * otherRelativeVectors[0]));
-                    movingObject.transform.eulerAngles = otherCogwheel.transform.eulerAngles + (movingObjectCogAngle/2)*otherCogwheel.transform.up;
+                    float movingObjectPitchDiameter = movingObject.GetComponentInChildren<Cogwheel>().getPitchDiameter();
+
+                    movingObject.transform.position = otherPosition + ((1 + movingObjectPitchDiameter/otherPitchDiameter) * (otherCogwheel.transform.rotation * otherRelativeVectors[0]));
+                    movingObject.transform.LookAt(otherPosition, Hit.normal);
                 }
                 //Else: Follow cursor
                 else
