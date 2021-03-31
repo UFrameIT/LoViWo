@@ -21,7 +21,7 @@ public class CreateCogwheel : MonoBehaviour
         {
             GameObject cogwheel = Instantiate(cogwheelGeneratorPrefab);
             cogwheel.gameObject.layer = LayerMask.NameToLayer("CurrentlyEdited");
-            cogwheel.GetComponentInChildren<CogwheelGenerator>().setCogwheelValues(height, cogCount, radius);
+            cogwheel.GetComponentInChildren<Cogwheel>().generateMesh(height, cogCount, radius);
 
             //TODO: Remove
             cogwheel.transform.position = new Vector3(20, (float)(radius * 2 + 0.5), 0);

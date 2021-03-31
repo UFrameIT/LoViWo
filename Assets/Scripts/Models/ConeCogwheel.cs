@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(MeshFilter))]
-public class ConeCogwheelGenerator : MonoBehaviour, CogwheelGenerator
+public class ConeCogwheel : MonoBehaviour, Cogwheel
 {
     private Mesh mesh;
     private float angle = 360.0f;
@@ -19,10 +19,10 @@ public class ConeCogwheelGenerator : MonoBehaviour, CogwheelGenerator
     private float cogTopHeight;
     private float cogBaseHeight;
     private float cogHeight;
-    private float module;
+    public float module;
     private float bottomClearance;
 
-    private float cogAngle;
+    public float cogAngle;
     private float radiusAdjustment;
 
     //Only needed for involute-toothing:
@@ -32,11 +32,27 @@ public class ConeCogwheelGenerator : MonoBehaviour, CogwheelGenerator
     //Default: Every 0.5° of the circle segment, there starts a new triangle
     private float angleAccuracy = 0.5f;
 
+    private List<Vector3> relativeCogInputVectors = new List<Vector3>();
+
+
+    public List<Vector3> getRelativeCogInputVectors()
+    {
+        return relativeCogInputVectors;
+    }
+
     public float getHeight() {
         return this.height;
     }
 
-    public void setCogwheelValues(float height, int cogCount, float radius)
+    public float getModule() {
+        return this.module;
+    }
+
+    public float getCogAngle() {
+        return this.cogAngle;
+    }
+
+    public void generateMesh(float height, int cogCount, float radius)
     {
         if (height <= 0 || cogCount <= 1 || radius <= 0)
         {
@@ -60,7 +76,21 @@ public class ConeCogwheelGenerator : MonoBehaviour, CogwheelGenerator
         this.angleAccuracy = this.cogAngle / 80;
         this.radiusAdjustment = this.cogHeight / (80/4);
 
+        calculateRelativeCogInputVectors();
         CreateConeCogwheel();
+    }
+
+    private void calculateRelativeCogInputVectors()
+    {
+        float radius = this.pitchDiameter/2;
+
+        for (int i = 0; i < this.cogCount; i++) {
+            float currentAngle = i * this.cogAngle;
+            float pointX = radius * Mathf.Cos(currentAngle * Mathf.Deg2Rad);
+            float pointZ = radius * Mathf.Sin(currentAngle * Mathf.Deg2Rad);
+            Vector3 relativeVector = new Vector3(pointX, 0, pointZ);
+            relativeCogInputVectors.Add(relativeVector);
+        }
     }
 
     private void CreateConeCogwheel()

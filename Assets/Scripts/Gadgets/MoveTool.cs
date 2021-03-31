@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using System;
 
 public class MoveTool : MonoBehaviour
 {
@@ -50,54 +51,31 @@ public class MoveTool : MonoBehaviour
             if (Physics.Raycast(ray, out tempHit, float.MaxValue, this.layerMask))
             {
                 this.Hit = tempHit;
-                // Debug.Log(Hit.transform.tag);
-                /*if (Hit.collider.transform.CompareTag("SnapZone"))
+                
+                //If Collision with other cogwheel, that has the same module: Snapzone positioning
+                if (Hit.collider.gameObject.layer == LayerMask.NameToLayer("Cogwheel") && Hit.collider.gameObject.GetComponentInChildren<Cogwheel>().getModule().Equals(this.movingObject.GetComponentInChildren<Cogwheel>().getModule()))
                 {
-                    if (Hit.collider.gameObject.layer == LayerMask.NameToLayer("Ray"))
-                    {
+                    Vector3 currentPosition = Hit.point;
+                    GameObject otherCogwheel = Hit.collider.gameObject;
+                    Vector3 otherPosition = otherCogwheel.transform.position;
+                    List<Vector3> otherRelativeVectors = otherCogwheel.GetComponentInChildren<Cogwheel>().getRelativeCogInputVectors();
+                    otherRelativeVectors.Sort((x,y) => Math.Abs(Vector3.Distance(currentPosition, otherPosition + (otherCogwheel.transform.rotation * x))).CompareTo(Math.Abs(Vector3.Distance(currentPosition, otherPosition + (otherCogwheel.transform.rotation * y)))));
 
-                        int id = Hit.collider.gameObject.GetComponent<FactObject>().Id;
-                        RayFact lineFact = CommunicationEvents.Facts.Find((x => x.Id == id)) as RayFact;
-                        PointFact p1 = CommunicationEvents.Facts.Find((x => x.Id == lineFact.Pid1)) as PointFact;
-                        PointFact p2 = CommunicationEvents.Facts.Find((x => x.Id == lineFact.Pid2)) as PointFact;
-
-                        Vector3 lineDir = p2.Point - p1.Point;
-                        Plane plane = new Plane(lineDir, Hit.point);
-
-                        Ray intersectionRay = new Ray(p1.Point, lineDir);
-
-                        if (plane.Raycast(intersectionRay, out float enter))
-                        {
-
-                            Hit.point = p1.Point + lineDir.normalized * enter;
-                        }
-                        else Debug.LogError("something wrong with linesnapzone");
-                        CheckMouseButtons(true, true);
-
-
-
-                    }
-                    else
-                    {
-                        Hit.point = Hit.collider.transform.position;
-                        Hit.normal = Vector3.up;
-                        CheckMouseButtons(true);
-                    }
-
-
-                    transform.position = Hit.point;
-                    transform.up = Hit.normal;
-
+                    float movingObjectCogAngle = movingObject.GetComponentInChildren<Cogwheel>().getCogAngle();
+                    movingObject.transform.up = Hit.normal;
+                    movingObject.transform.position = otherPosition + (2 * (otherCogwheel.transform.rotation * otherRelativeVectors[0]));
+                    movingObject.transform.eulerAngles = otherCogwheel.transform.eulerAngles + (movingObjectCogAngle/2)*otherCogwheel.transform.up;
                 }
-                else */
+                //Else: Follow cursor
+                else
                 {
-                    float height = movingObject.transform.GetComponentInChildren<CogwheelGenerator>().getHeight();
+                    float height = movingObject.transform.GetComponentInChildren<Cogwheel>().getHeight();
                     Vector3 tempPoint = Hit.point;
                     movingObject.transform.up = Hit.normal;
-                    movingObject.transform.position = tempPoint + ((height/2) * Hit.normal);
-                    CheckMouseButtons();
+                    movingObject.transform.position = tempPoint + ((height / 2) * Hit.normal);
                 }
 
+                CheckMouseButtons();
             }
         }
     }

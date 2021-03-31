@@ -25,7 +25,9 @@ public class PanelEvents : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Tab))
         {
-            Selectable next = system.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
+            Selectable next = null;
+            if(system.currentSelectedGameObject != null && system.currentSelectedGameObject.GetComponent<Selectable>() != null)
+                next = system.currentSelectedGameObject.GetComponent<Selectable>().FindSelectableOnDown();
 
             if (next != null)
             {
