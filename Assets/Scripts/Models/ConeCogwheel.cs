@@ -399,5 +399,10 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
         GetComponent<MeshFilter>().mesh = mesh;
         GetComponent<MeshCollider>().sharedMesh = mesh;
         mesh.RecalculateNormals();
+
+        /* Use this to save the Mesh, created from Mesh API
+        UnityEditor.AssetDatabase.CreateAsset(mesh, "Assets/Resources/Prefabs/Models/GeneratorCogwheel.asset");
+        UnityEditor.AssetDatabase.SaveAssets();
+        */
     }
 }

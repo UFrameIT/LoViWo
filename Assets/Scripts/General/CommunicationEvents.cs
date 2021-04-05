@@ -13,4 +13,5 @@ public static class CommunicationEvents
     public static SignalEvent openUIEvent = new SignalEvent();
     public static SignalEvent openPanelEvent = new SignalEvent();
     public static AnimationEvent positionCogwheelEvent = new AnimationEvent();
+    public static AnimationEvent positionGeneratorEvent = new AnimationEvent();
 }

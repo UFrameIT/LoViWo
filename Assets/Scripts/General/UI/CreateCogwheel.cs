@@ -3,12 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CreateCogwheel : MonoBehaviour
+public class CreateCogwheel : MonoBehaviour, CreateModel
 {
     public GameObject cogwheelGeneratorPrefab;
     public InputField radiusInput;
     public InputField cogCountInput;
     public InputField heightInput;
+
+    public void setGeneratorPrefab(GameObject prefab) {
+        this.cogwheelGeneratorPrefab = prefab;
+    }
 
     public void createCogwheel() {
         float height;
@@ -23,8 +27,7 @@ public class CreateCogwheel : MonoBehaviour
             cogwheel.gameObject.layer = LayerMask.NameToLayer("CurrentlyEdited");
             cogwheel.GetComponentInChildren<Cogwheel>().generateMesh(height, cogCount, radius);
 
-            //TODO: Remove
-            cogwheel.transform.position = new Vector3(20, (float)(radius * 2 + 0.5), 0);
+            //cogwheel.transform.position = new Vector3(20, (float)(radius * 2 + 0.5), 0);
             CommunicationEvents.positionCogwheelEvent.Invoke(cogwheel);
         }
         else

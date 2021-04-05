@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class MoveTool : MonoBehaviour
+public class CogwheelMoveTool : MonoBehaviour
 {
     public RaycastHit Hit;
     private Camera Cam;
@@ -73,7 +73,7 @@ public class MoveTool : MonoBehaviour
                     float height = movingObject.transform.GetComponentInChildren<Cogwheel>().getHeight();
                     Vector3 tempPoint = Hit.point;
                     movingObject.transform.up = Hit.normal;
-                    movingObject.transform.position = tempPoint + ((height / 2) * Hit.normal);
+                    movingObject.transform.position = tempPoint;
                 }
 
                 CheckMouseButtons();

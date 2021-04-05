@@ -17,6 +17,6 @@ public class CreatePanel : MonoBehaviour
         panel.transform.localScale = new Vector3(1, 1, 1);
         panel.transform.localPosition = new Vector3(-350,0,0);
         panel.GetComponentInChildren<PanelEvents>().setTitle(panelTitle);
-        panel.GetComponentInChildren<CreateCogwheel>().cogwheelGeneratorPrefab = generatorPrefab;
+        panel.GetComponentInChildren<CreateModel>().setGeneratorPrefab(generatorPrefab);
     }
 }
