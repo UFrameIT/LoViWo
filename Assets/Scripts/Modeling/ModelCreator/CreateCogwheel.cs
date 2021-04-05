@@ -27,7 +27,6 @@ public class CreateCogwheel : MonoBehaviour, CreateModel
             cogwheel.gameObject.layer = LayerMask.NameToLayer("CurrentlyEdited");
             cogwheel.GetComponentInChildren<Cogwheel>().generateMesh(height, cogCount, radius);
 
-            //cogwheel.transform.position = new Vector3(20, (float)(radius * 2 + 0.5), 0);
             CommunicationEvents.positionCogwheelEvent.Invoke(cogwheel);
         }
         else

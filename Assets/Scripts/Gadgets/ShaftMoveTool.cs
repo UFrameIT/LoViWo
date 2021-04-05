@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class GeneratorMoveTool : MonoBehaviour
+public class ShaftMoveTool : MonoBehaviour
 {
     public RaycastHit Hit;
     private Camera Cam;
@@ -19,7 +19,7 @@ public class GeneratorMoveTool : MonoBehaviour
         this.layerMask = ~this.layerMask;
         Cam = Camera.main;
 
-        CommunicationEvents.positionGeneratorEvent.AddListener(Activate);
+        CommunicationEvents.positionShaftEvent.AddListener(Activate);
         CommunicationEvents.openUIEvent.AddListener(Cancel);
         CommunicationEvents.closeUIEvent.AddListener(Cancel);
     }
@@ -51,11 +51,18 @@ public class GeneratorMoveTool : MonoBehaviour
             if (Physics.Raycast(ray, out tempHit, float.MaxValue, this.layerMask))
             {
                 this.Hit = tempHit;
-                
-                //If Collision with Ground
-                if (Hit.collider.gameObject.layer == LayerMask.NameToLayer("Ground"))
+
+                //If Collision with Generator
+                if (Hit.collider.gameObject.layer == LayerMask.NameToLayer("Generator"))
                 {
-                    movingObject.transform.position = Hit.point;
+                    GameObject generator = Hit.collider.gameObject;
+
+                    movingObject.transform.position = generator.transform.position + Hit.normal * (movingObject.transform.localScale.y + (generator.transform.localScale.y / 2));
+                    movingObject.transform.up = Hit.normal;
+                }
+                else {
+                    movingObject.transform.position = Hit.point + Hit.normal * (movingObject.transform.localScale.x / 2);
+                    movingObject.transform.forward = Hit.normal;
                 }
 
                 CheckMouseButtons();
@@ -68,17 +75,8 @@ public class GeneratorMoveTool : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
-            //Set Layer for gameobject and all its children
-            SetLayerRecursively(movingObject, LayerMask.NameToLayer("Generator"));
+            movingObject.gameObject.layer = LayerMask.NameToLayer("Shaft");
             Stop();
-        }
-    }
-
-    void SetLayerRecursively(GameObject obj, int layer) {
-        obj.layer = layer;
-
-        foreach (Transform child in obj.transform) {
-            SetLayerRecursively(child.gameObject, layer);
         }
     }
 }
