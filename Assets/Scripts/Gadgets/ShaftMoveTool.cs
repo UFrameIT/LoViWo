@@ -60,7 +60,16 @@ public class ShaftMoveTool : MonoBehaviour
                     movingObject.transform.position = generator.transform.position + Hit.normal * (movingObject.transform.localScale.y + (generator.transform.localScale.y / 2));
                     movingObject.transform.up = Hit.normal;
                 }
-                else {
+                //If Collision with Cogwheel
+                else if (Hit.collider.gameObject.layer == LayerMask.NameToLayer("Cogwheel"))
+                {
+                    GameObject otherCogwheel = Hit.collider.gameObject;
+
+                    movingObject.transform.position = otherCogwheel.transform.position;
+                    movingObject.transform.up = otherCogwheel.transform.up;
+                }
+                else
+                {
                     movingObject.transform.position = Hit.point + Hit.normal * (movingObject.transform.localScale.x / 2);
                     movingObject.transform.forward = Hit.normal;
                 }
