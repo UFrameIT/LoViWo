@@ -31,6 +31,7 @@ public class CogwheelMoveTool : MonoBehaviour
         CommunicationEvents.closeUIEvent.AddListener(Cancel);
 
         if (debug && debugMaterial != null && lineRenderer != null) {
+            this.lineRenderer.enabled = true;
             this.lineRenderer.material = debugMaterial;
             this.lineRenderer.startWidth = 0.095f;
             this.lineRenderer.endWidth = 0.095f;
