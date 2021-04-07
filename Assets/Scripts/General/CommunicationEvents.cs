@@ -15,4 +15,5 @@ public static class CommunicationEvents
     public static AnimationEvent positionCogwheelEvent = new AnimationEvent();
     public static AnimationEvent positionGeneratorEvent = new AnimationEvent();
     public static AnimationEvent positionShaftEvent = new AnimationEvent();
+    public static AnimationEvent positionShaftHolderEvent = new AnimationEvent();
 }

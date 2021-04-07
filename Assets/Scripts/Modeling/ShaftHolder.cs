@@ -7,7 +7,7 @@ using UnityEngine;
 public class ShaftHolder : MonoBehaviour
 {
     public float innerRadius;
-    public float height;
+    public float thickness;
 
     private float borderWidth = 1.0f;
     private Mesh mesh;
@@ -15,10 +15,10 @@ public class ShaftHolder : MonoBehaviour
     //Every 0.5° of the inner circle, there starts a new triangle
     private float angleAccuracy = 0.5f;
 
-    public void generateMesh(float innerRadius, float height)
+    public void generateMesh(float innerRadius, float thickness)
     {
         this.innerRadius = Mathf.Abs(innerRadius);
-        this.height = Mathf.Abs(height);
+        this.thickness = Mathf.Abs(thickness);
 
         CreateShaftHolder();
     }
@@ -41,13 +41,13 @@ public class ShaftHolder : MonoBehaviour
 
         //Adding Triangles independent of inner circle
         Vector3 upperRightCornerBase = new Vector3(halfSquareLength, 0, halfSquareLength);
-        Vector3 upperRightCornerTop = new Vector3(halfSquareLength, height, halfSquareLength);
+        Vector3 upperRightCornerTop = new Vector3(halfSquareLength, thickness, halfSquareLength);
         Vector3 upperLeftCornerBase = new Vector3(-halfSquareLength, 0, halfSquareLength);
-        Vector3 upperLeftCornerTop = new Vector3(-halfSquareLength, height, halfSquareLength);
+        Vector3 upperLeftCornerTop = new Vector3(-halfSquareLength, thickness, halfSquareLength);
         Vector3 lowerLeftCornerBase = new Vector3(-halfSquareLength, 0, -halfSquareLength);
-        Vector3 lowerLeftCornerTop = new Vector3(-halfSquareLength, height, -halfSquareLength);
+        Vector3 lowerLeftCornerTop = new Vector3(-halfSquareLength, thickness, -halfSquareLength);
         Vector3 lowerRightCornerBase = new Vector3(halfSquareLength, 0, -halfSquareLength);
-        Vector3 lowerRightCornerTop = new Vector3(halfSquareLength, height, -halfSquareLength);
+        Vector3 lowerRightCornerTop = new Vector3(halfSquareLength, thickness, -halfSquareLength);
 
         //Adding corner points
         verticeList.Add(upperRightCornerBase);
@@ -69,13 +69,13 @@ public class ShaftHolder : MonoBehaviour
 
         //Circle points
         Vector3 circlePointBase_0_1 = new Vector3(0, 0, innerRadius);
-        Vector3 circlePointTop_0_1 = new Vector3(0, height, innerRadius);
+        Vector3 circlePointTop_0_1 = new Vector3(0, thickness, innerRadius);
         Vector3 circlePointBase_m1_0 = new Vector3(-innerRadius, 0, 0);
-        Vector3 circlePointTop_m1_0 = new Vector3(-innerRadius, height, 0);
+        Vector3 circlePointTop_m1_0 = new Vector3(-innerRadius, thickness, 0);
         Vector3 circlePointBase_0_m1 = new Vector3(0, 0, -innerRadius);
-        Vector3 circlePointTop_0_m1 = new Vector3(0, height, -innerRadius);
+        Vector3 circlePointTop_0_m1 = new Vector3(0, thickness, -innerRadius);
         Vector3 circlePointBase_1_0 = new Vector3(innerRadius, 0, 0);
-        Vector3 circlePointTop_1_0 = new Vector3(innerRadius, height, 0);
+        Vector3 circlePointTop_1_0 = new Vector3(innerRadius, thickness, 0);
 
         //Adding circle points
         verticeList.Add(circlePointBase_0_1);
@@ -182,11 +182,11 @@ public class ShaftHolder : MonoBehaviour
                 int cornerTopIndex = verticeCounter++;
                 verticeList.Add(new Vector3(pointX, 0, pointZ));
                 int circlePoint1BaseIndex = verticeCounter++;
-                verticeList.Add(new Vector3(pointX, height, pointZ));
+                verticeList.Add(new Vector3(pointX, thickness, pointZ));
                 int circlePoint1TopIndex = verticeCounter++;
                 verticeList.Add(new Vector3(nextPointX, 0, nextPointZ));
                 int circlePoint2BaseIndex = verticeCounter++;
-                verticeList.Add(new Vector3(nextPointX, height, nextPointZ));
+                verticeList.Add(new Vector3(nextPointX, thickness, nextPointZ));
                 int circlePoint2TopIndex = verticeCounter++;
 
                 //Add triangle for lower side
@@ -216,11 +216,11 @@ public class ShaftHolder : MonoBehaviour
                 int cornerTopIndex = verticeCounter++;
                 verticeList.Add(new Vector3(pointX, 0, pointZ));
                 int circlePoint1BaseIndex = verticeCounter++;
-                verticeList.Add(new Vector3(pointX, height, pointZ));
+                verticeList.Add(new Vector3(pointX, thickness, pointZ));
                 int circlePoint1TopIndex = verticeCounter++;
                 verticeList.Add(new Vector3(nextPointX, 0, nextPointZ));
                 int circlePoint2BaseIndex = verticeCounter++;
-                verticeList.Add(new Vector3(nextPointX, height, nextPointZ));
+                verticeList.Add(new Vector3(nextPointX, thickness, nextPointZ));
                 int circlePoint2TopIndex = verticeCounter++;
 
                 //Add triangle for lower side
@@ -249,11 +249,11 @@ public class ShaftHolder : MonoBehaviour
                 int cornerTopIndex = verticeCounter++;
                 verticeList.Add(new Vector3(pointX, 0, pointZ));
                 int circlePoint1BaseIndex = verticeCounter++;
-                verticeList.Add(new Vector3(pointX, height, pointZ));
+                verticeList.Add(new Vector3(pointX, thickness, pointZ));
                 int circlePoint1TopIndex = verticeCounter++;
                 verticeList.Add(new Vector3(nextPointX, 0, nextPointZ));
                 int circlePoint2BaseIndex = verticeCounter++;
-                verticeList.Add(new Vector3(nextPointX, height, nextPointZ));
+                verticeList.Add(new Vector3(nextPointX, thickness, nextPointZ));
                 int circlePoint2TopIndex = verticeCounter++;
 
                 //Add triangle for lower side
@@ -282,11 +282,11 @@ public class ShaftHolder : MonoBehaviour
                 int cornerTopIndex = verticeCounter++;
                 verticeList.Add(new Vector3(pointX, 0, pointZ));
                 int circlePoint1BaseIndex = verticeCounter++;
-                verticeList.Add(new Vector3(pointX, height, pointZ));
+                verticeList.Add(new Vector3(pointX, thickness, pointZ));
                 int circlePoint1TopIndex = verticeCounter++;
                 verticeList.Add(new Vector3(nextPointX, 0, nextPointZ));
                 int circlePoint2BaseIndex = verticeCounter++;
-                verticeList.Add(new Vector3(nextPointX, height, nextPointZ));
+                verticeList.Add(new Vector3(nextPointX, thickness, nextPointZ));
                 int circlePoint2TopIndex = verticeCounter++;
 
                 //Add triangle for lower side

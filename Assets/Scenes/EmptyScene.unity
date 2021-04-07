@@ -283,6 +283,7 @@ Transform:
   - {fileID: 1730270806}
   - {fileID: 1221792686}
   - {fileID: 2003013767}
+  - {fileID: 575087619}
   m_Father: {fileID: 784939541}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -1820,6 +1821,49 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 533793499}
   m_CullTransparentMesh: 0
+--- !u!1 &575087618
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 575087619}
+  - component: {fileID: 575087620}
+  m_Layer: 9
+  m_Name: ShaftHolderMoveTool
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &575087619
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 575087618}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 69552591}
+  m_RootOrder: 3
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &575087620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 575087618}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6b74fc0811c41dd498ad2fe8d7640b97, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &586016304
 GameObject:
   m_ObjectHideFlags: 0
@@ -4805,9 +4849,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   parentCanvas: {fileID: 334365379}
-  prefab: {fileID: 6873752201105433567, guid: 5574cc758fe820044b980c5cfcd6cda0, type: 3}
-  panelTitle: Generator
-  generatorPrefab: {fileID: 272001209807832530, guid: 64f717dc282a6104eb2039998285217c,
+  prefab: {fileID: 1756704132705302512, guid: 16e2d52924a91784bbee9d6e58f375b2, type: 3}
+  panelTitle: Shaft-Holder
+  generatorPrefab: {fileID: 458557811768577588, guid: 6d879228ef449024d91897c9784e5005,
     type: 3}
 --- !u!114 &1847810950
 MonoBehaviour:

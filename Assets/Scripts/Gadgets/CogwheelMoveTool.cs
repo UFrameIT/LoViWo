@@ -117,7 +117,7 @@ public class CogwheelMoveTool : MonoBehaviour
                     Vector3 projectedPoint = Vector3.Project((Hit.point - shaft.transform.position), shaft.transform.up);
 
                     movingObject.transform.up = shaft.transform.up;
-                    movingObject.transform.position = shaft.transform.position + projectedPoint; //shaft.transform.position + shaft.transform.up * Vector3.Distance(Hit.point, shaft.transform.position);
+                    movingObject.transform.position = shaft.transform.position + projectedPoint;
                 }
                 //Else: Follow cursor
                 else
