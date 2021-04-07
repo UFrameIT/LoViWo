@@ -76,9 +76,9 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
         this.outsideDiameter = this.pitchDiameter + 2 * this.cogTopHeight;
         this.insideDiameter = this.pitchDiameter - 2 * this.cogBaseHeight;
 
-        this.cogAngle = this.angle / this.cogCount;
-        this.angleAccuracy = this.cogAngle / 80;
-        this.radiusAdjustment = this.cogHeight / (80/4);
+        this.cogAngle = this.angle / (float)this.cogCount;
+        this.angleAccuracy = this.cogAngle / 80.0f;
+        this.radiusAdjustment = this.cogHeight / (float)(80/4);
 
         calculateRelativeCogInputVectors();
         CreateConeCogwheel();

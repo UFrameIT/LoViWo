@@ -12,6 +12,13 @@ public class CogwheelMoveTool : MonoBehaviour
     private GameObject movingObject;
     private bool movingActive;
 
+    //Variables for debugging
+    public Boolean debug = false;
+    private Boolean debuggingActive = false;
+    public Material debugMaterial;
+    public LineRenderer lineRenderer;
+    private List<Vector3> linePositions = new List<Vector3>();
+
     void Start()
     {
         this.layerMask = LayerMask.GetMask("Player","CurrentlyEdited");
@@ -22,11 +29,27 @@ public class CogwheelMoveTool : MonoBehaviour
         CommunicationEvents.positionCogwheelEvent.AddListener(Activate);
         CommunicationEvents.openUIEvent.AddListener(Cancel);
         CommunicationEvents.closeUIEvent.AddListener(Cancel);
+
+        if (debug && debugMaterial != null && lineRenderer != null) {
+            this.lineRenderer.material = debugMaterial;
+            this.lineRenderer.startWidth = 0.095f;
+            this.lineRenderer.endWidth = 0.095f;
+            this.debuggingActive = true;
+        }
     }
 
     void Activate(GameObject obj) {
         this.movingObject = obj;
         this.movingActive = true;
+
+        if (debuggingActive) {
+            this.lineRenderer.positionCount = 4;
+
+            Vector3 nullVector = new Vector3(0, 0, 0);
+            for (int i = 0; i < this.lineRenderer.positionCount; i++) {
+                this.linePositions.Add(nullVector);
+            }
+        }
     }
 
     //Stop Moving AND destroy moving GameObject
@@ -39,6 +62,12 @@ public class CogwheelMoveTool : MonoBehaviour
     void Stop() {
         movingObject = null;
         movingActive = false;
+
+        if (debuggingActive)
+        {
+            this.lineRenderer.positionCount = 0;
+            this.linePositions = new List<Vector3>();
+        }
     }
 
     void Update()
@@ -63,9 +92,23 @@ public class CogwheelMoveTool : MonoBehaviour
                     otherRelativeVectors.Sort((x, y) => Math.Abs(Vector3.Distance(currentPosition, otherPosition + (otherCogwheel.transform.rotation * x))).CompareTo(Math.Abs(Vector3.Distance(currentPosition, otherPosition + (otherCogwheel.transform.rotation * y)))));
 
                     float movingObjectPitchDiameter = movingObject.GetComponentInChildren<Cogwheel>().getPitchDiameter();
+
+                    movingObject.transform.position = otherPosition + ((1 + movingObjectPitchDiameter / otherPitchDiameter) * (otherCogwheel.transform.rotation * otherRelativeVectors[0]));
                     
-                    movingObject.transform.position = otherPosition + ((1.0f + movingObjectPitchDiameter / otherPitchDiameter) * (otherCogwheel.transform.rotation * otherRelativeVectors[0]));
-                    movingObject.transform.LookAt(otherPosition, Hit.normal);
+                    //The Right-Vector of movingObject should look at the otherObject, so Vector3.Cross(up, right) gives us the resulting forward-vector
+                    Vector3 right = (otherPosition - movingObject.transform.position).normalized;
+                    Vector3 up = Hit.normal;
+                    movingObject.transform.rotation = Quaternion.LookRotation(Vector3.Cross(up, right), up);
+
+                    if (debuggingActive) {
+                        this.linePositions[0] = otherPosition;
+                        this.linePositions[1] = otherPosition + (otherCogwheel.transform.rotation * otherRelativeVectors[0]);
+                        this.linePositions[2] = movingObject.transform.position + (movingObjectPitchDiameter/2 * movingObject.transform.right);
+                        this.linePositions[3] = movingObject.transform.position;
+
+                        for(int i = 0; i < this.lineRenderer.positionCount; i++)
+                            this.lineRenderer.SetPosition(i, this.linePositions[i]);
+                    }
                 }
                 //If Collision with Shaft
                 else if (Hit.collider.gameObject.layer == LayerMask.NameToLayer("Shaft")) {
