@@ -8,6 +8,8 @@ public static class CommunicationEvents
     public class SignalEvent : UnityEvent {}
 
     public class AnimationEvent : UnityEvent<GameObject>{}
+
+    public class SimulationEvent : UnityEvent<bool, KnowledgeBasedBehaviour, float> {}
     
     public static SignalEvent closeUIEvent = new SignalEvent();
     public static SignalEvent openUIEvent = new SignalEvent();
@@ -16,4 +18,7 @@ public static class CommunicationEvents
     public static AnimationEvent positionGeneratorEvent = new AnimationEvent();
     public static AnimationEvent positionShaftEvent = new AnimationEvent();
     public static AnimationEvent positionShaftHolderEvent = new AnimationEvent();
+
+    public static SimulationEvent generatorOnEvent = new SimulationEvent();
+    public static SignalEvent generatorOffEvent = new SignalEvent();
 }

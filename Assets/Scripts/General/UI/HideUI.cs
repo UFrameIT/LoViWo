@@ -14,6 +14,9 @@ public class HideUI : MonoBehaviour
     public MouseLook CamControl;
     public Canvas UICanvas;
 
+    //TODO: Remove this bool
+    private bool generatorOn = false;
+
     void Start()
     {
 
@@ -57,5 +60,18 @@ public class HideUI : MonoBehaviour
             ScreenCapture.CaptureScreenshot("UFrameIT-Screenshots\\Unity_ScreenCapture\\Capture.png");
         }
         */
+        //TODO: Remove this Code, remove the generatorOn/Off events, build a menu and invoke Activate-/Stop-Method
+        //Of Generator-Script
+        else if (Input.GetKeyDown(KeyCode.LeftControl)) {
+            if (!generatorOn)
+            {
+                generatorOn = true;
+                generatorOnEvent.Invoke(false, null, 10.0f);
+            }
+            else {
+                generatorOn = false;
+                generatorOffEvent.Invoke();
+            }
+        }
     }
 }

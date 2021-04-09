@@ -13,6 +13,7 @@ GameObject:
   - component: {fileID: 652212249053607733}
   - component: {fileID: 652212249053607734}
   - component: {fileID: 1153191457887489175}
+  - component: {fileID: 1926708551805729523}
   m_Layer: 0
   m_Name: ConeCogwheel
   m_TagString: Untagged
@@ -93,6 +94,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48da048244f1f4e43a7315830e56d270, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  module: 0
+  cogAngle: 0
 --- !u!64 &1153191457887489175
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -107,3 +110,16 @@ MeshCollider:
   m_Convex: 0
   m_CookingOptions: 30
   m_Mesh: {fileID: 0}
+--- !u!114 &1926708551805729523
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 652212249053607688}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c845b9ea4a7971b45b223d757d5005cf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  rotatingPart: {fileID: 652212249053607688}

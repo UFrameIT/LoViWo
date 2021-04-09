@@ -12,6 +12,8 @@ public class CogwheelMoveTool : MonoBehaviour
     private GameObject movingObject;
     private bool movingActive;
 
+    private GameObject lastCollidedObject;
+
     //Variables for debugging
     public Boolean debug = false;
     private Boolean debuggingActive = false;
@@ -83,37 +85,46 @@ public class CogwheelMoveTool : MonoBehaviour
                 this.Hit = tempHit;
 
                 //If Collision with other cogwheel, that has the same module: Snapzone positioning
-                if (Hit.collider.gameObject.layer == LayerMask.NameToLayer("Cogwheel") && Hit.collider.gameObject.GetComponentInChildren<Cogwheel>().getModule().Equals(this.movingObject.GetComponentInChildren<Cogwheel>().getModule()))
+                if (Hit.collider.gameObject.layer == LayerMask.NameToLayer("Cogwheel"))
                 {
-                    Vector3 currentPosition = Hit.point;
-                    GameObject otherCogwheel = Hit.collider.gameObject;
-                    Vector3 otherPosition = otherCogwheel.transform.position;
-                    float otherPitchDiameter = otherCogwheel.GetComponentInChildren<Cogwheel>().getPitchDiameter();
-                    List<Vector3> otherRelativeVectors = otherCogwheel.GetComponentInChildren<Cogwheel>().getRelativeCogInputVectors();
-                    otherRelativeVectors.Sort((x, y) => Math.Abs(Vector3.Distance(currentPosition, otherPosition + (otherCogwheel.transform.rotation * x))).CompareTo(Math.Abs(Vector3.Distance(currentPosition, otherPosition + (otherCogwheel.transform.rotation * y)))));
+                    this.lastCollidedObject = null;
 
-                    float movingObjectPitchDiameter = movingObject.GetComponentInChildren<Cogwheel>().getPitchDiameter();
+                    if (Hit.collider.gameObject.GetComponentInChildren<Cogwheel>().getModule().Equals(this.movingObject.GetComponentInChildren<Cogwheel>().getModule()))
+                    {
+                        Vector3 currentPosition = Hit.point;
+                        GameObject otherCogwheel = Hit.collider.gameObject;
 
-                    movingObject.transform.position = otherPosition + ((1 + movingObjectPitchDiameter / otherPitchDiameter) * (otherCogwheel.transform.rotation * otherRelativeVectors[0]));
-                    
-                    //The Right-Vector of movingObject should look at the otherObject, so Vector3.Cross(up, right) gives us the resulting forward-vector
-                    Vector3 right = (otherPosition - movingObject.transform.position).normalized;
-                    Vector3 up = Hit.normal;
-                    movingObject.transform.rotation = Quaternion.LookRotation(Vector3.Cross(up, right), up);
+                        Vector3 otherPosition = otherCogwheel.transform.position;
+                        float otherPitchDiameter = otherCogwheel.GetComponentInChildren<Cogwheel>().getPitchDiameter();
+                        List<Vector3> otherRelativeVectors = otherCogwheel.GetComponentInChildren<Cogwheel>().getRelativeCogInputVectors();
+                        otherRelativeVectors.Sort((x, y) => Math.Abs(Vector3.Distance(currentPosition, otherPosition + (otherCogwheel.transform.rotation * x))).CompareTo(Math.Abs(Vector3.Distance(currentPosition, otherPosition + (otherCogwheel.transform.rotation * y)))));
 
-                    if (debuggingActive) {
-                        this.linePositions[0] = otherPosition;
-                        this.linePositions[1] = otherPosition + (otherCogwheel.transform.rotation * otherRelativeVectors[0]);
-                        this.linePositions[2] = movingObject.transform.position + (movingObjectPitchDiameter/2 * movingObject.transform.right);
-                        this.linePositions[3] = movingObject.transform.position;
+                        float movingObjectPitchDiameter = movingObject.GetComponentInChildren<Cogwheel>().getPitchDiameter();
 
-                        for(int i = 0; i < this.lineRenderer.positionCount; i++)
-                            this.lineRenderer.SetPosition(i, this.linePositions[i]);
+                        movingObject.transform.position = otherPosition + ((1 + movingObjectPitchDiameter / otherPitchDiameter) * (otherCogwheel.transform.rotation * otherRelativeVectors[0]));
+
+                        //The Right-Vector of movingObject should look at the otherObject, so Vector3.Cross(up, right) gives us the resulting forward-vector
+                        Vector3 right = (otherPosition - movingObject.transform.position).normalized;
+                        Vector3 up = Hit.normal;
+                        movingObject.transform.rotation = Quaternion.LookRotation(Vector3.Cross(up, right), up);
+
+                        if (debuggingActive)
+                        {
+                            this.linePositions[0] = otherPosition;
+                            this.linePositions[1] = otherPosition + (otherCogwheel.transform.rotation * otherRelativeVectors[0]);
+                            this.linePositions[2] = movingObject.transform.position + (movingObjectPitchDiameter / 2 * movingObject.transform.right);
+                            this.linePositions[3] = movingObject.transform.position;
+
+                            for (int i = 0; i < this.lineRenderer.positionCount; i++)
+                                this.lineRenderer.SetPosition(i, this.linePositions[i]);
+                        }
                     }
                 }
                 //If Collision with Shaft
                 else if (Hit.collider.gameObject.layer == LayerMask.NameToLayer("Shaft")) {
                     GameObject shaft = Hit.collider.gameObject;
+                    this.lastCollidedObject = shaft;
+
                     Vector3 projectedPoint = Vector3.Project((Hit.point - shaft.transform.position), shaft.transform.up);
 
                     movingObject.transform.up = shaft.transform.up;
@@ -122,12 +133,18 @@ public class CogwheelMoveTool : MonoBehaviour
                 //Else: Follow cursor
                 else
                 {
+                    this.lastCollidedObject = Hit.collider.gameObject;
+
                     float height = movingObject.transform.GetComponentInChildren<Cogwheel>().getHeight();
                     movingObject.transform.up = Hit.normal;
                     movingObject.transform.position = Hit.point;
                 }
 
                 CheckMouseButtons();
+            }
+            else
+            {
+                lastCollidedObject = null;
             }
         }
     }
@@ -137,6 +154,11 @@ public class CogwheelMoveTool : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
+            if (lastCollidedObject != null && lastCollidedObject.GetComponentInChildren<Connectable>() != null)
+            {
+                lastCollidedObject.GetComponentInChildren<Connectable>().addConnectedPart(this.movingObject.GetComponentInChildren<Rotatable>());
+            }
+
             movingObject.gameObject.layer = LayerMask.NameToLayer("Cogwheel");
             Stop();
         }
