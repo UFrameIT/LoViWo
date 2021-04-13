@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class RotatableObject : MonoBehaviour, Rotatable
+public class RotatableObject : MonoBehaviour, Rotatable, Connectable
 {
     public GameObject rotatingPart;
     private List<Rotatable> connectedObjects = new List<Rotatable>();

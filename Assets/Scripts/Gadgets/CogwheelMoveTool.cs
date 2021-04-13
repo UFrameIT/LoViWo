@@ -93,6 +93,7 @@ public class CogwheelMoveTool : MonoBehaviour
                     {
                         Vector3 currentPosition = Hit.point;
                         GameObject otherCogwheel = Hit.collider.gameObject;
+                        this.lastCollidedObject = otherCogwheel;
 
                         Vector3 otherPosition = otherCogwheel.transform.position;
                         float otherPitchDiameter = otherCogwheel.GetComponentInChildren<Cogwheel>().getPitchDiameter();
@@ -157,6 +158,10 @@ public class CogwheelMoveTool : MonoBehaviour
             if (lastCollidedObject != null && lastCollidedObject.GetComponentInChildren<Connectable>() != null)
             {
                 lastCollidedObject.GetComponentInChildren<Connectable>().addConnectedPart(this.movingObject.GetComponentInChildren<Rotatable>());
+            }
+            if (lastCollidedObject != null && lastCollidedObject.GetComponentInChildren<Interlockable>() != null)
+            {
+                lastCollidedObject.GetComponentInChildren<Interlockable>().addInterlockingPart(this.movingObject.GetComponentInChildren<Interlockable>());
             }
 
             movingObject.gameObject.layer = LayerMask.NameToLayer("Cogwheel");
