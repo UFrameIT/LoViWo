@@ -14,5 +14,7 @@ public interface Cogwheel
 
     float getPitchDiameter();
 
+    float getRadius();
+
     List<Vector3> getRelativeCogInputVectors();
 }

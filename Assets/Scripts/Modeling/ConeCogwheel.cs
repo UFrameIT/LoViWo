@@ -13,6 +13,7 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
     private float height;
     private int cogCount;
 
+    private float radius;
     private float pitchDiameter;
     private float outsideDiameter;
     private float insideDiameter;
@@ -56,6 +57,10 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
         return this.pitchDiameter;
     }
 
+    public float getRadius() {
+        return this.radius;
+    }
+
     public void generateMesh(float height, int cogCount, float radius)
     {
         if (height <= 0 || cogCount <= 1 || radius <= 0)
@@ -65,6 +70,7 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
         }
 
         this.height = height;
+        this.radius = radius;
         this.pitchDiameter = radius * 2;
         this.cogCount = cogCount;
         this.module = pitchDiameter / cogCount;

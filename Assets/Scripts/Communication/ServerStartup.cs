@@ -12,7 +12,7 @@ public class ServerStartup : MonoBehaviour
 
     void Start()
     {
-        GameState.serverRunning = false;
+        GameState.ServerRunning = false;
         StartCoroutine(ServerRoutine());
     }
 
@@ -61,7 +61,7 @@ public class ServerStartup : MonoBehaviour
             }
         }
 
-        GameState.serverRunning = true;
+        GameState.ServerRunning = true;
         UnityEngine.Debug.Log("ServerStartup: finished.");
         yield return null;
     }
