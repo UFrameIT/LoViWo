@@ -14,11 +14,9 @@ public class HideUI : MonoBehaviour
     public MouseLook CamControl;
     public Canvas UICanvas;
 
-    //TODO: Remove this bool
-    private bool generatorOn = false;
-
     void Start()
     {
+        CommunicationEvents.openUIEvent.AddListener(openUI);
 
         if (!LockOnly)
         {
@@ -36,23 +34,7 @@ public class HideUI : MonoBehaviour
     {
         if (Input.GetKeyDown(Key))
         {
-
-            if (LockOnly)
-            {
-                CamControl.enabled = !CamControl.enabled;
-                PlayerControl.enabled = CamControl.enabled;
-            }
-            else
-            {
-                bool camActive = UICanvas.enabled;
-                UICanvas.enabled = !UICanvas.enabled;
-                CamControl.enabled = camActive;
-                PlayerControl.enabled = camActive;
-                if (!UICanvas.enabled)
-                    CommunicationEvents.closeUIEvent.Invoke();
-            }
-
-
+            switchUIOnOff();
         }
         /*
         //Todo before capturing: Make directories "UFrameIT-Screenshots/Unity_ScreenCapture" in project folder
@@ -60,18 +42,27 @@ public class HideUI : MonoBehaviour
             ScreenCapture.CaptureScreenshot("UFrameIT-Screenshots\\Unity_ScreenCapture\\Capture.png");
         }
         */
-        //TODO: Remove this Code, remove the generatorOn/Off events, build a menu and invoke Activate-/Stop-Method
-        //Of Generator-Script
-        else if (Input.GetKeyDown(KeyCode.LeftControl)) {
-            if (!generatorOn)
-            {
-                generatorOn = true;
-                generatorOnEvent.Invoke(false, null, 10.0f);
-            }
-            else {
-                generatorOn = false;
-                generatorOffEvent.Invoke();
-            }
+    }
+
+    void switchUIOnOff() {
+        if (LockOnly)
+        {
+            CamControl.enabled = !CamControl.enabled;
+            PlayerControl.enabled = CamControl.enabled;
         }
+        else
+        {
+            bool camActive = UICanvas.enabled;
+            UICanvas.enabled = !UICanvas.enabled;
+            CamControl.enabled = camActive;
+            PlayerControl.enabled = camActive;
+            if (!UICanvas.enabled)
+                CommunicationEvents.closeUIEvent.Invoke();
+        }
+    }
+
+    void openUI() {
+        if (!UICanvas.enabled)
+            switchUIOnOff();
     }
 }
