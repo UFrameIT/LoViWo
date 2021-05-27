@@ -54,10 +54,24 @@ public static class JSONManager
         public MMTTerm applicant;
         public List<MMTTerm> arguments;
         public string kind = "OMA";
+
         public OMA(MMTTerm applicant, List<MMTTerm> arguments)
         {
             this.applicant = applicant;
             this.arguments = arguments;
+        }
+    }
+
+    public class RECARG : MMTTerm
+    {
+        public string kind = "RECARG";
+        public string name;
+        public MMTTerm value;
+
+        public RECARG(string name, MMTTerm value)
+        {
+            this.name = name;
+            this.value = value;
         }
     }
 
