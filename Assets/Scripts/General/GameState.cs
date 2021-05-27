@@ -1,6 +1,5 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
-using UnityEngine;
 
 public static class GameState
 {
@@ -8,6 +7,8 @@ public static class GameState
 
     //Global List of Facts
     public static List<Fact> Facts = new List<Fact>();
-    //List of Facts, used for Simulation
-    public static List<Fact> TemporaryFacts = new List<Fact>();
+
+    //Caching last result
+    public static Tuple<List<Fact>,List<SimplifiedFact>> LastKBSimulationResult = 
+        new Tuple<List<Fact>, List<SimplifiedFact>>(new List<Fact>(),null);
 }

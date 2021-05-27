@@ -24,11 +24,8 @@ public class Generator : MonoBehaviour, Connectable
     void Update()
     {
         if (simulationActive) {
-            if (knowledgeBasedSimulation) {}
-            else
-            {
-                rotatingPart.transform.RotateAround(rotatingPart.transform.position, rotatingPart.transform.up, this.angularVelocity * Time.deltaTime);
-            }
+            //The Generator must rotate in the same way, regardless whether the simulation is knowledge-based or not
+            rotatingPart.transform.RotateAround(rotatingPart.transform.position, rotatingPart.transform.up, this.angularVelocity * Time.deltaTime);
         }
     }
 
@@ -38,21 +35,33 @@ public class Generator : MonoBehaviour, Connectable
         this.angularVelocity = angularVelocity;
         this.simulationActive = true;
 
+        //Start rotation forall Objects, firmly attached to the generator
         foreach (Rotatable connectedObject in connectedObjects)
         {
             connectedObject.rotate(this.angularVelocity);
         }
+
+        if (knowledgeBasedSimulation) {
+            //Start knowledge-based simulation for interlocking cogwheels
+            KnowledgeBasedSimulation.startKnowledgeBasedSimulation();
+        }
     }
 
     public void Stop() {
+        bool wasKnowledgeBasedSimulation = this.knowledgeBasedSimulation;
         this.knowledgeBasedSimulation = false;
         this.kBSimulationBehaviour = null;
         this.angularVelocity = 0.0f;
         this.simulationActive = false;
 
+        //Stop rotation forall Objects, firmly attached to the generator
         foreach (Rotatable connectedObject in connectedObjects)
         {
             connectedObject.stopRotation();
+        }
+
+        if (wasKnowledgeBasedSimulation) {
+            //Stop knowledge-based simulation for interlocking cogwheels
         }
     }
 
