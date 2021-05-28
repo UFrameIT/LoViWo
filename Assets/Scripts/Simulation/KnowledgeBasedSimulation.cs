@@ -1,15 +1,16 @@
-using System.Collections;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Networking;
+using MathNet.Numerics.LinearAlgebra;
 
 public static class KnowledgeBasedSimulation
 {
     public static void startKnowledgeBasedSimulation() {
         List<SimplifiedFact> sFactList = GameState.LastKBSimulationResult.Item2;
 
-        //Only send server-request when global fact-list has changed
+        //Only send server-request if global fact-list has changed
         if (!GameState.LastKBSimulationResult.Item1.Equals(GameState.Facts))
         {
             if (GameState.ServerRunning)
@@ -19,6 +20,7 @@ public static class KnowledgeBasedSimulation
 
                 if (response != null)
                 {
+                    GameState.LastKBSimulationResult = new Tuple<List<Fact>, List<SimplifiedFact>>(GameState.Facts, response);
                     sFactList = response;
                 }
                 else {
@@ -33,10 +35,29 @@ public static class KnowledgeBasedSimulation
 
         if (sFactList != null)
         {
-            Debug.Log("Works up to here. Todo: Prepare for GLS-Solver");
-            //prepare Data for gls-solver
-            //solve
-            //use result to rotate cogwheels (and their connected parts)
+            List<SEqsysFact> sEqsysFacts = sFactList.FindAll(sFact => sFact.GetType().Equals(typeof(SEqsysFact)))
+                                                    .Select(sFact => (SEqsysFact) sFact)
+                                                    .ToList();
+            SEqsysFact eqsysFactForSimulation = null;
+
+            if (sEqsysFacts.Count == 0)
+                Debug.Log("KnowledgeBasedSimulation: sFactList contains no SEqsysFact.");
+            else if (sEqsysFacts.Count > 1)
+            {
+                Debug.Log("KnowledgeBasedSimulation: sFactList contains more than one SEqsysFact. Using newest one for Simulation.");
+                eqsysFactForSimulation = sEqsysFacts.ElementAt(sEqsysFacts.Count - 1);
+            }
+            else
+                eqsysFactForSimulation = sEqsysFacts.ElementAt(0);
+
+            if (eqsysFactForSimulation != null) {
+                //Prepare Data (parse equations) for gls-solver
+                Tuple<Matrix<double>, Vector<double>> glsTuple = eqsysFactForSimulation.parseEquationSystem();
+                //Solve GLS:
+                Vector<double> glsSolution = glsTuple.Item1.Solve(glsTuple.Item2); 
+                //use result to rotate cogwheels (and their connected parts)
+                //TODO
+            }
         }
         else {
             Debug.Log("KnowledgeBasedSimulation: Cannot simulate, sFactList is null.");

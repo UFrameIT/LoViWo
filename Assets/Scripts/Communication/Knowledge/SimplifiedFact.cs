@@ -1,8 +1,11 @@
-using System.Collections;
+using System;
+using System.Linq;
 using System.Collections.Generic;
+using UnityEngine;
 using static JSONManager;
 using JsonSubTypes;
 using Newtonsoft.Json;
+using MathNet.Numerics.LinearAlgebra;
 
 /*
  * SimplifiedFact: Class used for deserialization of ServerResponses
@@ -60,4 +63,32 @@ public class SValueFact : SimplifiedFact
 public class SEqsysFact : SSymbolFact
 {
     public List<List<MMTTerm>> equations;
+
+    public Tuple<Matrix<double>, Vector<double>> parseEquationSystem() {
+        if (this.equations == null || this.equations.Count == 0)
+        {
+            Debug.Log("SEqsysFact.ParseEquationSystem: equations null or empty.");
+            return null;
+        }
+        else
+        {
+            bool eachEquationHasTwoElements = true;
+            this.equations.ForEach(equation => eachEquationHasTwoElements &= (equation.Count == 2));
+            if (!eachEquationHasTwoElements)
+            {
+                Debug.Log("SEqsysFact.ParseEquationSystem: Some equations are corrupt and don't have 2 elements.");
+                return null;
+            }
+            else {
+                foreach (List<MMTTerm> equation in this.equations) {
+                    MMTTerm leftSide = equation.ElementAt(0);
+                    MMTTerm rightSide = equation.ElementAt(1);
+
+                    //TODO
+                }
+                //TODO
+                return null;
+            }
+        }
+    }
 }

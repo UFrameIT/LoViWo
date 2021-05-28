@@ -16,6 +16,11 @@ public class MMTURICollection
     public string Tuple = "http://gl.mathhub.info/MMT/LFX/Sigma?Symbols?Tuple";
     public string Prop = "http://mathhub.info/MitM/Foundation?Logic?prop";
 
+    public string Record = "http://gl.mathhub.info/MMT/LFX/Records?Symbols?Recexp";
+    public string AngularVelocity = "http://mathhub.info/LoViVo?Cogwheel3D?angular_velocity";
+    public string Multiplication = "http://mathhub.info/MitM/Foundation?RealLiterals?times_real_lit";
+    public string Minus = "http://mathhub.info/MitM/Foundation?RealLiterals?minus_real_lit";
+    
     public string Point = "http://mathhub.info/MitM/core/geometry?3DGeometry?point";
     public string LineType = "http://mathhub.info/MitM/core/geometry?Geometry/Common?line_type";
     public string LineOf = "http://mathhub.info/MitM/core/geometry?Geometry/Common?lineOf";
