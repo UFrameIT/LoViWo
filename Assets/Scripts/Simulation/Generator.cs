@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿using System.Linq;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -43,7 +43,9 @@ public class Generator : MonoBehaviour, Connectable
 
         if (knowledgeBasedSimulation) {
             //Start knowledge-based simulation for interlocking cogwheels
-            KnowledgeBasedSimulation.startKnowledgeBasedSimulation();
+            Dictionary<Fact, float> knownAvMap = new Dictionary<Fact, float>();
+            this.collectKnownCogwheelAVs(knownAvMap, angularVelocity, this.getConnectedParts());
+            KnowledgeBasedSimulation.startKnowledgeBasedSimulation(knownAvMap);
         }
     }
 
@@ -67,5 +69,24 @@ public class Generator : MonoBehaviour, Connectable
 
     public void addConnectedPart(Rotatable part) {
         connectedObjects.Add(part);
+    }
+
+    public List<Rotatable> getConnectedParts() {
+        return this.connectedObjects;
+    }
+
+    private void collectKnownCogwheelAVs(Dictionary<Fact, float> knownAvMap, float generatorAV, List<Rotatable> rotatables) {
+        foreach (Rotatable connectedObject in rotatables) {
+            if (connectedObject.GetType().Equals(typeof(RotatableCogwheel)))
+            {
+                Fact cogwheelFact = GameState.Facts.Find(fact =>
+                    fact.Representation.GetComponentInChildren<RotatableCogwheel>() != null &&
+                    fact.Representation.GetComponentInChildren<RotatableCogwheel>().Equals(connectedObject));
+                knownAvMap.Add(cogwheelFact, generatorAV);
+            }
+            else if (connectedObject.GetType().GetInterfaces().Contains(typeof(Connectable))) {
+                collectKnownCogwheelAVs(knownAvMap, generatorAV, ((Connectable)connectedObject).getConnectedParts());
+            }
+        }
     }
 }

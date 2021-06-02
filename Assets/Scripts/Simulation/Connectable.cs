@@ -5,4 +5,5 @@ using UnityEngine;
 public interface Connectable
 {
     void addConnectedPart(Rotatable part);
+    List<Rotatable> getConnectedParts();
 }

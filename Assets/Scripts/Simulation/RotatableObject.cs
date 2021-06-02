@@ -24,6 +24,11 @@ public class RotatableObject : MonoBehaviour, Rotatable, Connectable
         connectedObjects.Add(part);
     }
 
+    public List<Rotatable> getConnectedParts()
+    {
+        return this.connectedObjects;
+    }
+
     public void rotate(float angularVelocity) {
         this.angularVelocity = angularVelocity;
         this.rotationActive = true;

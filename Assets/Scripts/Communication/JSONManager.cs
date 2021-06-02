@@ -1,4 +1,4 @@
-using System;
+using System.Linq;
 using JsonSubTypes;
 using Newtonsoft.Json;
 using System.Collections;
@@ -18,6 +18,7 @@ public class MMTURICollection
 
     public string Record = "http://gl.mathhub.info/MMT/LFX/Records?Symbols?Recexp";
     public string AngularVelocity = "http://mathhub.info/LoViVo?Cogwheel3D?angular_velocity";
+    public string Addition = "http://mathhub.info/MitM/Foundation?RealLiterals?plus_real_lit";
     public string Multiplication = "http://mathhub.info/MitM/Foundation?RealLiterals?times_real_lit";
     public string Minus = "http://mathhub.info/MitM/Foundation?RealLiterals?minus_real_lit";
     
@@ -38,20 +39,46 @@ public static class JSONManager
     //could init the strings of MMTURIs with JSON or other settings file instead
     public static MMTURICollection MMTURIs = new MMTURICollection();
 
-    public class URI
-    {
-        public string uri;
-
-        public URI(string uri)
-        {
-            this.uri = uri;
-        }
-    }
-
     [JsonConverter(typeof(JsonSubtypes), "kind")]
     public class MMTTerm
     {
         string kind;
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is MMTTerm)) return false;
+
+            MMTTerm term = (MMTTerm)obj;
+            return kind.Equals(term.kind);
+        }
+
+        public override int GetHashCode()
+        {
+            return kind.GetHashCode();
+        }
+
+        public bool isSimplifiedCogwheelAvTerm() {
+            return this.GetType().Equals(typeof(OMA))
+                        && ((OMA)this).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)this).applicant).uri.Equals(MMTURIs.AngularVelocity)
+                        && ((OMA)this).arguments.Count == 1
+                        && ((OMA)this).arguments.ElementAt(0).GetType().Equals(typeof(OMA))
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)((OMA)this).arguments.ElementAt(0)).applicant).uri.Equals(MMTURIs.Record)
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.Count == 5
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).name.Equals("radius")
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).value.GetType().Equals(typeof(OMF))
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).name.Equals("position")
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).value.GetType().Equals(typeof(OMA))
+                        && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).value).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).value).applicant).uri.Equals(MMTURIs.Tuple)
+                        && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).value).arguments.Count == 3
+                        && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).value).arguments.ElementAt(0).GetType().Equals(typeof(OMF))
+                        && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).value).arguments.ElementAt(1).GetType().Equals(typeof(OMF))
+                        && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).value).arguments.ElementAt(2).GetType().Equals(typeof(OMF));
+        }
     }
 
     public class OMA : MMTTerm
@@ -64,6 +91,21 @@ public static class JSONManager
         {
             this.applicant = applicant;
             this.arguments = arguments;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is OMA)) return false;
+
+            OMA oma = (OMA)obj;
+            return kind.Equals(oma.kind)
+                    && applicant.Equals(oma.applicant)
+                    && arguments.SequenceEqual(oma.arguments);
+        }
+
+        public override int GetHashCode()
+        {
+            return kind.GetHashCode() ^ applicant.GetHashCode() ^ arguments.Aggregate(0, (total, next) => total ^= next.GetHashCode());
         }
     }
 
@@ -78,6 +120,21 @@ public static class JSONManager
             this.name = name;
             this.value = value;
         }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is RECARG)) return false;
+
+            RECARG recarg = (RECARG)obj;
+            return kind.Equals(recarg.kind)
+                    && name.Equals(recarg.name)
+                    && value.Equals(recarg.value);
+        }
+
+        public override int GetHashCode()
+        {
+            return kind.GetHashCode() ^ name.GetHashCode() ^ value.GetHashCode();
+        }
     }
 
     public class OMS : MMTTerm
@@ -88,6 +145,20 @@ public static class JSONManager
         public OMS(string uri)
         {
             this.uri = uri;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is OMS)) return false;
+
+            OMS oms = (OMS)obj;
+            return kind.Equals(oms.kind)
+                    && uri.Equals(oms.uri);
+        }
+
+        public override int GetHashCode()
+        {
+            return kind.GetHashCode() ^ uri.GetHashCode();
         }
     }
 
@@ -101,6 +172,20 @@ public static class JSONManager
         {
             this.s = s;
         }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is OMSTR)) return false;
+
+            OMSTR omstr = (OMSTR)obj;
+            return kind.Equals(omstr.kind)
+                    && s.Equals(omstr.s);
+        }
+
+        public override int GetHashCode()
+        {
+            return kind.GetHashCode() ^ s.GetHashCode();
+        }
     }
 
 
@@ -113,6 +198,20 @@ public static class JSONManager
         public OMF(float f)
         {
             this.f = f;
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (!(obj is OMF)) return false;
+
+            OMF omf = (OMF)obj;
+            return kind.Equals(omf.kind)
+                    && f.Equals(omf.f);
+        }
+
+        public override int GetHashCode()
+        {
+            return kind.GetHashCode() ^ f.GetHashCode();
         }
     }
 
