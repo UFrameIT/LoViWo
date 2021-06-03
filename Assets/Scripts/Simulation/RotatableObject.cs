@@ -29,13 +29,13 @@ public class RotatableObject : MonoBehaviour, Rotatable, Connectable
         return this.connectedObjects;
     }
 
-    public void rotate(float angularVelocity) {
+    public void rotate(float angularVelocity, bool knowledgeBased) {
         this.angularVelocity = angularVelocity;
         this.rotationActive = true;
 
         foreach (Rotatable connectedObject in connectedObjects)
         {
-            connectedObject.rotate(this.angularVelocity);
+            connectedObject.rotate(this.angularVelocity, knowledgeBased);
         }
     }
 

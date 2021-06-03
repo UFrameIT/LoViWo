@@ -55,7 +55,7 @@ public class Generator : MonoBehaviour, Connectable
             //Start rotation forall Objects, firmly attached to the generator
             foreach (Rotatable connectedObject in connectedObjects)
             {
-                connectedObject.rotate(this.angularVelocity);
+                connectedObject.rotate(this.angularVelocity, knowledgeBasedSimulation);
             }
 
             //Rotating the other cogwheels if knowedgeBased is checked
@@ -69,7 +69,7 @@ public class Generator : MonoBehaviour, Connectable
                     RotatableCogwheel rcComponent = newlyDiscoveredAv.Key.Representation.GetComponentInChildren<RotatableCogwheel>();
                     if (rcComponent != null)
                     {
-                        rcComponent.rotate(newlyDiscoveredAv.Value);
+                        rcComponent.rotate(newlyDiscoveredAv.Value, knowledgeBasedSimulation);
                     }
                     else
                         Debug.Log("KnowledgeBasedSimulation.startKnowledgeBasedSimulation: Didn't find RotatableCogwheel component" +

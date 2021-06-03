@@ -4,6 +4,6 @@ using UnityEngine;
 
 public interface Rotatable
 {
-    void rotate(float angularVelocity);
+    void rotate(float angularVelocity, bool knowledgeBased);
     void stopRotation();
 }

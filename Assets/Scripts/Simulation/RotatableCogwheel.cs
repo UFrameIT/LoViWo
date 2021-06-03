@@ -12,6 +12,8 @@ public class RotatableCogwheel : MonoBehaviour, Rotatable, Interlockable
     private Vector3 positionBeforeSimulation;
     private Quaternion rotationBeforeSimulation;
 
+    private bool knowledgeBasedSimulation;
+
     // Update is called once per frame
     void Update()
     {
@@ -53,13 +55,17 @@ public class RotatableCogwheel : MonoBehaviour, Rotatable, Interlockable
         this.rotatingPart.transform.localRotation = this.rotationBeforeSimulation;
     }
 
-    public void rotate(float angularVelocity) {
+    public void rotate(float angularVelocity, bool knowledgeBased) {
         this.angularVelocity = angularVelocity;
+        this.knowledgeBasedSimulation = knowledgeBased;
         this.rotationActive = true;
         saveTransform();
 
-        foreach (Interlockable interlockingObject in interlockingObjects) {
-            interlockingObject.activatePhysics();
+        if (!knowledgeBased) {
+            foreach (Interlockable interlockingObject in interlockingObjects)
+            {
+                interlockingObject.activatePhysics();
+            }
         }
     }
 
@@ -68,9 +74,11 @@ public class RotatableCogwheel : MonoBehaviour, Rotatable, Interlockable
         this.rotationActive = false;
         restoreTransform();
 
-        foreach (Interlockable interlockingObject in interlockingObjects)
-        {
-            interlockingObject.deactivatePhysics();
+        if (!knowledgeBasedSimulation) {
+            foreach (Interlockable interlockingObject in interlockingObjects)
+            {
+                interlockingObject.deactivatePhysics();
+            }
         }
     }
 }
