@@ -8,7 +8,7 @@ using static JSONManager;
 
 public static class KnowledgeBasedSimulation
 {
-    public static void startKnowledgeBasedSimulation(Dictionary<Fact, float> knownAvMap) {
+    public static Dictionary<Fact, float> knowledgeBasedSimulation(Dictionary<Fact, float> knownAvMap) {
         List<SimplifiedFact> sFactList = GameState.LastKBSimulationResult.Item2;
 
         //Only send server-request if global fact-list has changed
@@ -26,11 +26,13 @@ public static class KnowledgeBasedSimulation
                 }
                 else {
                     Debug.Log("KnowledgeBasedSimulation: /fact/list reponse is null. Using LastKBSimuationResult.");
+                    return null;
                 }
             }
             else
             {
                 Debug.LogWarning("KnowledgeBasedSimulation: Cannot send server-request, because FrameIT-Server is not running.");
+                return null;
             }
         }
 
@@ -41,8 +43,10 @@ public static class KnowledgeBasedSimulation
                                                     .ToList();
             SEqsysFact eqsysFactForSimulation = null;
 
-            if (sEqsysFacts.Count == 0)
+            if (sEqsysFacts.Count == 0) {
                 Debug.Log("KnowledgeBasedSimulation: sFactList contains no SEqsysFact.");
+                return null;
+            }
             else if (sEqsysFacts.Count > 1)
             {
                 Debug.Log("KnowledgeBasedSimulation: sFactList contains more than one SEqsysFact. Using newest one for Simulation.");
@@ -51,15 +55,18 @@ public static class KnowledgeBasedSimulation
             else
                 eqsysFactForSimulation = sEqsysFacts.ElementAt(0);
 
-            if (eqsysFactForSimulation != null) {
+            if (eqsysFactForSimulation != null)
+            {
                 //Prepare Data (parse equations) for gls-solver
                 Tuple<List<List<double>>, List<double>, List<MMTTerm>> glsTuple = eqsysFactForSimulation.parseEquationSystem();
 
                 if (glsTuple == null)
                 {
                     Debug.Log("KnowledgeBasedSimulation: Sth. went wrong while parsing the EquationSystem.");
+                    return null;
                 }
-                else {
+                else
+                {
                     List<List<double>> AData = glsTuple.Item1;
                     List<double> bData = glsTuple.Item2;
                     List<MMTTerm> variables = glsTuple.Item3;
@@ -70,29 +77,18 @@ public static class KnowledgeBasedSimulation
                     Vector<double> b = Vector<double>.Build.DenseOfEnumerable(bData);
                     //Solve GLS of the form 'A * x = b':
                     Vector<double> glsSolution = A.Solve(b);
-                    
+
                     //Map the glsSolution to the variables and to the corresponding cogwheels
-                    Dictionary<Fact, float> newlyDiscoveredAvsMap = getNewlyDiscoveredAvsMap(knownAvMap, variables, glsSolution);
-                    
-                    if (newlyDiscoveredAvsMap != null)
-                    {
-                        //Use result to rotate cogwheels (and their connected parts)
-                        foreach (KeyValuePair<Fact, float> newlyDiscoveredAv in newlyDiscoveredAvsMap) {
-                            RotatableCogwheel rcComponent = newlyDiscoveredAv.Key.Representation.GetComponentInChildren<RotatableCogwheel>();
-                            if (rcComponent != null)
-                            {
-                                rcComponent.rotate(newlyDiscoveredAv.Value);
-                            }
-                            else
-                                Debug.Log("KnowledgeBasedSimulation.startKnowledgeBasedSimulation: Didn't find RotatableCogwheel component" +
-                                    "in newlyDiscoveredAv.");
-                        }
-                    }
+                    return getNewlyDiscoveredAvsMap(knownAvMap, variables, glsSolution);
                 }
+            }
+            else {
+                return null;
             }
         }
         else {
             Debug.Log("KnowledgeBasedSimulation: Cannot simulate, sFactList is null.");
+            return null;
         }
     }
 

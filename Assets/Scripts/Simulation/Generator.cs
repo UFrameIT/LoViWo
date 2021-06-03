@@ -13,6 +13,8 @@ public class Generator : MonoBehaviour, Connectable
     private KnowledgeBasedBehaviour kBSimulationBehaviour;
     private float angularVelocity;
 
+    private Dictionary<Fact, float> lastNewlyDiscoveredAvsMap = null;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -30,40 +32,86 @@ public class Generator : MonoBehaviour, Connectable
     }
 
     public void Activate(bool knowledgeBasedSimulation, KnowledgeBasedBehaviour kBSimulationBehaviour, float angularVelocity) {
-        this.knowledgeBasedSimulation = knowledgeBasedSimulation;
-        this.kBSimulationBehaviour = kBSimulationBehaviour;
-        this.angularVelocity = angularVelocity;
-        this.simulationActive = true;
-
-        //Start rotation forall Objects, firmly attached to the generator
-        foreach (Rotatable connectedObject in connectedObjects)
+        if (this.simulationActive)
         {
-            connectedObject.rotate(this.angularVelocity);
+            Debug.Log("Simulation is already active. Please press Stop before starting again.");
         }
+        else {
+            this.knowledgeBasedSimulation = knowledgeBasedSimulation;
+            this.kBSimulationBehaviour = kBSimulationBehaviour;
+            this.angularVelocity = angularVelocity;
+            this.simulationActive = true;
 
-        if (knowledgeBasedSimulation) {
-            //Start knowledge-based simulation for interlocking cogwheels
-            Dictionary<Fact, float> knownAvMap = new Dictionary<Fact, float>();
-            this.collectKnownCogwheelAVs(knownAvMap, angularVelocity, this.getConnectedParts());
-            KnowledgeBasedSimulation.startKnowledgeBasedSimulation(knownAvMap);
+            Dictionary<Fact, float> newlyDiscoveredAvsMap = null;
+
+            if (knowledgeBasedSimulation)
+            {
+                //Acquire new knowledge for interlocking cogwheels
+                Dictionary<Fact, float> knownAvMap = new Dictionary<Fact, float>();
+                this.collectKnownCogwheelAVs(knownAvMap, angularVelocity, this.getConnectedParts());
+                newlyDiscoveredAvsMap = KnowledgeBasedSimulation.knowledgeBasedSimulation(knownAvMap);
+            }
+
+            //Start rotation forall Objects, firmly attached to the generator
+            foreach (Rotatable connectedObject in connectedObjects)
+            {
+                connectedObject.rotate(this.angularVelocity);
+            }
+
+            //Rotating the other cogwheels if knowedgeBased is checked
+            if (knowledgeBasedSimulation && newlyDiscoveredAvsMap != null)
+            {
+                lastNewlyDiscoveredAvsMap = newlyDiscoveredAvsMap;
+
+                //Use result to rotate cogwheels (and their connected parts)
+                foreach (KeyValuePair<Fact, float> newlyDiscoveredAv in newlyDiscoveredAvsMap)
+                {
+                    RotatableCogwheel rcComponent = newlyDiscoveredAv.Key.Representation.GetComponentInChildren<RotatableCogwheel>();
+                    if (rcComponent != null)
+                    {
+                        rcComponent.rotate(newlyDiscoveredAv.Value);
+                    }
+                    else
+                        Debug.Log("KnowledgeBasedSimulation.startKnowledgeBasedSimulation: Didn't find RotatableCogwheel component" +
+                            "in newlyDiscoveredAv.");
+                }
+            }
         }
     }
 
     public void Stop() {
-        bool wasKnowledgeBasedSimulation = this.knowledgeBasedSimulation;
-        this.knowledgeBasedSimulation = false;
-        this.kBSimulationBehaviour = null;
-        this.angularVelocity = 0.0f;
-        this.simulationActive = false;
-
-        //Stop rotation forall Objects, firmly attached to the generator
-        foreach (Rotatable connectedObject in connectedObjects)
+        if (!this.simulationActive)
         {
-            connectedObject.stopRotation();
+            Debug.Log("Simulation is already inactive.");
         }
+        else {
+            bool wasKnowledgeBasedSimulation = this.knowledgeBasedSimulation;
+            this.knowledgeBasedSimulation = false;
+            this.kBSimulationBehaviour = null;
+            this.angularVelocity = 0.0f;
+            this.simulationActive = false;
 
-        if (wasKnowledgeBasedSimulation) {
-            //Stop knowledge-based simulation for interlocking cogwheels
+            //Stop rotation forall Objects, firmly attached to the generator
+            foreach (Rotatable connectedObject in connectedObjects)
+            {
+                connectedObject.stopRotation();
+            }
+
+            if (wasKnowledgeBasedSimulation && this.lastNewlyDiscoveredAvsMap != null)
+            {
+                //Stop knowledge-based simulation for interlocking cogwheels
+                foreach (KeyValuePair<Fact, float> av in lastNewlyDiscoveredAvsMap)
+                {
+                    RotatableCogwheel rcComponent = av.Key.Representation.GetComponentInChildren<RotatableCogwheel>();
+                    if (rcComponent != null)
+                    {
+                        rcComponent.stopRotation();
+                    }
+                    else
+                        Debug.Log("KnowledgeBasedSimulation.startKnowledgeBasedSimulation: Didn't find RotatableCogwheel component" +
+                            "in newlyDiscoveredAv.");
+                }
+            }
         }
     }
 
