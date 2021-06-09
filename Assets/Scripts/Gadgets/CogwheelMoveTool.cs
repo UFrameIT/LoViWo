@@ -104,10 +104,18 @@ public class CogwheelMoveTool : MonoBehaviour
 
                         movingObject.transform.position = otherPosition + ((1 + movingObjectPitchDiameter / otherPitchDiameter) * (otherCogwheel.transform.rotation * otherRelativeVectors[0]));
 
-                        //The Right-Vector of movingObject should look at the otherObject, so Vector3.Cross(up, right) gives us the resulting forward-vector
-                        Vector3 right = (otherPosition - movingObject.transform.position).normalized;
-                        Vector3 up = Hit.normal;
-                        movingObject.transform.rotation = Quaternion.LookRotation(Vector3.Cross(up, right), up);
+                        //In our created Cogwheels the right-vector and forward-vector are switched. So the right-vector is actually
+                        //the vector that points to the initial gap at 0°
+                        //If we want the Right-Vector of movingObject to look at the otherObject's position,
+                        //the forward-vector must be Vector3.Cross(up, left)
+
+                        //If we would use Vector3.Cross(up, right) here, the forward vector would result in a rotation,
+                        //where rotation.right would be -1 * (*right-vector-we-actually-want*)
+                        //This can cause problems for cogwheels with odd cogCount, because here, the right-vector
+                        //points to the middle of a cog-gap, whereas -1 * right-vector (left-vector) points to the middle of a cog
+                        Vector3 left = -1 * (otherPosition - movingObject.transform.position).normalized;
+                        Vector3 up = otherCogwheel.transform.up;
+                        movingObject.transform.rotation = Quaternion.LookRotation(Vector3.Cross(up, left), up);
 
                         if (debuggingActive)
                         {

@@ -35,7 +35,7 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
 
     private List<Vector3> relativeCogInputVectors = new List<Vector3>();
 
-
+    //-> THE RELATIVE COG INPUT VECTORS ALWAYS POINT TO THE MIDDLE OF A COG, RELATIVE TO THE POSITION OF THE COGWHEEL
     public List<Vector3> getRelativeCogInputVectors()
     {
         return relativeCogInputVectors;
@@ -94,6 +94,9 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
     {
         float radius = this.pitchDiameter/2;
 
+        //At x * cogAngle degrees (with x ∈ ℕ0), there's always the middle of a gap
+        //So at (x + 0.5) * cogAngle degrees (with x ∈ ℕ0), there's always the middle of a cog
+        //-> THE RELATIVE COG INPUT VECTORS ALWAYS POINT TO THE MIDDLE OF A COG, RELATIVE TO THE POSITION OF THE COGWHEEL
         for (float i = 0.5f; i < this.cogCount; i += 1f)
         {
             float currentAngle = i * this.cogAngle;
@@ -220,6 +223,9 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
             
             float remainder = x % this.cogAngle;
 
+            //Every cog has 8 (respectively 5) parts: 1/8 for the starting gap, 2/8 for the rising edge,
+            //2/8 for the constant edge, 2/8 for the falling edge and 1/8 for the ending gap
+            //So at x * cogAngle degrees (with x ∈ ℕ), there's always the middle of a gap
             if (remainder >= 0 && remainder < (this.cogAngle/8)){/*Nothing to do*/}
             else if (remainder >= (this.cogAngle/8) && remainder < (3 * this.cogAngle/8))
             {

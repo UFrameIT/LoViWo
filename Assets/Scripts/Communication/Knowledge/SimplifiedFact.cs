@@ -174,7 +174,7 @@ public class SEqsysFact : SSymbolFact
     private bool addToMatrixA(List<List<double>> AData, List<MMTTerm> variables, MMTTerm newTerm) {
 
         List<double> newADataRow;
-        Dictionary<OMF, MMTTerm> multPairs = new Dictionary<OMF, MMTTerm>();
+        Dictionary<MMTTerm, OMF> multPairs = new Dictionary<MMTTerm, OMF>();
 
         bool noErrors = true;
         List<MMTTerm> plusTerms = new List<MMTTerm>();
@@ -214,14 +214,14 @@ public class SEqsysFact : SSymbolFact
                         variables.Add(multiplicand);
                     }
 
-                    multPairs.Add(multiplier, multiplicand);
+                    multPairs.Add(multiplicand, multiplier);
                 }
             }
         }
 
         newADataRow = new List<double>(new double[variables.Count]);
-        foreach (KeyValuePair<OMF, MMTTerm> multPair in multPairs) {
-            newADataRow[variables.IndexOf(multPair.Value)] = multPair.Key.f;
+        foreach (KeyValuePair<MMTTerm, OMF> multPair in multPairs) {
+            newADataRow[variables.IndexOf(multPair.Key)] = multPair.Value.f;
         }
 
         AData.Add(newADataRow);

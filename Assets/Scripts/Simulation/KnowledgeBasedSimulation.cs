@@ -21,7 +21,7 @@ public static class KnowledgeBasedSimulation
 
                 if (response != null)
                 {
-                    GameState.LastKBSimulationResult = new Tuple<List<Fact>, List<SimplifiedFact>>(GameState.Facts, response);
+                    GameState.LastKBSimulationResult = new Tuple<List<Fact>, List<SimplifiedFact>>(new List<Fact>(GameState.Facts), response);
                     sFactList = response;
                 }
                 else {
