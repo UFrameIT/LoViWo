@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class RotatableObject : MonoBehaviour, Rotatable, Connectable
 {
-    public GameObject rotatingPart;
     private List<Rotatable> connectedObjects = new List<Rotatable>();
 
     private float angularVelocity;
@@ -15,7 +14,7 @@ public class RotatableObject : MonoBehaviour, Rotatable, Connectable
     {
         if (rotationActive)
         {
-            rotatingPart.transform.RotateAround(rotatingPart.transform.position, rotatingPart.transform.up, this.angularVelocity * Time.deltaTime);
+            this.transform.RotateAround(this.transform.position, this.transform.up, this.angularVelocity * Time.deltaTime);
         }
     }
 

@@ -4,7 +4,6 @@ using UnityEngine;
 
 public class RotatableCogwheel : MonoBehaviour, Rotatable, Interlockable
 {
-    public GameObject rotatingPart;
     private List<Interlockable> interlockingObjects = new List<Interlockable>();
 
     private float angularVelocity;
@@ -19,7 +18,7 @@ public class RotatableCogwheel : MonoBehaviour, Rotatable, Interlockable
     {
         if (rotationActive)
         {
-            rotatingPart.transform.RotateAround(rotatingPart.transform.position, rotatingPart.transform.up, this.angularVelocity * Time.deltaTime);
+            this.transform.RotateAround(this.transform.position, this.transform.up, this.angularVelocity * Time.deltaTime);
         }
     }
 
@@ -31,28 +30,40 @@ public class RotatableCogwheel : MonoBehaviour, Rotatable, Interlockable
     public void activatePhysics()
     {
         saveTransform();
-        if (rotatingPart.transform.GetComponentInChildren<Rigidbody>() != null)
-            rotatingPart.transform.GetComponentInChildren<Rigidbody>().isKinematic = false;
+        if (this.transform.GetComponentInChildren<Rigidbody>() != null)
+            this.transform.GetComponentInChildren<Rigidbody>().isKinematic = false;
+
+        //Recursively activatePhysics of interlockingObjects
+        foreach (Interlockable interlockingObject in interlockingObjects)
+        {
+            interlockingObject.activatePhysics();
+        }
     }
 
     public void saveTransform()
     {
-        this.positionBeforeSimulation = this.rotatingPart.transform.localPosition;
-        this.rotationBeforeSimulation = this.rotatingPart.transform.localRotation;
+        this.positionBeforeSimulation = this.transform.localPosition;
+        this.rotationBeforeSimulation = this.transform.localRotation;
     }
 
     public void deactivatePhysics()
     {
-        if (rotatingPart.transform.GetComponentInChildren<Rigidbody>() != null)
-            rotatingPart.transform.GetComponentInChildren<Rigidbody>().isKinematic = true;
+        if (this.transform.GetComponentInChildren<Rigidbody>() != null)
+            this.transform.GetComponentInChildren<Rigidbody>().isKinematic = true;
+
+        //Recursively deactivatePhysics of interlockingObjects
+        foreach (Interlockable interlockingObject in interlockingObjects)
+        {
+            interlockingObject.deactivatePhysics();
+        }
 
         restoreTransform();
     }
 
     public void restoreTransform()
     {
-        this.rotatingPart.transform.localPosition = this.positionBeforeSimulation;
-        this.rotatingPart.transform.localRotation = this.rotationBeforeSimulation;
+        this.transform.localPosition = this.positionBeforeSimulation;
+        this.transform.localRotation = this.rotationBeforeSimulation;
     }
 
     public void rotate(float angularVelocity, bool knowledgeBased) {
@@ -62,10 +73,7 @@ public class RotatableCogwheel : MonoBehaviour, Rotatable, Interlockable
         saveTransform();
 
         if (!knowledgeBased) {
-            foreach (Interlockable interlockingObject in interlockingObjects)
-            {
-                interlockingObject.activatePhysics();
-            }
+            activatePhysics();
         }
     }
 
@@ -75,10 +83,7 @@ public class RotatableCogwheel : MonoBehaviour, Rotatable, Interlockable
         restoreTransform();
 
         if (!knowledgeBasedSimulation) {
-            foreach (Interlockable interlockingObject in interlockingObjects)
-            {
-                interlockingObject.deactivatePhysics();
-            }
+            deactivatePhysics();
         }
     }
 }
