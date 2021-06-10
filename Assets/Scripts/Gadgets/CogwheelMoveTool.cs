@@ -89,10 +89,16 @@ public class CogwheelMoveTool : MonoBehaviour
                 {
                     this.lastCollidedObject = null;
 
-                    if (Hit.collider.gameObject.GetComponentInChildren<Cogwheel>().getModule().Equals(this.movingObject.GetComponentInChildren<Cogwheel>().getModule()))
+                    if ((Hit.collider.gameObject.transform.parent != null && Hit.collider.gameObject.transform.parent.GetComponentInChildren<Cogwheel>().getModule().Equals(this.movingObject.GetComponentInChildren<Cogwheel>().getModule())) ||
+                        (Hit.collider.gameObject.GetComponentInChildren<Cogwheel>().getModule().Equals(this.movingObject.GetComponentInChildren<Cogwheel>().getModule())))
                     {
                         Vector3 currentPosition = Hit.point;
-                        GameObject otherCogwheel = Hit.collider.gameObject;
+                        GameObject otherCogwheel;
+                        if (Hit.collider.gameObject.transform.parent != null)
+                            otherCogwheel = Hit.collider.gameObject.transform.parent.gameObject;
+                        else
+                            otherCogwheel = Hit.collider.gameObject;
+
                         this.lastCollidedObject = otherCogwheel;
 
                         Vector3 otherPosition = otherCogwheel.transform.position;
@@ -173,6 +179,11 @@ public class CogwheelMoveTool : MonoBehaviour
             }
 
             movingObject.gameObject.layer = LayerMask.NameToLayer("Cogwheel");
+            //Set Layer for all children
+            foreach (Transform t in movingObject.GetComponentsInChildren<Transform>())
+            {
+                t.gameObject.layer = LayerMask.NameToLayer("Cogwheel");
+            }
 
             //Create new CogwheelFact and add to global FactList
             int cogId = GameState.Facts.Count;

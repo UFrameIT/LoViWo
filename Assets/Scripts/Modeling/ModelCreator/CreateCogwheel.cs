@@ -26,6 +26,10 @@ public class CreateCogwheel : MonoBehaviour, CreateModel
             GameObject cogwheel = Instantiate(cogwheelGeneratorPrefab);
             cogwheel.gameObject.layer = LayerMask.NameToLayer("CurrentlyEdited");
             cogwheel.GetComponentInChildren<Cogwheel>().generateMesh(height, cogCount, radius);
+            //Set Layer for all children
+            foreach (Transform t in cogwheel.GetComponentsInChildren<Transform>()) {
+                t.gameObject.layer = LayerMask.NameToLayer("CurrentlyEdited");
+            }
 
             CommunicationEvents.positionCogwheelEvent.Invoke(cogwheel);
         }
