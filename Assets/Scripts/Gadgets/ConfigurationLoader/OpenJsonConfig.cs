@@ -43,8 +43,8 @@ public class OpenJsonConfig : MonoBehaviour
             string json = File.ReadAllText(path);
             List<SceneObject> sceneObjects = SceneObject.FromJSON(json);
 
-            foreach (SceneObject obj in sceneObjects) {
-                SceneLoaderDictionary.loadSceneObjectDictionary[obj.GetType()].Invoke(obj);
+            for (int i = 0; i < sceneObjects.Count; i++) {
+                SceneLoaderDictionary.loadSceneObjectDictionary[sceneObjects[i].GetType()].Invoke(sceneObjects[i]);
             }
         }
         else {
@@ -79,6 +79,8 @@ public class OpenJsonConfig : MonoBehaviour
             newFact.Representation = cogwheel;
             GameState.Facts.Insert(cogId, newFact);
             UnityEngine.Debug.Log("Successfully added new CogwheelFact with backendUri: " + newFact.backendURI);
+
+            addedSceneObjects.Add(new Tuple<SceneObject, GameObject>(obj, cogwheel));
         }
     }
 
@@ -109,6 +111,8 @@ public class OpenJsonConfig : MonoBehaviour
 
             //Set Layer for gameobject and all its children
             SetLayerRecursively(generator, LayerMask.NameToLayer("Generator"));
+
+            addedSceneObjects.Add(new Tuple<SceneObject, GameObject>(obj, generator));
         }
     }
 
@@ -136,6 +140,8 @@ public class OpenJsonConfig : MonoBehaviour
 
             //Set Layer for gameobject and all its children
             SetLayerRecursively(shaft, LayerMask.NameToLayer("Shaft"));
+
+            addedSceneObjects.Add(new Tuple<SceneObject, GameObject>(obj, shaft));
         }
     }
 
@@ -170,6 +176,8 @@ public class OpenJsonConfig : MonoBehaviour
 
             //Set Layer for gameobject and all its children
             SetLayerRecursively(shaftHolder, LayerMask.NameToLayer("ShaftHolder"));
+
+            addedSceneObjects.Add(new Tuple<SceneObject, GameObject>(obj, shaftHolder));
         }
     }
 
