@@ -5,7 +5,6 @@ using UnityEngine;
 using static JSONManager;
 using JsonSubTypes;
 using Newtonsoft.Json;
-using MathNet.Numerics.LinearAlgebra;
 
 /*
  * SimplifiedFact: Class used for deserialization of ServerResponses

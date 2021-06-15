@@ -1,0 +1,136 @@
+[
+	{
+		"id": 1,
+        "kind": "ConeCogwheelObject",
+        "position": {
+			"x": 18.52768,
+			"y": 8.435658,
+			"z": 3.701808
+		},
+		"rotation": {
+			"x": 261,
+			"y": 90,
+			"z": -90
+		},
+		"radius": 6,
+		"cogCount": 30,
+		"height": 1,
+		"interlockingObjects": []
+    },
+	{
+		"id": 2,
+        "kind": "ShaftObject",
+        "position": {
+			"x": 18.52768,
+			"y": 8.435658,
+			"z": 3.701808
+		},
+		"rotation": {
+			"x": -89.98,
+			"y": 0,
+			"z": 0
+		},
+		"radius": 1,
+		"length": 5,
+		"connectedObjects": [1]
+    },
+	{
+		"id": 3,
+        "kind": "ShaftHolderObject",
+        "position": {
+			"x": 18.52768,
+			"y": 8.435659,
+			"z": 0.02620459
+		},
+		"rotation": {
+			"x": 0,
+			"y": -90,
+			"z": 90
+		},
+		"radius": 1,
+		"thickness": 1
+    },
+	{
+		"id": 4,
+        "kind": "ShaftHolderObject",
+        "position": {
+			"x": 18.52768,
+			"y": 8.435655,
+			"z": 8.274351
+		},
+		"rotation": {
+			"x": 0,
+			"y": -90,
+			"z": 90
+		},
+		"radius": 1,
+		"thickness": 1
+    },
+	{
+		"id": 5,
+        "kind": "ConeCogwheelObject",
+        "position": {
+			"x": 28.40457,
+			"y": 10,
+			"z": 3.701809
+		},
+		"rotation": {
+			"x": -89.98,
+			"y": 0,
+			"z": 0
+		},
+		"radius": 4,
+		"cogCount": 20,
+		"height": 1,
+		"interlockingObjects": [1]
+    },
+	{
+		"id": 6,
+        "kind": "ShaftObject",
+        "position": {
+			"x": 28.40457,
+			"y": 10,
+			"z": 1.820274
+		},
+		"rotation": {
+			"x": -89.98,
+			"y": 0,
+			"z": 0
+		},
+		"radius": 1,
+		"length": 10,
+		"connectedObjects": [5]
+    },
+    {
+		"id": 7,
+        "kind": "GeneratorObject",
+        "position": {
+			"x": 28.40457,
+			"y": 0,
+			"z": 17.69527
+		},
+		"rotation": {
+			"x": 0,
+			"y": 0,
+			"z": 0
+		},
+		"height": 10,
+		"connectedObjects": [6]
+    },
+	 {
+		"id": 8,
+        "kind": "ShaftHolderObject",
+        "position": {
+			"x": 28.40457,
+			"y": 10,
+			"z": -6.967102
+		},
+		"rotation": {
+			"x": 0,
+			"y": -90,
+			"z": 90
+		},
+		"radius": 1,
+		"thickness": 1
+    }
+]

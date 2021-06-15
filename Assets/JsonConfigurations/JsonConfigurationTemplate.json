@@ -1,0 +1,69 @@
+[
+    {
+		"id": 1,
+        "kind": "GeneratorObject",
+        "position": {
+			"x": ,
+			"y": ,
+			"z": 
+		},
+		"rotation": {
+			"x": ,
+			"y": ,
+			"z": 
+		},
+		"height": ,
+		"connectedObjects": []
+    },
+     {
+		"id": 2,
+        "kind": "ShaftObject",
+        "position": {
+			"x": ,
+			"y": ,
+			"z": 
+		},
+		"rotation": {
+			"x": ,
+			"y": ,
+			"z": 
+		},
+		"radius": ,
+		"length": ,
+		"connectedObjects": []
+    },
+	 {
+		"id": 3,
+        "kind": "ShaftHolderObject",
+        "position": {
+			"x": ,
+			"y": ,
+			"z": 
+		},
+		"rotation": {
+			"x": ,
+			"y": ,
+			"z": 
+		},
+		"radius": ,
+		"thickness": 
+    },
+	 {
+		"id": 4,
+        "kind": "ConeCogwheelObject",
+        "position": {
+			"x": ,
+			"y": ,
+			"z": 
+		},
+		"rotation": {
+			"x": ,
+			"y": ,
+			"z": 
+		},
+		"radius": ,
+		"cogCount": ,
+		"height": ,
+		"interlockingObjects": []
+    }
+]
