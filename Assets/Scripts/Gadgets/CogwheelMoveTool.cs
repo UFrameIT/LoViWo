@@ -89,8 +89,12 @@ public class CogwheelMoveTool : MonoBehaviour
                 {
                     this.lastCollidedObject = null;
 
-                    if ((Hit.collider.gameObject.transform.parent != null && Hit.collider.gameObject.transform.parent.GetComponentInChildren<Cogwheel>().getModule().Equals(this.movingObject.GetComponentInChildren<Cogwheel>().getModule())) ||
-                        (Hit.collider.gameObject.GetComponentInChildren<Cogwheel>().getModule().Equals(this.movingObject.GetComponentInChildren<Cogwheel>().getModule())))
+                    if ((Hit.collider.gameObject.transform.parent != null
+                            && Hit.collider.gameObject.transform.parent.GetComponentInChildren<Cogwheel>() != null
+                            && Hit.collider.gameObject.transform.parent.GetComponentInChildren<Cogwheel>().getModule().Equals(this.movingObject.GetComponentInChildren<Cogwheel>().getModule()))
+                        ||
+                        (Hit.collider.gameObject.GetComponentInChildren<Cogwheel>() != null
+                        && Hit.collider.gameObject.GetComponentInChildren<Cogwheel>().getModule().Equals(this.movingObject.GetComponentInChildren<Cogwheel>().getModule())))
                     {
                         Vector3 currentPosition = Hit.point;
                         GameObject otherCogwheel;
