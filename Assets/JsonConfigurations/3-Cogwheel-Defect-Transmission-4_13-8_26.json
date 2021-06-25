@@ -1,0 +1,203 @@
+[
+	{
+		"id": 1,
+        "kind": "ConeCogwheelObject",
+        "position": {
+			"x": 13.10054,
+			"y": 19.80931,
+			"z": -2.200002
+		},
+		"rotation": {
+			"x": -89.723,
+			"y": -81.253,
+			"z": 81.349
+		},
+		"radius": 8,
+		"cogCount": 26,
+		"height": 1,
+		"interlockingObjects": []
+    },
+	{
+		"id": 2,
+        "kind": "ShaftObject",
+        "position": {
+			"x": 13.10054,
+			"y": 19.80931,
+			"z": -2.200002
+		},
+		"rotation": {
+			"x": -89.897,
+			"y": 0,
+			"z": 0.191
+		},
+		"radius": 1,
+		"length": 30,
+		"connectedObjects": [1]
+    },
+	{
+		"id": 3,
+        "kind": "ShaftHolderObject",
+        "position": {
+			"x": 13.14883,
+			"y": 19.78828,
+			"z": 26.81891
+		},
+		"rotation": {
+			"x": 0.095,
+			"y": -89.905,
+			"z": 89.958
+		},
+		"radius": 1,
+		"thickness": 1
+    },
+	{
+		"id": 4,
+        "kind": "ShaftHolderObject",
+        "position": {
+			"x": 13.05439,
+			"y": 19.8294,
+			"z": -29.92735
+		},
+		"rotation": {
+			"x": 0.095,
+			"y": -89.905,
+			"z": 89.958
+		},
+		"radius": 1,
+		"thickness": 1
+    },
+	{
+		"id": 5,
+        "kind": "ConeCogwheelObject",
+        "position": {
+			"x": 12.6,
+			"y": 7.473309,
+			"z": -2.2
+		},
+		"rotation": {
+			"x": -89.603,
+			"y": -88.083,
+			"z": 88.121
+		},
+		"radius": 4,
+		"cogCount": 13,
+		"height": 1,
+		"interlockingObjects": []
+    },
+	{
+		"id": 6,
+        "kind": "ShaftObject",
+        "position": {
+			"x": 12.6,
+			"y": 7.473309,
+			"z": -2.2
+		},
+		"rotation": {
+			"x": -89.96,
+			"y": 0,
+			"z": 0.075
+		},
+		"radius": 1,
+		"length": 5,
+		"connectedObjects": [5]
+    },
+	{
+		"id": 7,
+        "kind": "ShaftHolderObject",
+        "position": {
+			"x": 12.60293,
+			"y": 7.472294,
+			"z": 2.26485
+		},
+		"rotation": {
+			"x": 0.038,
+			"y": -89.962,
+			"z": 89.987
+		},
+		"radius": 1,
+		"thickness": 1
+    },
+	{
+		"id": 8,
+        "kind": "ShaftHolderObject",
+        "position": {
+			"x": 12.59793,
+			"y": 7.474028,
+			"z": -5.361716
+		},
+		"rotation": {
+			"x": 0.038,
+			"y": -89.962,
+			"z": 89.987
+		},
+		"radius": 1,
+		"thickness": 1
+    },
+	{
+		"id": 9,
+        "kind": "ConeCogwheelObject",
+        "position": {
+			"x": 20.46544,
+			"y": 10,
+			"z": -2.200002
+		},
+		"rotation": {
+			"x": 69.096,
+			"y": 91.138,
+			"z": -89.498
+		},
+		"radius": 4,
+		"cogCount": 13,
+		"height": 1,
+		"interlockingObjects": [1,5]
+    },
+	{
+		"id": 10,
+        "kind": "ShaftObject",
+        "position": {
+			"x": 20.47805,
+			"y": 10,
+			"z": -0.5811396
+		},
+		"rotation": {
+			"x": -89.98,
+			"y": 0,
+			"z": 0
+		},
+		"radius": 1,
+		"length": 10,
+		"connectedObjects": [9]
+    },
+    {
+		"id": 11,
+        "kind": "GeneratorObject",
+        "position": {
+			"x": 20.47805,
+			"y": 0,
+			"z": 15.29386
+		},
+		"rotation": {
+			"x": 0,
+			"y": 0,
+			"z": 0
+		},
+		"height": 10,
+		"connectedObjects": [10]
+    },
+	 {
+		"id": 12,
+        "kind": "ShaftHolderObject",
+        "position": {
+			"x": 20.47805,
+			"y": 10,
+			"z": -9.400836
+		},
+		"rotation": {
+			"x": 0,
+			"y": -90,
+			"z": 90
+		},
+		"radius": 1,
+		"thickness": 1
+    }
+]

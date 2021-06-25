@@ -97,7 +97,9 @@ public class ShaftHolderMoveTool : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             //Set Layer for gameobject and all its children
-            SetLayerRecursively(movingObject, LayerMask.NameToLayer("ShaftHolder"));
+            string tagLayerName = "ShaftHolder";
+            SetLayerRecursively(movingObject, LayerMask.NameToLayer(tagLayerName));
+            movingObject.gameObject.tag = tagLayerName;
             Stop();
         }
     }

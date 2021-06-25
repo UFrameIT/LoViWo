@@ -5,6 +5,10 @@ TagManager:
   serializedVersion: 2
   tags:
   - Ground
+  - Cogwheel
+  - Generator
+  - Shaft
+  - ShaftHolder
   layers:
   - Default
   - TransparentFX

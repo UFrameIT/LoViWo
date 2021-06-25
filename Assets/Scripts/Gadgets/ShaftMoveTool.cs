@@ -97,7 +97,9 @@ public class ShaftMoveTool : MonoBehaviour
                 getUpperParent(lastCollidedObject).GetComponentInChildren<Connectable>().addConnectedPart(this.movingObject.GetComponentInChildren<Rotatable>());
             }
 
-            movingObject.gameObject.layer = LayerMask.NameToLayer("Shaft");
+            string tagLayerName = "Shaft";
+            movingObject.gameObject.layer = LayerMask.NameToLayer(tagLayerName);
+            movingObject.gameObject.tag = tagLayerName;
             Stop();
         }
     }

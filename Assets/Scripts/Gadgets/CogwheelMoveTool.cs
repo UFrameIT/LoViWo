@@ -91,10 +91,10 @@ public class CogwheelMoveTool : MonoBehaviour
 
                     if ((Hit.collider.gameObject.transform.parent != null
                             && Hit.collider.gameObject.transform.parent.GetComponentInChildren<Cogwheel>() != null
-                            && Hit.collider.gameObject.transform.parent.GetComponentInChildren<Cogwheel>().getModule().Equals(this.movingObject.GetComponentInChildren<Cogwheel>().getModule()))
+                            && Math.Abs(Hit.collider.gameObject.transform.parent.GetComponentInChildren<Cogwheel>().getModule() - this.movingObject.GetComponentInChildren<Cogwheel>().getModule()) < 0.001f )
                         ||
                         (Hit.collider.gameObject.GetComponentInChildren<Cogwheel>() != null
-                        && Hit.collider.gameObject.GetComponentInChildren<Cogwheel>().getModule().Equals(this.movingObject.GetComponentInChildren<Cogwheel>().getModule())))
+                        && Math.Abs(Hit.collider.gameObject.GetComponentInChildren<Cogwheel>().getModule() - this.movingObject.GetComponentInChildren<Cogwheel>().getModule()) < 0.001f))
                     {
                         Vector3 currentPosition = Hit.point;
                         GameObject otherCogwheel;
@@ -182,12 +182,14 @@ public class CogwheelMoveTool : MonoBehaviour
                 lastCollidedObject.GetComponentInChildren<Interlockable>().addInterlockingPart(this.movingObject.GetComponentInChildren<Interlockable>());
             }
 
-            movingObject.gameObject.layer = LayerMask.NameToLayer("Cogwheel");
+            string tagLayerName = "Cogwheel";
+            movingObject.gameObject.layer = LayerMask.NameToLayer(tagLayerName);
             //Set Layer for all children
             foreach (Transform t in movingObject.GetComponentsInChildren<Transform>())
             {
-                t.gameObject.layer = LayerMask.NameToLayer("Cogwheel");
+                t.gameObject.layer = LayerMask.NameToLayer(tagLayerName);
             }
+            movingObject.gameObject.tag = tagLayerName;
 
             //Create new CogwheelFact and add to global FactList
             int cogId = GameState.Facts.Count;

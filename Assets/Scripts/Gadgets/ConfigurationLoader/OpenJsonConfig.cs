@@ -11,6 +11,13 @@ public class SceneLoaderDictionary {
         {typeof(ShaftObject), OpenJsonConfig.loadShaftObject},
         {typeof(ShaftHolderObject), OpenJsonConfig.loadShaftHolderObject}
     };
+    public static Dictionary<Type, string> tagSceneObjectDictionary = new Dictionary<Type, string>()
+    {
+        {typeof(ConeCogwheelObject), "Cogwheel"},
+        {typeof(GeneratorObject), "Generator"},
+        {typeof(ShaftObject), "Shaft"},
+        {typeof(ShaftHolderObject), "ShaftHolder"}
+    };
 }
 
 public class OpenJsonConfig : MonoBehaviour
@@ -43,6 +50,16 @@ public class OpenJsonConfig : MonoBehaviour
             string json = File.ReadAllText(path);
             List<SceneObject> sceneObjects = SceneObject.FromJSON(json);
 
+            //If the deserialization was successful: Delete all existing GameObjects / Facts
+            GameState.Facts.Clear();
+            foreach (KeyValuePair<Type, string> entry in SceneLoaderDictionary.tagSceneObjectDictionary)
+            {
+                GameObject[] objects = GameObject.FindGameObjectsWithTag(entry.Value);
+                foreach (GameObject obj in objects) {
+                    Destroy(obj);
+                }
+            }
+
             for (int i = 0; i < sceneObjects.Count; i++) {
                 SceneLoaderDictionary.loadSceneObjectDictionary[sceneObjects[i].GetType()].Invoke(sceneObjects[i]);
             }
@@ -70,7 +87,9 @@ public class OpenJsonConfig : MonoBehaviour
             }
 
             //Set Layer for gameobject and all its children
-            SetLayerRecursively(cogwheel, LayerMask.NameToLayer("Cogwheel"));
+            string tagLayerName = "Cogwheel";
+            SetLayerRecursively(cogwheel, LayerMask.NameToLayer(tagLayerName));
+            cogwheel.gameObject.tag = tagLayerName;
 
             //Create new CogwheelFact and add to global FactList
             int cogId = GameState.Facts.Count;
@@ -110,7 +129,9 @@ public class OpenJsonConfig : MonoBehaviour
             }
 
             //Set Layer for gameobject and all its children
-            SetLayerRecursively(generator, LayerMask.NameToLayer("Generator"));
+            string tagLayerName = "Generator";
+            SetLayerRecursively(generator, LayerMask.NameToLayer(tagLayerName));
+            generator.gameObject.tag = tagLayerName;
 
             addedSceneObjects.Add(new Tuple<SceneObject, GameObject>(obj, generator));
         }
@@ -139,7 +160,9 @@ public class OpenJsonConfig : MonoBehaviour
             }
 
             //Set Layer for gameobject and all its children
-            SetLayerRecursively(shaft, LayerMask.NameToLayer("Shaft"));
+            string tagLayerName = "Shaft";
+            SetLayerRecursively(shaft, LayerMask.NameToLayer(tagLayerName));
+            shaft.gameObject.tag = tagLayerName;
 
             addedSceneObjects.Add(new Tuple<SceneObject, GameObject>(obj, shaft));
         }
@@ -175,7 +198,9 @@ public class OpenJsonConfig : MonoBehaviour
             bottom.localPosition = new Vector3((-(shaftHolderBorderWidth + shhObject.radius + shaftHolder.transform.GetChild(0).localScale.y - shaftHolder.transform.GetChild(1).localScale.x / 2)), bottom.localPosition.y, bottom.localPosition.z);
 
             //Set Layer for gameobject and all its children
-            SetLayerRecursively(shaftHolder, LayerMask.NameToLayer("ShaftHolder"));
+            string tagLayerName = "ShaftHolder";
+            SetLayerRecursively(shaftHolder, LayerMask.NameToLayer(tagLayerName));
+            shaftHolder.gameObject.tag = tagLayerName;
 
             addedSceneObjects.Add(new Tuple<SceneObject, GameObject>(obj, shaftHolder));
         }

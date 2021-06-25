@@ -69,7 +69,9 @@ public class GeneratorMoveTool : MonoBehaviour
         if (Input.GetMouseButtonDown(0))
         {
             //Set Layer for gameobject and all its children
-            SetLayerRecursively(movingObject, LayerMask.NameToLayer("Generator"));
+            string tagLayerName = "Generator";
+            SetLayerRecursively(movingObject, LayerMask.NameToLayer(tagLayerName));
+            movingObject.gameObject.tag = tagLayerName;
             Stop();
         }
     }
