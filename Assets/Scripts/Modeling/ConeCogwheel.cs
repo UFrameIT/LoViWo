@@ -55,6 +55,10 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
         return this.cogAngle;
     }
 
+    public int getCogCount() {
+        return this.cogCount;
+    }
+
     public float getPitchDiameter() {
         return this.pitchDiameter;
     }

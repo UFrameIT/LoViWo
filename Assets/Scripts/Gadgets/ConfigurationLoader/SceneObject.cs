@@ -24,6 +24,11 @@ public abstract class SceneObject
         List<SceneObject> sceneObjects = JsonConvert.DeserializeObject<List<SceneObject>>(json);
         return sceneObjects;
     }
+
+    public static string ToJSON(List<SceneObject> objects) {
+        string json = Newtonsoft.Json.JsonConvert.SerializeObject(objects);
+        return json;
+    }
 }
 
 public class ConeCogwheelObject : SceneObject
@@ -58,4 +63,10 @@ public class Vector3Object
     public float x;
     public float y;
     public float z;
+
+    public Vector3Object(float x, float y, float z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
 }

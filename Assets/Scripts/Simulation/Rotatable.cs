@@ -6,4 +6,5 @@ public interface Rotatable
 {
     void rotate(float angularVelocity, bool knowledgeBased);
     void stopRotation();
+    Transform getRootTransform();
 }

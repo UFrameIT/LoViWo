@@ -28,6 +28,10 @@ public class RotatableObject : MonoBehaviour, Rotatable, Connectable
         return this.connectedObjects;
     }
 
+    public Transform getRootTransform() {
+        return this.transform.root;
+    }
+
     public void rotate(float angularVelocity, bool knowledgeBased) {
         this.angularVelocity = angularVelocity;
         this.rotationActive = true;

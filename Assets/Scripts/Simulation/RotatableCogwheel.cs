@@ -27,6 +27,14 @@ public class RotatableCogwheel : MonoBehaviour, Rotatable, Interlockable
         interlockingObjects.Add(part);
     }
 
+    public List<Interlockable> getInterlockingParts() {
+        return this.interlockingObjects;
+    }
+
+    public Transform getRootTransform() {
+        return this.transform.root;
+    }
+
     public void activatePhysics()
     {
         saveTransform();

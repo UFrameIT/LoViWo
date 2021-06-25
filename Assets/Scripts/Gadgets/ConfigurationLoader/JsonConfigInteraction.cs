@@ -5,22 +5,25 @@ using UnityEngine;
 using UnityEditor;
 
 public class SceneLoaderDictionary {
-    public static Dictionary<Type, Action<SceneObject>> loadSceneObjectDictionary = new Dictionary<Type, Action<SceneObject>>() {
-        {typeof(ConeCogwheelObject), OpenJsonConfig.loadConeCogwheelObject},
-        {typeof(GeneratorObject), OpenJsonConfig.loadGeneratorObject},
-        {typeof(ShaftObject), OpenJsonConfig.loadShaftObject},
-        {typeof(ShaftHolderObject), OpenJsonConfig.loadShaftHolderObject}
-    };
-    public static Dictionary<Type, string> tagSceneObjectDictionary = new Dictionary<Type, string>()
+    public static Dictionary<Type, Action<SceneObject>> loadSceneObjectDictionary = new Dictionary<Type, Action<SceneObject>>()
     {
-        {typeof(ConeCogwheelObject), "Cogwheel"},
-        {typeof(GeneratorObject), "Generator"},
-        {typeof(ShaftObject), "Shaft"},
-        {typeof(ShaftHolderObject), "ShaftHolder"}
+        {typeof(ConeCogwheelObject), JsonConfigInteraction.loadConeCogwheelObject},
+        {typeof(GeneratorObject), JsonConfigInteraction.loadGeneratorObject},
+        {typeof(ShaftObject), JsonConfigInteraction.loadShaftObject},
+        {typeof(ShaftHolderObject), JsonConfigInteraction.loadShaftHolderObject}
     };
+    public static Dictionary<string, Action<List<SceneObject>, Dictionary<GameObject, SceneObject>, GameObject>> addSceneObjectDictionary
+        = new Dictionary<string, Action<List<SceneObject>, Dictionary<GameObject, SceneObject>, GameObject>>()
+    {
+            {"Cogwheel", JsonConfigInteraction.addConeCogwheelObject},
+            {"Generator", JsonConfigInteraction.addGeneratorObject},
+            {"Shaft", JsonConfigInteraction.addShaftObject},
+            {"ShaftHolder", JsonConfigInteraction.addShaftHolderObject}
+    };
+    public static List<string> sceneObjectsTagList = new List<string>() {"Cogwheel","Generator","Shaft","ShaftHolder"};
 }
 
-public class OpenJsonConfig : MonoBehaviour
+public class JsonConfigInteraction : MonoBehaviour
 {
     public static Dictionary<Type, GameObject> prefabDictionary;
     public static List<Tuple<SceneObject, GameObject>> addedSceneObjects;
@@ -52,9 +55,9 @@ public class OpenJsonConfig : MonoBehaviour
 
             //If the deserialization was successful: Delete all existing GameObjects / Facts
             GameState.Facts.Clear();
-            foreach (KeyValuePair<Type, string> entry in SceneLoaderDictionary.tagSceneObjectDictionary)
+            foreach (string entry in SceneLoaderDictionary.sceneObjectsTagList)
             {
-                GameObject[] objects = GameObject.FindGameObjectsWithTag(entry.Value);
+                GameObject[] objects = GameObject.FindGameObjectsWithTag(entry);
                 foreach (GameObject obj in objects) {
                     Destroy(obj);
                 }
@@ -66,6 +69,39 @@ public class OpenJsonConfig : MonoBehaviour
         }
         else {
             Debug.Log("OpenJsonConfig: Selected file was not a json-file.");
+        }
+    }
+
+    public void saveJsonConfig() {
+        List<SceneObject> sceneObjects = new List<SceneObject>();
+        Dictionary<GameObject, SceneObject> addedSceneObjects = new Dictionary<GameObject, SceneObject>();
+
+        //Add all SceneObjects to list
+        foreach (string entry in SceneLoaderDictionary.sceneObjectsTagList)
+        {
+            GameObject[] objects = GameObject.FindGameObjectsWithTag(entry);
+            foreach (GameObject obj in objects)
+            {
+                //If object not already added
+                if (!addedSceneObjects.ContainsKey(obj)) {
+                    SceneLoaderDictionary.addSceneObjectDictionary[obj.tag].Invoke(sceneObjects, addedSceneObjects, obj);
+                }
+            }
+        }
+
+        string json = SceneObject.ToJSON(sceneObjects);
+        //Save json in file
+        string path = EditorUtility.SaveFilePanel("Save Json Config...",
+                                                  "Assets\\JsonConfigurations",
+                                                  DateTime.Today.ToString("yyyy-MM-dd") + "-Config.json",
+                                                  "json");
+        if (".json".Equals(Path.GetExtension(path)))
+        {
+            File.WriteAllText(path, json);
+        }
+        else
+        {
+            Debug.Log("SaveJsonConfig: Saved file was not a json-file.");
         }
     }
 
@@ -203,6 +239,139 @@ public class OpenJsonConfig : MonoBehaviour
             shaftHolder.gameObject.tag = tagLayerName;
 
             addedSceneObjects.Add(new Tuple<SceneObject, GameObject>(obj, shaftHolder));
+        }
+    }
+
+    public static void addConeCogwheelObject(List<SceneObject> sceneObjects, Dictionary<GameObject, SceneObject> addedSceneObjects, GameObject obj)
+    {
+        if (obj.tag.Equals("Cogwheel"))
+        {
+            ConeCogwheelObject newObject = new ConeCogwheelObject();
+
+            List<Interlockable> interlockingObjects = obj.GetComponentInChildren<RotatableCogwheel>().getInterlockingParts();
+            newObject.interlockingObjects = new int[interlockingObjects.Count];
+
+            for(int i = 0; i < interlockingObjects.Count; i++) {
+                if(!addedSceneObjects.ContainsKey(interlockingObjects[i].getRootTransform().gameObject))
+                    SceneLoaderDictionary.addSceneObjectDictionary[interlockingObjects[i].getRootTransform().tag].Invoke(sceneObjects, addedSceneObjects, interlockingObjects[i].getRootTransform().gameObject);
+
+                newObject.interlockingObjects[i] = addedSceneObjects[interlockingObjects[i].getRootTransform().gameObject].id;
+            }
+
+            newObject.id = sceneObjects.Count;
+            newObject.kind = "ConeCogwheelObject";
+            Vector3 objPosition = obj.transform.position;
+            newObject.position = new Vector3Object(objPosition.x, objPosition.y, objPosition.z);
+            Vector3 objRotation = obj.transform.eulerAngles;
+            newObject.rotation = new Vector3Object(objRotation.x, objRotation.y, objRotation.z);
+
+            ConeCogwheel coneCogwheelModeling = obj.GetComponentInChildren<ConeCogwheel>();
+            newObject.radius = coneCogwheelModeling.getRadius();
+            newObject.cogCount = coneCogwheelModeling.getCogCount();
+            newObject.height = coneCogwheelModeling.getHeight();
+
+            sceneObjects.Add(newObject);
+            addedSceneObjects.Add(obj, newObject);
+        }
+        else {
+            Debug.Log("JsonConfigInteraction.addConeCogwheelObject: object is not tagged with 'Cogwheel'.");
+        }
+    }
+
+    public static void addGeneratorObject(List<SceneObject> sceneObjects, Dictionary<GameObject, SceneObject> addedSceneObjects, GameObject obj)
+    {
+        if (obj.tag.Equals("Generator"))
+        {
+            GeneratorObject newObject = new GeneratorObject();
+
+            List<Rotatable> connectedObjects = obj.GetComponentInChildren<Generator>().getConnectedParts();
+            newObject.connectedObjects = new int[connectedObjects.Count];
+
+            for (int i = 0; i < connectedObjects.Count; i++)
+            {
+                if (!addedSceneObjects.ContainsKey(connectedObjects[i].getRootTransform().gameObject))
+                    SceneLoaderDictionary.addSceneObjectDictionary[connectedObjects[i].getRootTransform().tag].Invoke(sceneObjects, addedSceneObjects, connectedObjects[i].getRootTransform().gameObject);
+
+                newObject.connectedObjects[i] = addedSceneObjects[connectedObjects[i].getRootTransform().gameObject].id;
+            }
+
+            newObject.id = sceneObjects.Count;
+            newObject.kind = "GeneratorObject";
+            Vector3 objPosition = obj.transform.position;
+            newObject.position = new Vector3Object(objPosition.x, objPosition.y, objPosition.z);
+            Vector3 objRotation = obj.transform.eulerAngles;
+            newObject.rotation = new Vector3Object(objRotation.x, objRotation.y, objRotation.z);
+
+            newObject.height = obj.transform.GetChild(1).localScale.y;
+
+            sceneObjects.Add(newObject);
+            addedSceneObjects.Add(obj, newObject);
+        }
+        else
+        {
+            Debug.Log("JsonConfigInteraction.addConeCogwheelObject: object is not tagged with 'Generator'.");
+        }
+    }
+
+    public static void addShaftObject(List<SceneObject> sceneObjects, Dictionary<GameObject, SceneObject> addedSceneObjects, GameObject obj)
+    {
+        if (obj.tag.Equals("Shaft"))
+        {
+            ShaftObject newObject = new ShaftObject();
+
+            List<Rotatable> connectedObjects = obj.GetComponentInChildren<RotatableObject>().getConnectedParts();
+            newObject.connectedObjects = new int[connectedObjects.Count];
+
+            for (int i = 0; i < connectedObjects.Count; i++)
+            {
+                if (!addedSceneObjects.ContainsKey(connectedObjects[i].getRootTransform().gameObject))
+                    SceneLoaderDictionary.addSceneObjectDictionary[connectedObjects[i].getRootTransform().tag].Invoke(sceneObjects, addedSceneObjects, connectedObjects[i].getRootTransform().gameObject);
+
+                newObject.connectedObjects[i] = addedSceneObjects[connectedObjects[i].getRootTransform().gameObject].id;
+            }
+
+            newObject.id = sceneObjects.Count;
+            newObject.kind = "ShaftObject";
+            Vector3 objPosition = obj.transform.position;
+            newObject.position = new Vector3Object(objPosition.x, objPosition.y, objPosition.z);
+            Vector3 objRotation = obj.transform.eulerAngles;
+            newObject.rotation = new Vector3Object(objRotation.x, objRotation.y, objRotation.z);
+
+            newObject.radius = (obj.transform.localScale.x / 2.0f);
+            newObject.length = obj.transform.localScale.y;
+
+            sceneObjects.Add(newObject);
+            addedSceneObjects.Add(obj, newObject);
+        }
+        else
+        {
+            Debug.Log("JsonConfigInteraction.addConeCogwheelObject: object is not tagged with 'Shaft'.");
+        }
+    }
+
+    public static void addShaftHolderObject(List<SceneObject> sceneObjects, Dictionary<GameObject, SceneObject> addedSceneObjects, GameObject obj)
+    {
+        if (obj.tag.Equals("ShaftHolder"))
+        {
+            ShaftHolderObject newObject = new ShaftHolderObject();
+            
+            newObject.id = sceneObjects.Count;
+            newObject.kind = "ShaftHolderObject";
+            Vector3 objPosition = obj.transform.position;
+            newObject.position = new Vector3Object(objPosition.x, objPosition.y, objPosition.z);
+            Vector3 objRotation = obj.transform.eulerAngles;
+            newObject.rotation = new Vector3Object(objRotation.x, objRotation.y, objRotation.z);
+
+            ShaftHolder shaftHolderModeling = obj.GetComponentInChildren<ShaftHolder>();
+            newObject.radius = shaftHolderModeling.innerRadius;
+            newObject.thickness = shaftHolderModeling.thickness;
+
+            sceneObjects.Add(newObject);
+            addedSceneObjects.Add(obj, newObject);
+        }
+        else
+        {
+            Debug.Log("JsonConfigInteraction.addConeCogwheelObject: object is not tagged with 'ShaftHolder'.");
         }
     }
 
