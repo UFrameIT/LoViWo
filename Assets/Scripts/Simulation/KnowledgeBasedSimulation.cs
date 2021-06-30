@@ -128,18 +128,21 @@ public static class KnowledgeBasedSimulation
                 //to a cogwheel whose angularVelocity is already known (Because it is the rotatingCogwheel driven by the generator).
                 MMTTerm knownAvVariable = variables.Find(variable => variable.isSimplifiedCogwheelAvTerm()
                                                                         && ((OMF)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(0)).value).f.Equals(((CogwheelFact)knownAv.Key).Radius)
-                                                                        && ((OMF)((OMA)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(1)).value).arguments.ElementAt(0)).f.Equals(((CogwheelFact)knownAv.Key).Point.x)
-                                                                        && ((OMF)((OMA)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(1)).value).arguments.ElementAt(1)).f.Equals(((CogwheelFact)knownAv.Key).Point.y)
-                                                                        && ((OMF)((OMA)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(1)).value).arguments.ElementAt(2)).f.Equals(((CogwheelFact)knownAv.Key).Point.z));
+                                                                        && ((OMF)((OMA)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(3)).value).arguments.ElementAt(0)).f.Equals(((CogwheelFact)knownAv.Key).Point.x)
+                                                                        && ((OMF)((OMA)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(3)).value).arguments.ElementAt(1)).f.Equals(((CogwheelFact)knownAv.Key).Point.y)
+                                                                        && ((OMF)((OMA)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(3)).value).arguments.ElementAt(2)).f.Equals(((CogwheelFact)knownAv.Key).Point.z));
                 int numberOfElementsPerRow = AData.ElementAt(0).Count;
                 //Create new row with zero-entries
                 List<double> newADataRow = new List<double>(new double[numberOfElementsPerRow]);
-                //Set 1 in AData for the column of the corresponding variable
-                newADataRow[variables.IndexOf(knownAvVariable)] = 1;
-                //Add new column to AData
-                AData.Add(newADataRow);
-                //Add known angularVelocity to bData
-                bData.Add(knownAv.Value);
+
+                if (knownAvVariable != null) {
+                    //Set 1 in AData for the column of the corresponding variable
+                    newADataRow[variables.IndexOf(knownAvVariable)] = 1;
+                    //Add new column to AData
+                    AData.Add(newADataRow);
+                    //Add known angularVelocity to bData
+                    bData.Add(knownAv.Value);
+                }
             }
         }
     }
@@ -154,9 +157,9 @@ public static class KnowledgeBasedSimulation
                 if (fact.GetType().Equals(typeof(CogwheelFact))) {
                     MMTTerm knownAvVariable = variables.Find(variable => variable.isSimplifiedCogwheelAvTerm()
                                                                         && ((OMF)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(0)).value).f.Equals(((CogwheelFact)fact).Radius)
-                                                                        && ((OMF)((OMA)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(1)).value).arguments.ElementAt(0)).f.Equals(((CogwheelFact)fact).Point.x)
-                                                                        && ((OMF)((OMA)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(1)).value).arguments.ElementAt(1)).f.Equals(((CogwheelFact)fact).Point.y)
-                                                                        && ((OMF)((OMA)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(1)).value).arguments.ElementAt(2)).f.Equals(((CogwheelFact)fact).Point.z));
+                                                                        && ((OMF)((OMA)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(3)).value).arguments.ElementAt(0)).f.Equals(((CogwheelFact)fact).Point.x)
+                                                                        && ((OMF)((OMA)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(3)).value).arguments.ElementAt(1)).f.Equals(((CogwheelFact)fact).Point.y)
+                                                                        && ((OMF)((OMA)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(3)).value).arguments.ElementAt(2)).f.Equals(((CogwheelFact)fact).Point.z));
                     //If an element was found
                     if (knownAvVariable != null) {
                         double newlyDiscoveredAv = glsSolution.ElementAt(variables.IndexOf(knownAvVariable));

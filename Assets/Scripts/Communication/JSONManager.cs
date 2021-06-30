@@ -65,19 +65,19 @@ public static class JSONManager
                         && ((OMA)this).arguments.ElementAt(0).GetType().Equals(typeof(OMA))
                         && ((OMA)((OMA)this).arguments.ElementAt(0)).applicant.GetType().Equals(typeof(OMS))
                         && ((OMS)((OMA)((OMA)this).arguments.ElementAt(0)).applicant).uri.Equals(MMTURIs.Record)
-                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.Count == 5
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.Count == 7
                         && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0).GetType().Equals(typeof(RECARG))
-                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).name.Equals("radius")
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).name.Equals("pitchRadius")
                         && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).value.GetType().Equals(typeof(OMF))
-                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1).GetType().Equals(typeof(RECARG))
-                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).name.Equals("position")
-                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).value.GetType().Equals(typeof(OMA))
-                        && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).value).applicant.GetType().Equals(typeof(OMS))
-                        && ((OMS)((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).value).applicant).uri.Equals(MMTURIs.Tuple)
-                        && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).value).arguments.Count == 3
-                        && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).value).arguments.ElementAt(0).GetType().Equals(typeof(OMF))
-                        && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).value).arguments.ElementAt(1).GetType().Equals(typeof(OMF))
-                        && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).value).arguments.ElementAt(2).GetType().Equals(typeof(OMF));
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(3).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(3)).name.Equals("position")
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(3)).value.GetType().Equals(typeof(OMA))
+                        && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(3)).value).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(3)).value).applicant).uri.Equals(MMTURIs.Tuple)
+                        && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(3)).value).arguments.Count == 3
+                        && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(3)).value).arguments.ElementAt(0).GetType().Equals(typeof(OMF))
+                        && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(3)).value).arguments.ElementAt(1).GetType().Equals(typeof(OMF))
+                        && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(3)).value).arguments.ElementAt(2).GetType().Equals(typeof(OMF));
         }
     }
 
