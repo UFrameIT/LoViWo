@@ -71,15 +71,58 @@ public static class KnowledgeBasedSimulation
                     List<double> bData = glsTuple.Item2;
                     List<MMTTerm> variables = glsTuple.Item3;
 
+                    int numberOfVariables = bData.Count;
                     addKnownEqsysValues(AData, bData, variables, knownAvMap);
 
                     Matrix<double> A = Matrix<double>.Build.DenseOfRows(AData);
                     Vector<double> b = Vector<double>.Build.DenseOfEnumerable(bData);
-                    //Solve GLS of the form 'A * x = b':
-                    Vector<double> glsSolution = A.Solve(b);
 
-                    //Map the glsSolution to the variables and to the corresponding cogwheels
-                    return getNewlyDiscoveredAvsMap(knownAvMap, variables, glsSolution);
+
+                    /****DETERMINE HOW MANY SOLUTIONS THE LINEAR-EQUATION-SYSTEM HAS AND REACT CORRESPONDINGLY****/
+                    int rankA = A.Rank();
+
+                    if (AData.Count == bData.Count)
+                    {
+                        for (int i = 0; i < AData.Count; i++)
+                        {
+                            AData[i].Add(bData[i]);
+                        }
+
+                        Matrix<double> AExtended = Matrix<double>.Build.DenseOfRows(AData);
+                        int rankAExtended = AExtended.Rank();
+
+                        //TODO: SHOW EQUATION-SYSTEM / RANKS ETC. / MAYBE WITH USING COMMUNICATIONEVENTS
+
+                        if (rankA != rankAExtended)
+                        {
+                            Debug.Log(String.Format("The linear EquationSystem has NO solution. Reason: rank of A and rank of AExtended are not equal. RankA = {0}, RankAExtended = {1}", rankA, rankAExtended));
+                            return null;
+                        }
+                        else if (rankA < numberOfVariables)
+                        {
+                            Debug.Log(String.Format("The linear EquationSystem has an infinite number of solutions. Reason: rank of A = rank of AExtended = {0} < varNum = {1}", rankA, numberOfVariables));
+                            return null;
+                        }
+                        else if (rankA == numberOfVariables)
+                        {
+                            Debug.Log(String.Format("The linear EquationSystem has exactly one solution. Reason: rank of A = rank of AExtended = {0} = varNum = {1}", rankA, numberOfVariables));
+
+                            //Solve GLS of the form 'A * x = b':
+                            Vector<double> glsSolution = A.Solve(b);
+
+                            //Map the glsSolution to the variables and to the corresponding cogwheels
+                            return getNewlyDiscoveredAvsMap(knownAvMap, variables, glsSolution);
+                        }
+                        else
+                        {
+                            Debug.Log(String.Format("Rank of A = rank of AExtended = {0} > varNum = {1}", rankA, numberOfVariables));
+                            return null;
+                        }
+                    }
+                    else {
+                        Debug.Log("Row-Count of Matrix A and Vector b were not equal!");
+                        return null;
+                    }
                 }
             }
             else {

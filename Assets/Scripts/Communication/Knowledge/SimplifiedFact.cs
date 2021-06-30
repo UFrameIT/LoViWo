@@ -80,7 +80,7 @@ public class SEqsysFact : SSymbolFact
                 return null;
             }
             else {
-                //Wen want to create a GLS of the form 'A * x = b'
+                //We want to create a GLS of the form 'A * x = b'
                 List<List<double>> AData = new List<List<double>>();
                 List<double> bData = new List<double>();
                 //variables-list is used to bring elements of AData into the right order, and

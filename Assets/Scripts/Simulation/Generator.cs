@@ -52,10 +52,13 @@ public class Generator : MonoBehaviour, Connectable
                 newlyDiscoveredAvsMap = KnowledgeBasedSimulation.knowledgeBasedSimulation(knownAvMap);
             }
 
-            //Start rotation forall Objects, firmly attached to the generator
-            foreach (Rotatable connectedObject in connectedObjects)
+            if (!knowledgeBasedSimulation || (knowledgeBasedSimulation && newlyDiscoveredAvsMap != null))
             {
-                connectedObject.rotate(this.angularVelocity, knowledgeBasedSimulation);
+                //Start rotation forall Objects, firmly attached to the generator
+                foreach (Rotatable connectedObject in connectedObjects)
+                {
+                    connectedObject.rotate(this.angularVelocity, knowledgeBasedSimulation);
+                }
             }
 
             //Rotating the other cogwheels if knowedgeBased is checked
@@ -91,10 +94,13 @@ public class Generator : MonoBehaviour, Connectable
             this.angularVelocity = 0.0f;
             this.simulationActive = false;
 
-            //Stop rotation forall Objects, firmly attached to the generator
-            foreach (Rotatable connectedObject in connectedObjects)
+            if (!wasKnowledgeBasedSimulation || (wasKnowledgeBasedSimulation && this.lastNewlyDiscoveredAvsMap != null))
             {
-                connectedObject.stopRotation();
+                //Stop rotation forall Objects, firmly attached to the generator
+                foreach (Rotatable connectedObject in connectedObjects)
+                {
+                    connectedObject.stopRotation();
+                }
             }
 
             if (wasKnowledgeBasedSimulation && this.lastNewlyDiscoveredAvsMap != null)
