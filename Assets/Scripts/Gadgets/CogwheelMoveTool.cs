@@ -194,7 +194,9 @@ public class CogwheelMoveTool : MonoBehaviour
             //Create new CogwheelFact and add to global FactList
             int cogId = GameState.Facts.Count;
             float radius = movingObject.GetComponentInChildren<Cogwheel>().getRadius();
-            CogwheelFact newFact = new CogwheelFact(cogId, movingObject.transform.position, movingObject.transform.up, radius);
+            float insideRadius = movingObject.GetComponentInChildren<Cogwheel>().getInsideRadius();
+            float outsideRadius = movingObject.GetComponentInChildren<Cogwheel>().getOutsideRadius();
+            CogwheelFact newFact = new CogwheelFact(cogId, movingObject.transform.position, movingObject.transform.up, radius, insideRadius, outsideRadius);
             newFact.Representation = movingObject;
             GameState.Facts.Insert(cogId, newFact);
             UnityEngine.Debug.Log("Successfully added new CogwheelFact with backendUri: " + newFact.backendURI);

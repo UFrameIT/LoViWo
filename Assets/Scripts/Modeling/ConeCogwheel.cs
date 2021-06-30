@@ -67,6 +67,14 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
         return this.radius;
     }
 
+    public float getInsideRadius() {
+        return this.insideDiameter / 2.0f;
+    }
+
+    public float getOutsideRadius() {
+        return this.outsideDiameter / 2.0f;
+    }
+
     public void generateMesh(float height, int cogCount, float radius)
     {
         if (height <= 0 || cogCount <= 1 || radius <= 0)

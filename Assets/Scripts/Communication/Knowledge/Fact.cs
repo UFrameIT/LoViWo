@@ -96,14 +96,18 @@ public class CogwheelFact : Fact
     public Vector3 Point;
     public Vector3 Normal;
     public float Radius;
+    public float InsideRadius;
+    public float OutsideRadius;
 
 
-    public CogwheelFact(int i, Vector3 P, Vector3 N, float R)
+    public CogwheelFact(int i, Vector3 P, Vector3 N, float R, float iR, float oR)
     {
         this.Id = i;
         this.Point = P;
         this.Normal = N;
         this.Radius = R;
+        this.InsideRadius = iR;
+        this.OutsideRadius = oR;
 
         List<MMTTerm> tupleArguments = new List<MMTTerm>
         {
@@ -115,6 +119,8 @@ public class CogwheelFact : Fact
         List<MMTTerm> wheelOfArguments = new List<MMTTerm>
         {
             new OMF(this.Radius),
+            new OMF(this.InsideRadius),
+            new OMF(this.OutsideRadius),
             new OMA(new OMS(MMTURIs.Tuple), tupleArguments)
         };
 
