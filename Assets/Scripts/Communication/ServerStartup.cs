@@ -18,8 +18,8 @@ public class ServerStartup : MonoBehaviour
 
     IEnumerator ServerRoutine()
     {
-        UnityEngine.Debug.Log("Server Startup: Sending /scroll/list request.");
-        UnityWebRequest request = UnityWebRequest.Get(GameSettings.ServerAdress + "/scroll/list");
+        UnityEngine.Debug.Log("Server Startup: Sending /fact/list request.");
+        UnityWebRequest request = UnityWebRequest.Get(GameSettings.ServerAdress + "/fact/list");
         yield return request.SendWebRequest();
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
@@ -45,7 +45,7 @@ public class ServerStartup : MonoBehaviour
 #endif
             while (true)
             {
-                request = UnityWebRequest.Get(GameSettings.ServerAdress + "/scroll/list");
+                request = UnityWebRequest.Get(GameSettings.ServerAdress + "/fact/list");
                 yield return request.SendWebRequest();
                 if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
                 {

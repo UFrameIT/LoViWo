@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -77,6 +77,7 @@ public static class KnowledgeBasedSimulation
                     Matrix<double> A = Matrix<double>.Build.DenseOfRows(AData);
                     Vector<double> b = Vector<double>.Build.DenseOfEnumerable(bData);
 
+                    string[] equations = equationsToString(AData, bData);
 
                     /****DETERMINE HOW MANY SOLUTIONS THE LINEAR-EQUATION-SYSTEM HAS AND REACT CORRESPONDINGLY****/
                     int rankA = A.Rank();
@@ -90,22 +91,30 @@ public static class KnowledgeBasedSimulation
 
                         Matrix<double> AExtended = Matrix<double>.Build.DenseOfRows(AData);
                         int rankAExtended = AExtended.Rank();
+                        string solutions = "";
 
                         //TODO: SHOW EQUATION-SYSTEM / RANKS ETC. / MAYBE WITH USING COMMUNICATIONEVENTS
 
                         if (rankA != rankAExtended)
                         {
+                            solutions = "0";
                             Debug.Log(String.Format("The linear EquationSystem has NO solution. Reason: rank of A and rank of AExtended are not equal. RankA = {0}, RankAExtended = {1}", rankA, rankAExtended));
+                            CommunicationEvents.showEquationSystemEvent.Invoke(equations, rankA, rankAExtended, solutions);
                             return null;
                         }
                         else if (rankA < numberOfVariables)
                         {
+                            solutions = "∞";
                             Debug.Log(String.Format("The linear EquationSystem has an infinite number of solutions. Reason: rank of A = rank of AExtended = {0} < varNum = {1}", rankA, numberOfVariables));
+                            CommunicationEvents.showEquationSystemEvent.Invoke(equations, rankA, rankAExtended, solutions);
                             return null;
                         }
                         else if (rankA == numberOfVariables)
                         {
+                            solutions = "1";
                             Debug.Log(String.Format("The linear EquationSystem has exactly one solution. Reason: rank of A = rank of AExtended = {0} = varNum = {1}", rankA, numberOfVariables));
+
+                            CommunicationEvents.showEquationSystemEvent.Invoke(equations, rankA, rankAExtended, solutions);
 
                             //Solve GLS of the form 'A * x = b':
                             Vector<double> glsSolution = A.Solve(b);
@@ -115,7 +124,9 @@ public static class KnowledgeBasedSimulation
                         }
                         else
                         {
+                            solutions = "?";
                             Debug.Log(String.Format("Rank of A = rank of AExtended = {0} > varNum = {1}", rankA, numberOfVariables));
+                            CommunicationEvents.showEquationSystemEvent.Invoke(equations, rankA, rankAExtended, solutions);
                             return null;
                         }
                     }
@@ -219,5 +230,33 @@ public static class KnowledgeBasedSimulation
 
         //Build relative complement A \ B => discoveredAvsMap \ knownAvMap
         return discoveredAvsMap.Except(knownAvMap).ToDictionary(x => x.Key, x => x.Value);
+    }
+
+    private static string[] equationsToString(List<List<double>> AData, List<double> bData) {
+        List<string> equations = new List<String>();
+
+        if (AData.Count == bData.Count)
+        {
+            for (int i = 0; i < AData.Count; i++)
+            {
+                string equation = "";
+
+                for (int j = 0; j < AData[i].Count; j++) {
+                    if (j == AData[i].Count - 1)
+                    {
+                        equation += AData[i][j].ToString() + "*av" + j.ToString() + " = " + bData[i].ToString();
+                    }
+                    else {
+                        equation += AData[i][j].ToString() + "*av" + j.ToString() + " + ";
+                    }
+                }
+
+                equations.Add(equation);
+            }
+
+            return equations.ToArray();
+        }
+        else
+            return equations.ToArray();
     }
 }
