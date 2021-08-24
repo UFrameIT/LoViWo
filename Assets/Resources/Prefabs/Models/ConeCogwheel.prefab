@@ -63,7 +63,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 9298f589095650c4b963491c5de3eeb4, type: 2}
+  - {fileID: 2100000, guid: 3017e2e48540af840b181c2c65be02d4, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -109,7 +109,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 48da048244f1f4e43a7315830e56d270, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  cogMaterial: {fileID: 2100000, guid: 9298f589095650c4b963491c5de3eeb4, type: 2}
+  cogMaterial: {fileID: 2100000, guid: 3017e2e48540af840b181c2c65be02d4, type: 2}
   module: 0
   cogAngle: 0
 --- !u!64 &1153191457887489175

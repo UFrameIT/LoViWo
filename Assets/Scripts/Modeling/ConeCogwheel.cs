@@ -219,6 +219,7 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
         mesh.triangles = triangleList.ToArray();
         GetComponent<MeshFilter>().mesh = mesh;
         GetComponent<MeshCollider>().sharedMesh = mesh;
+        GetComponent<MeshRenderer>().material = cogMaterial;
         mesh.RecalculateNormals();
 
         posAngle = absoluteAngle;
