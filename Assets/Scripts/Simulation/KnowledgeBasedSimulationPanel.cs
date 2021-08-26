@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 public class KnowledgeBasedSimulationPanel : MonoBehaviour
 {
@@ -33,12 +34,12 @@ public class KnowledgeBasedSimulationPanel : MonoBehaviour
         foreach (string equation in equations) {
             GameObject equationObj = Instantiate(equationsPrefab);
             equationObj.transform.SetParent(equationsContent.transform, false);
-            equationObj.GetComponentInChildren<Text>().text = equation;
+            equationObj.GetComponentInChildren<TMP_Text>().text = equation;
         }
 
-        rankAText.GetComponentInChildren<Text>().text = "Rank(A): " + rankA.ToString();
-        rankAbText.GetComponentInChildren<Text>().text = "Rank(A|b): " + rankAb.ToString();
-        solutionsText.GetComponentInChildren<Text>().text = "Solutions: " + solutions;
+        rankAText.GetComponentInChildren<TMP_Text>().text = "Rank(A): " + rankA.ToString();
+        rankAbText.GetComponentInChildren<TMP_Text>().text = "Rank(A|b): " + rankAb.ToString();
+        solutionsText.GetComponentInChildren<TMP_Text>().text = "Solutions: " + solutions;
     }
 
     public void Deactivate() {
