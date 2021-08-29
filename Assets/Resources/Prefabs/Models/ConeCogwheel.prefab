@@ -112,6 +112,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   cogMaterial: {fileID: 2100000, guid: 3017e2e48540af840b181c2c65be02d4, type: 2}
+  debugTriangles: 1
+  lineRenderer: {fileID: 6479666748617999015}
+  debugMaterial: {fileID: 2100000, guid: 2dee852b955663e4ea916d4e298009b1, type: 2}
+  lineWidth: 0.1
   module: 0
   cogAngle: 0
 --- !u!114 &2404511580151409748
@@ -170,7 +174,7 @@ LineRenderer:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 652212249053607688}
-  m_Enabled: 0
+  m_Enabled: 1
   m_CastShadows: 1
   m_ReceiveShadows: 1
   m_DynamicOccludee: 1
@@ -203,9 +207,7 @@ LineRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Positions:
-  - {x: 0, y: 0, z: 0}
-  - {x: 0, y: 0, z: 1}
+  m_Positions: []
   m_Parameters:
     serializedVersion: 3
     widthMultiplier: 1

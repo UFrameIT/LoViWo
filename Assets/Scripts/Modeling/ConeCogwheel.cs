@@ -8,6 +8,14 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
 {
     public Material cogMaterial;
 
+    public bool debugTriangles = false;
+    public bool onlyFront = true;
+    public LineRenderer lineRenderer;
+    public Material debugMaterial;
+    public float lineWidth = 0f;
+    private List<Vector3> debugLinePositions = new List<Vector3>();
+    public float debugCylinderAngleAccuracy = 1f;
+
     private Mesh mesh;
     private float angle = 360.0f;
     private float bottomClearanceFactor = 0.1f;
@@ -36,6 +44,15 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
     private float angleAccuracy = 0.5f;
 
     private List<Vector3> relativeCogInputVectors = new List<Vector3>();
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        //Draw Cogwheel when debugging active and Prefab instantiated in scene
+        if (this.debuggingPossible()) {
+            this.generateMesh(1,20,4);
+        }
+    }
 
     //-> THE RELATIVE COG INPUT VECTORS ALWAYS POINT TO THE MIDDLE OF A COG, RELATIVE TO THE POSITION OF THE COGWHEEL
     public List<Vector3> getRelativeCogInputVectors()
@@ -75,6 +92,13 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
         return this.outsideDiameter / 2.0f;
     }
 
+    private bool debuggingPossible() {
+        return  this.debugTriangles &&
+                this.lineWidth >= 0f &&
+                (this.lineRenderer != null) &&
+                (this.debugMaterial != null);
+    }
+
     public void generateMesh(float height, int cogCount, float radius)
     {
         if (height <= 0 || cogCount <= 1 || radius <= 0)
@@ -98,7 +122,11 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
 
         this.cogAngle = this.angle / (float)this.cogCount;
         //We define the angleAccuracy in such a way, that 80 steps in the for-loop result in one cog
-        this.angleAccuracy = this.cogAngle / 80.0f;
+        if (!debuggingPossible())
+            this.angleAccuracy = this.cogAngle / 80.0f;
+        else
+            this.angleAccuracy = debugCylinderAngleAccuracy;
+
         //One Cog consists of 1/8 starting-gap, 2/8 rising-edge, 2/8 constant-edge, 2/8 falling-edge, 1/8 ending-gap
         //Therefore in 80/4 = 20 steps, the radius for the cog must rise from radius to radius+cogHeight
         this.radiusAdjustment = this.cogHeight / (float)(80/4);
@@ -176,6 +204,23 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
                     triangleList.Add(center0Index);
                     triangleList.Add(i + 1);
                     triangleList.Add(i);
+
+                    if (debuggingPossible() && !this.onlyFront) {
+                        //First Triangle
+                        debugLinePositions.Add(center0);
+                        debugLinePositions.Add(center1);
+                        debugLinePositions.Add(center1);
+                        debugLinePositions.Add(verticeList[i+1]);
+                        debugLinePositions.Add(verticeList[i+1]);
+                        debugLinePositions.Add(center0);
+                        //Second Triangle
+                        debugLinePositions.Add(center0);
+                        debugLinePositions.Add(verticeList[i + 1]);
+                        debugLinePositions.Add(verticeList[i + 1]);
+                        debugLinePositions.Add(verticeList[i]);
+                        debugLinePositions.Add(verticeList[i]);
+                        debugLinePositions.Add(center0);
+                    }
                 }
 
                 i += 2;
@@ -198,7 +243,44 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
             triangleList.Add(i - 2);
             triangleList.Add(i + 1);
             triangleList.Add(i);
-            
+
+            if (debuggingPossible())
+            {
+                //First Triangle
+                debugLinePositions.Add(center1);
+                debugLinePositions.Add(verticeList[i + 1]);
+                debugLinePositions.Add(verticeList[i + 1]);
+                debugLinePositions.Add(verticeList[i - 1]);
+                debugLinePositions.Add(verticeList[i - 1]);
+                debugLinePositions.Add(center1);
+
+                if (!this.onlyFront)
+                {
+
+                    //Second Triangle
+                    debugLinePositions.Add(center0);
+                    debugLinePositions.Add(verticeList[i - 2]);
+                    debugLinePositions.Add(verticeList[i - 2]);
+                    debugLinePositions.Add(verticeList[i]);
+                    debugLinePositions.Add(verticeList[i]);
+                    debugLinePositions.Add(center0);
+                    //Third Triangle
+                    debugLinePositions.Add(verticeList[i - 2]);
+                    debugLinePositions.Add(verticeList[i - 1]);
+                    debugLinePositions.Add(verticeList[i - 1]);
+                    debugLinePositions.Add(verticeList[i + 1]);
+                    debugLinePositions.Add(verticeList[i + 1]);
+                    debugLinePositions.Add(verticeList[i - 2]);
+                    //Fourth Triangle
+                    debugLinePositions.Add(verticeList[i - 2]);
+                    debugLinePositions.Add(verticeList[i + 1]);
+                    debugLinePositions.Add(verticeList[i + 1]);
+                    debugLinePositions.Add(verticeList[i]);
+                    debugLinePositions.Add(verticeList[i]);
+                    debugLinePositions.Add(verticeList[i - 2]);
+                }
+            }
+
             if (nextAngle == posAngle && absoluteAngle != 360)
             {
                 //Adding triangles for right side
@@ -208,6 +290,24 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
                 triangleList.Add(center0Index);
                 triangleList.Add(i);
                 triangleList.Add(i + 1);
+
+                if (debuggingPossible() && !this.onlyFront)
+                {
+                    //First Triangle
+                    debugLinePositions.Add(center0);
+                    debugLinePositions.Add(verticeList[i + 1]);
+                    debugLinePositions.Add(verticeList[i + 1]);
+                    debugLinePositions.Add(center1);
+                    debugLinePositions.Add(center1);
+                    debugLinePositions.Add(center0);
+                    //Second Triangle
+                    debugLinePositions.Add(center0);
+                    debugLinePositions.Add(verticeList[i]);
+                    debugLinePositions.Add(verticeList[i]);
+                    debugLinePositions.Add(verticeList[i + 1]);
+                    debugLinePositions.Add(verticeList[i + 1]);
+                    debugLinePositions.Add(center0);
+                }
             }
 
             i += 2;
@@ -225,6 +325,8 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
         negAngle = 0;
 
         float changingRadius = radius;
+
+        this.angleAccuracy = this.cogAngle / 80.0f;
 
         //Only set this, so that there are no errors because newCog isn't instantiated
         //-> newCog will be a new GameObject() at the start of every cog
@@ -310,7 +412,7 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
                     float conePointZ = changingRadius * Mathf.Sin(nextAngle * Mathf.Deg2Rad);
                     verticeList.Add(new Vector3(conePointX, 0, conePointZ));
                     verticeList.Add(new Vector3(conePointX, height, conePointZ));
-
+                    
                     //Adding triangles for front side
                     triangleList.Add(i);
                     triangleList.Add(i + 1);
@@ -326,6 +428,42 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
                     triangleList.Add(i + 1);
                     triangleList.Add(i + 3);
                     triangleList.Add(i + 5);
+
+                    if (debuggingPossible())
+                    {
+                        //First Triangle
+                        debugLinePositions.Add(verticeList[i + 1]);
+                        debugLinePositions.Add(verticeList[i + 3]);
+                        debugLinePositions.Add(verticeList[i + 3]);
+                        debugLinePositions.Add(verticeList[i + 5]);
+                        debugLinePositions.Add(verticeList[i + 5]);
+                        debugLinePositions.Add(verticeList[i + 1]);
+
+                        if (!this.onlyFront) {
+
+                            //Second Triangle
+                            debugLinePositions.Add(verticeList[i]);
+                            debugLinePositions.Add(verticeList[i + 1]);
+                            debugLinePositions.Add(verticeList[i + 1]);
+                            debugLinePositions.Add(verticeList[i + 5]);
+                            debugLinePositions.Add(verticeList[i + 5]);
+                            debugLinePositions.Add(verticeList[i]);
+                            //Third Triangle
+                            debugLinePositions.Add(verticeList[i]);
+                            debugLinePositions.Add(verticeList[i + 5]);
+                            debugLinePositions.Add(verticeList[i + 5]);
+                            debugLinePositions.Add(verticeList[i + 4]);
+                            debugLinePositions.Add(verticeList[i + 4]);
+                            debugLinePositions.Add(verticeList[i]);
+                            //Fourth Triangle
+                            debugLinePositions.Add(verticeList[i]);
+                            debugLinePositions.Add(verticeList[i + 4]);
+                            debugLinePositions.Add(verticeList[i + 4]);
+                            debugLinePositions.Add(verticeList[i + 2]);
+                            debugLinePositions.Add(verticeList[i + 2]);
+                            debugLinePositions.Add(verticeList[i]);
+                        }
+                    }
 
                     i += 6;
                 }
@@ -359,6 +497,56 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
                     triangleList.Add(i - 3);
                     triangleList.Add(i + 1);
                     triangleList.Add(i + 3);
+
+                    if (debuggingPossible())
+                    {
+                        //First Triangle
+                        debugLinePositions.Add(verticeList[i - 3]);
+                        debugLinePositions.Add(verticeList[i + 3]);
+                        debugLinePositions.Add(verticeList[i + 3]);
+                        debugLinePositions.Add(verticeList[i - 1]);
+                        debugLinePositions.Add(verticeList[i - 1]);
+                        debugLinePositions.Add(verticeList[i - 3]);
+                        //Second Triangle
+                        debugLinePositions.Add(verticeList[i - 3]);
+                        debugLinePositions.Add(verticeList[i + 1]);
+                        debugLinePositions.Add(verticeList[i + 1]);
+                        debugLinePositions.Add(verticeList[i + 3]);
+                        debugLinePositions.Add(verticeList[i + 3]);
+                        debugLinePositions.Add(verticeList[i - 3]);
+
+                        if (!this.onlyFront)
+                        {
+                            //First Triangle
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            debugLinePositions.Add(verticeList[i - 1]);
+                            debugLinePositions.Add(verticeList[i - 1]);
+                            debugLinePositions.Add(verticeList[i + 3]);
+                            debugLinePositions.Add(verticeList[i + 3]);
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            //Second Triangle
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            debugLinePositions.Add(verticeList[i + 3]);
+                            debugLinePositions.Add(verticeList[i + 3]);
+                            debugLinePositions.Add(verticeList[i + 2]);
+                            debugLinePositions.Add(verticeList[i + 2]);
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            //Third Triangle
+                            debugLinePositions.Add(verticeList[i - 4]);
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            debugLinePositions.Add(verticeList[i + 2]);
+                            debugLinePositions.Add(verticeList[i + 2]);
+                            debugLinePositions.Add(verticeList[i - 4]);
+                            //Fourth Triangle
+                            debugLinePositions.Add(verticeList[i - 4]);
+                            debugLinePositions.Add(verticeList[i + 2]);
+                            debugLinePositions.Add(verticeList[i + 2]);
+                            debugLinePositions.Add(verticeList[i]);
+                            debugLinePositions.Add(verticeList[i]);
+                            debugLinePositions.Add(verticeList[i - 4]);
+                        }
+                    }
 
                     i += 4;
                 }
@@ -403,6 +591,56 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
                 triangleList.Add(i + 1);
                 triangleList.Add(i + 3);
 
+                if (debuggingPossible())
+                {
+                    //First Triangle
+                    debugLinePositions.Add(verticeList[i - 3]);
+                    debugLinePositions.Add(verticeList[i + 3]);
+                    debugLinePositions.Add(verticeList[i + 3]);
+                    debugLinePositions.Add(verticeList[i - 1]);
+                    debugLinePositions.Add(verticeList[i - 1]);
+                    debugLinePositions.Add(verticeList[i - 3]);
+                    //Second Triangle
+                    debugLinePositions.Add(verticeList[i - 3]);
+                    debugLinePositions.Add(verticeList[i + 1]);
+                    debugLinePositions.Add(verticeList[i + 1]);
+                    debugLinePositions.Add(verticeList[i + 3]);
+                    debugLinePositions.Add(verticeList[i + 3]);
+                    debugLinePositions.Add(verticeList[i - 3]);
+
+                    if (!this.onlyFront)
+                    {
+                        //Third Triangle
+                        debugLinePositions.Add(verticeList[i - 2]);
+                        debugLinePositions.Add(verticeList[i - 1]);
+                        debugLinePositions.Add(verticeList[i - 1]);
+                        debugLinePositions.Add(verticeList[i + 3]);
+                        debugLinePositions.Add(verticeList[i + 3]);
+                        debugLinePositions.Add(verticeList[i - 2]);
+                        //Fourth Triangle
+                        debugLinePositions.Add(verticeList[i - 2]);
+                        debugLinePositions.Add(verticeList[i + 3]);
+                        debugLinePositions.Add(verticeList[i + 3]);
+                        debugLinePositions.Add(verticeList[i + 2]);
+                        debugLinePositions.Add(verticeList[i + 2]);
+                        debugLinePositions.Add(verticeList[i - 2]);
+                        //Fifth Triangle
+                        debugLinePositions.Add(verticeList[i - 4]);
+                        debugLinePositions.Add(verticeList[i - 2]);
+                        debugLinePositions.Add(verticeList[i - 2]);
+                        debugLinePositions.Add(verticeList[i + 2]);
+                        debugLinePositions.Add(verticeList[i + 2]);
+                        debugLinePositions.Add(verticeList[i - 4]);
+                        //Sixth Triangle
+                        debugLinePositions.Add(verticeList[i - 4]);
+                        debugLinePositions.Add(verticeList[i + 2]);
+                        debugLinePositions.Add(verticeList[i + 2]);
+                        debugLinePositions.Add(verticeList[i]);
+                        debugLinePositions.Add(verticeList[i]);
+                        debugLinePositions.Add(verticeList[i - 4]);
+                    }
+                }
+
                 i += 4;
             }
             else if (remainder >= (5 * this.cogAngle/8) && remainder < (7 * this.cogAngle/8))
@@ -433,6 +671,42 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
                     triangleList.Add(i - 1);
                     triangleList.Add(i - 3);
                     triangleList.Add(i + 1);
+
+                    if (debuggingPossible())
+                    {
+                        //First Triangle
+                        debugLinePositions.Add(verticeList[i - 1]);
+                        debugLinePositions.Add(verticeList[i - 3]);
+                        debugLinePositions.Add(verticeList[i - 3]);
+                        debugLinePositions.Add(verticeList[i + 1]);
+                        debugLinePositions.Add(verticeList[i + 1]);
+                        debugLinePositions.Add(verticeList[i - 1]);
+
+                        if (!this.onlyFront)
+                        {
+                            //Second Triangle
+                            debugLinePositions.Add(verticeList[i - 1]);
+                            debugLinePositions.Add(verticeList[i + 1]);
+                            debugLinePositions.Add(verticeList[i + 1]);
+                            debugLinePositions.Add(verticeList[i]);
+                            debugLinePositions.Add(verticeList[i]);
+                            debugLinePositions.Add(verticeList[i - 1]);
+                            //Third Triangle
+                            debugLinePositions.Add(verticeList[i]);
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            debugLinePositions.Add(verticeList[i - 1]);
+                            debugLinePositions.Add(verticeList[i - 1]);
+                            debugLinePositions.Add(verticeList[i]);
+                            //Fourth Triangle
+                            debugLinePositions.Add(verticeList[i]);
+                            debugLinePositions.Add(verticeList[i - 4]);
+                            debugLinePositions.Add(verticeList[i - 4]);
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            debugLinePositions.Add(verticeList[i]);
+                        }
+                    }
 
                     i += 2;
                 }
@@ -468,6 +742,56 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
                     triangleList.Add(i + 1);
                     triangleList.Add(i + 3);
 
+                    if (debuggingPossible())
+                    {
+                        //First Triangle
+                        debugLinePositions.Add(verticeList[i - 3]);
+                        debugLinePositions.Add(verticeList[i + 3]);
+                        debugLinePositions.Add(verticeList[i + 3]);
+                        debugLinePositions.Add(verticeList[i - 1]);
+                        debugLinePositions.Add(verticeList[i - 1]);
+                        debugLinePositions.Add(verticeList[i - 3]);
+                        //Second Triangle
+                        debugLinePositions.Add(verticeList[i - 3]);
+                        debugLinePositions.Add(verticeList[i + 1]);
+                        debugLinePositions.Add(verticeList[i + 1]);
+                        debugLinePositions.Add(verticeList[i + 3]);
+                        debugLinePositions.Add(verticeList[i + 3]);
+                        debugLinePositions.Add(verticeList[i - 3]);
+
+                        if (!this.onlyFront)
+                        {
+                            //Third Triangle
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            debugLinePositions.Add(verticeList[i - 1]);
+                            debugLinePositions.Add(verticeList[i - 1]);
+                            debugLinePositions.Add(verticeList[i + 3]);
+                            debugLinePositions.Add(verticeList[i + 3]);
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            //Fourth Triangle
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            debugLinePositions.Add(verticeList[i + 3]);
+                            debugLinePositions.Add(verticeList[i + 3]);
+                            debugLinePositions.Add(verticeList[i + 2]);
+                            debugLinePositions.Add(verticeList[i + 2]);
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            //Fifth Triangle
+                            debugLinePositions.Add(verticeList[i - 4]);
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            debugLinePositions.Add(verticeList[i - 2]);
+                            debugLinePositions.Add(verticeList[i + 2]);
+                            debugLinePositions.Add(verticeList[i + 2]);
+                            debugLinePositions.Add(verticeList[i - 4]);
+                            //Sixth Triangle
+                            debugLinePositions.Add(verticeList[i - 4]);
+                            debugLinePositions.Add(verticeList[i + 2]);
+                            debugLinePositions.Add(verticeList[i + 2]);
+                            debugLinePositions.Add(verticeList[i]);
+                            debugLinePositions.Add(verticeList[i]);
+                            debugLinePositions.Add(verticeList[i - 4]);
+                        }
+                    }
+
                     i += 4;
                 }
             }
@@ -493,6 +817,15 @@ public class ConeCogwheel : MonoBehaviour, Cogwheel
                 }
             }
         }
+
+        this.lineRenderer.enabled = true;
+        this.lineRenderer.material = this.debugMaterial;
+        this.lineRenderer.startWidth = this.lineWidth;
+        this.lineRenderer.endWidth = this.lineWidth;
+
+        this.lineRenderer.positionCount = this.debugLinePositions.Count;
+        for (int index = 0; index < this.lineRenderer.positionCount; index++)
+            this.lineRenderer.SetPosition(index, this.debugLinePositions[index]);
 
         /* Use this to save the Mesh, created from Mesh API
         UnityEditor.AssetDatabase.CreateAsset(mesh, "Assets/Resources/Prefabs/Models/GeneratorCogwheel.asset");

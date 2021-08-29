@@ -7,7 +7,7 @@ public class HideUI : MonoBehaviour
 {
 
     public KeyCode Key = KeyCode.LeftShift;
-    //public KeyCode ScreenshotKey = KeyCode.F2;
+    public KeyCode ScreenshotKey = KeyCode.F2;
     
     public bool LockOnly = true;
     public PlayerMovement PlayerControl;
@@ -36,11 +36,9 @@ public class HideUI : MonoBehaviour
         {
             switchUIOnOff();
         }
-        /*
         else if (Input.GetKeyDown(ScreenshotKey)) {
             ScreenCapture.CaptureScreenshot("Capture.png");
         }
-        */
     }
 
     void switchUIOnOff() {
