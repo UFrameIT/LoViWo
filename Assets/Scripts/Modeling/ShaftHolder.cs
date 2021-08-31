@@ -9,11 +9,41 @@ public class ShaftHolder : MonoBehaviour
     public float innerRadius;
     public float thickness;
 
+    public bool debugTriangles = false;
+    public bool onlyFront = true;
+    public LineRenderer lineRenderer1;
+    public LineRenderer lineRenderer2;
+    public Material debugMaterial;
+    public float lineWidth1 = 0f;
+    public float lineWidth2 = 0f;
+    private List<Vector3> debugLinePositions1 = new List<Vector3>();
+    private List<Vector3> debugLinePositions2 = new List<Vector3>();
+    public float debugCylinderAngleAccuracy = 1f;
+
     private float borderWidth = 1.0f;
     private Mesh mesh;
 
     //Every 0.5° of the inner circle, there starts a new triangle
     private float angleAccuracy = 0.5f;
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        //Draw Cogwheel when debugging active and Prefab instantiated in scene
+        if (this.debuggingPossible())
+        {
+            this.angleAccuracy = this.debugCylinderAngleAccuracy;
+            this.generateMesh(1, 1);
+        }
+    }
+
+    private bool debuggingPossible()
+    {
+        return this.debugTriangles &&
+                this.lineWidth1 >= 0f &&
+                (this.lineRenderer1 != null) &&
+                (this.debugMaterial != null);
+    }
 
     public void generateMesh(float innerRadius, float thickness)
     {
@@ -152,6 +182,25 @@ public class ShaftHolder : MonoBehaviour
         triangleList.Add(upperRightCornerBase_Index);
         triangleList.Add(lowerRightCornerBase_Index);
 
+        if (debuggingPossible())
+        {
+            debugLinePositions1.Add(upperRightCornerTop);
+            debugLinePositions1.Add(circlePointTop_0_1);
+            debugLinePositions1.Add(upperLeftCornerTop);
+            debugLinePositions1.Add(upperLeftCornerTop);
+            debugLinePositions1.Add(circlePointTop_m1_0);
+            debugLinePositions1.Add(lowerLeftCornerTop);
+
+            debugLinePositions1.Add(lowerLeftCornerTop);
+            debugLinePositions1.Add(circlePointTop_0_m1);
+            debugLinePositions1.Add(lowerRightCornerTop);
+            debugLinePositions1.Add(lowerRightCornerTop);
+            debugLinePositions1.Add(circlePointTop_1_0);
+            debugLinePositions1.Add(upperRightCornerTop);
+
+            if (!this.onlyFront){/*Not Implemented yet*/}
+        }
+
         for (float x = negAngle; x < posAngle; x += angleAccuracy)
         {
             float nextAngle;
@@ -206,6 +255,15 @@ public class ShaftHolder : MonoBehaviour
                 triangleList.Add(circlePoint2TopIndex);
                 triangleList.Add(circlePoint1TopIndex);
 
+                if (debuggingPossible())
+                {
+                    debugLinePositions2.Add(verticeList[circlePoint1TopIndex]);
+                    debugLinePositions2.Add(verticeList[circlePoint2TopIndex]);
+                    debugLinePositions2.Add(verticeList[cornerTopIndex]);
+
+                    if (!this.onlyFront) {/*Not Implemented yet*/}
+                }
+
             }
             //Upper-Left Quater
             else if (90.0f <= x && x < 180.0f)
@@ -239,6 +297,15 @@ public class ShaftHolder : MonoBehaviour
                 triangleList.Add(circlePoint2BaseIndex);
                 triangleList.Add(circlePoint2TopIndex);
                 triangleList.Add(circlePoint1TopIndex);
+
+                if (debuggingPossible())
+                {
+                    debugLinePositions2.Add(verticeList[circlePoint1TopIndex]);
+                    debugLinePositions2.Add(verticeList[circlePoint2TopIndex]);
+                    debugLinePositions2.Add(verticeList[cornerTopIndex]);
+
+                    if (!this.onlyFront) {/*Not Implemented yet*/}
+                }
             }
             //Lower-Left Quater
             else if (180.0f <= x && x < 270.0f)
@@ -272,6 +339,15 @@ public class ShaftHolder : MonoBehaviour
                 triangleList.Add(circlePoint2BaseIndex);
                 triangleList.Add(circlePoint2TopIndex);
                 triangleList.Add(circlePoint1TopIndex);
+
+                if (debuggingPossible())
+                {
+                    debugLinePositions2.Add(verticeList[circlePoint1TopIndex]);
+                    debugLinePositions2.Add(verticeList[circlePoint2TopIndex]);
+                    debugLinePositions2.Add(verticeList[cornerTopIndex]);
+
+                    if (!this.onlyFront) {/*Not Implemented yet*/}
+                }
             }
             //Lower-Right Quater
             else
@@ -305,6 +381,15 @@ public class ShaftHolder : MonoBehaviour
                 triangleList.Add(circlePoint2BaseIndex);
                 triangleList.Add(circlePoint2TopIndex);
                 triangleList.Add(circlePoint1TopIndex);
+
+                if (debuggingPossible())
+                {
+                    debugLinePositions2.Add(verticeList[circlePoint1TopIndex]);
+                    debugLinePositions2.Add(verticeList[circlePoint2TopIndex]);
+                    debugLinePositions2.Add(verticeList[cornerTopIndex]);
+
+                    if (!this.onlyFront) {/*Not Implemented yet*/}
+                }
             }
         }
 
@@ -313,6 +398,24 @@ public class ShaftHolder : MonoBehaviour
         mesh.triangles = triangleList.ToArray();
         GetComponent<MeshFilter>().mesh = mesh;
         mesh.RecalculateNormals();
+
+        this.lineRenderer1.enabled = true;
+        this.lineRenderer1.material = this.debugMaterial;
+        this.lineRenderer1.startWidth = this.lineWidth1;
+        this.lineRenderer1.endWidth = this.lineWidth1;
+
+        this.lineRenderer2.enabled = true;
+        this.lineRenderer2.material = this.debugMaterial;
+        this.lineRenderer2.startWidth = this.lineWidth2;
+        this.lineRenderer2.endWidth = this.lineWidth2;
+
+        this.lineRenderer1.positionCount = this.debugLinePositions1.Count;
+        for (int index = 0; index < this.lineRenderer1.positionCount; index++)
+            this.lineRenderer1.SetPosition(index, this.debugLinePositions1[index]);
+
+        this.lineRenderer2.positionCount = this.debugLinePositions2.Count;
+        for (int index = 0; index < this.lineRenderer2.positionCount; index++)
+            this.lineRenderer2.SetPosition(index, this.debugLinePositions2[index]);
 
         // Use this to save the Mesh, created from Mesh API
         /*
