@@ -14,7 +14,8 @@ public class RotatableObject : MonoBehaviour, Rotatable, Connectable
     {
         if (rotationActive)
         {
-            this.transform.RotateAround(this.transform.position, this.transform.up, this.angularVelocity * Time.deltaTime);
+            //this.transform.GetComponentInChildren<Rigidbody>().AddTorque(this.transform.up * this.angularVelocity, ForceMode.Acceleration);
+            //this.transform.RotateAround(this.transform.position, this.transform.up, this.angularVelocity * Time.deltaTime);
         }
     }
 
