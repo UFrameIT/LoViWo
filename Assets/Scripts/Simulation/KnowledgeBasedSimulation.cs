@@ -70,9 +70,9 @@ public static class KnowledgeBasedSimulation
                     List<List<double>> AData = glsTuple.Item1;
                     List<double> bData = glsTuple.Item2;
                     List<MMTTerm> variables = glsTuple.Item3;
-
-                    int numberOfVariables = bData.Count;
+                    
                     addKnownEqsysValues(AData, bData, variables, knownAvMap);
+                    int numberOfVariables = variables.Count;
 
                     Matrix<double> A = Matrix<double>.Build.DenseOfRows(AData);
                     Vector<double> b = Vector<double>.Build.DenseOfEnumerable(bData);
