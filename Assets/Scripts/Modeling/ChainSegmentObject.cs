@@ -15,7 +15,7 @@ public class ChainSegmentObject : MonoBehaviour, ChainSegment
     {
         if (moving)
         {
-            pathPos += speed;
+            pathPos += speed * Time.deltaTime;
             if (pathPos >= pathLength)
             {
                 pathPos -= pathLength;

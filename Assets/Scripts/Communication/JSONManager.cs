@@ -10,11 +10,22 @@ public class MMTURICollection
 {
     public string Cogwheel = "http://mathhub.info/LoViVo?Cogwheel3D?cogwheel";
     public string CogwheelOf = "http://mathhub.info/LoViVo?Cogwheel3D?cogwheelOf";
+    public string Nil = "http://gl.mathhub.info/MMT/LFX/Datatypes?ListSymbols?nil_constant";
     public string List = "http://gl.mathhub.info/MMT/LFX/Datatypes?ListSymbols?ListType";
     public string ListOf = "http://gl.mathhub.info/MMT/LFX/Datatypes?ListSymbols?list";
     public string CogwheelEquationSystem = "http://mathhub.info/LoViVo?Cogwheel3D?eqsys";
+    public string Product = "http://gl.mathhub.info/MMT/LFX/Sigma?Symbols?Product";
     public string Tuple = "http://gl.mathhub.info/MMT/LFX/Sigma?Symbols?Tuple";
     public string Prop = "http://mathhub.info/MitM/Foundation?Logic?prop";
+
+    public string Chain = "http://mathhub.info/LoViVo?Chain?chain";
+    public string ChainOf = "http://mathhub.info/LoViVo?Chain?chainOf";
+    public string Convex = "http://mathhub.info/LoViVo?Chain?convex";
+    public string Concarve = "http://mathhub.info/LoViVo?Chain?concarve";
+    public string ChainVelocity = "http://mathhub.info/LoViVo?Chain?chain_velovity";
+    public string CogChainEquationSystem = "http://mathhub.info/LoViVo?Chain?eqsys2";
+
+    public string TestEquationSystem = "http://mathhub.info/LoViVo?Test?TestEqsys";
 
     public string Record = "http://gl.mathhub.info/MMT/LFX/Records?Symbols?Recexp";
     public string AngularVelocity = "http://mathhub.info/LoViVo?Cogwheel3D?angular_velocity";
@@ -42,7 +53,7 @@ public static class JSONManager
     [JsonConverter(typeof(JsonSubtypes), "kind")]
     public class MMTTerm
     {
-        string kind;
+        public string kind;
 
         public override bool Equals(object obj)
         {
@@ -57,7 +68,8 @@ public static class JSONManager
             return kind.GetHashCode();
         }
 
-        public bool isSimplifiedCogwheelAvTerm() {
+        public bool isSimplifiedCogwheelAvTerm()
+        {
             return this.GetType().Equals(typeof(OMA))
                         && ((OMA)this).applicant.GetType().Equals(typeof(OMS))
                         && ((OMS)((OMA)this).applicant).uri.Equals(MMTURIs.AngularVelocity)
@@ -65,7 +77,7 @@ public static class JSONManager
                         && ((OMA)this).arguments.ElementAt(0).GetType().Equals(typeof(OMA))
                         && ((OMA)((OMA)this).arguments.ElementAt(0)).applicant.GetType().Equals(typeof(OMS))
                         && ((OMS)((OMA)((OMA)this).arguments.ElementAt(0)).applicant).uri.Equals(MMTURIs.Record)
-                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.Count == 7
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.Count == 8
                         && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0).GetType().Equals(typeof(RECARG))
                         && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).name.Equals("pitchRadius")
                         && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).value.GetType().Equals(typeof(OMF))
@@ -79,18 +91,35 @@ public static class JSONManager
                         && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(3)).value).arguments.ElementAt(1).GetType().Equals(typeof(OMF))
                         && ((OMA)((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(3)).value).arguments.ElementAt(2).GetType().Equals(typeof(OMF));
         }
+
+        public bool isSimplifiedChainCvTerm()
+        {
+            return this.GetType().Equals(typeof(OMA))
+                        && ((OMA)this).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)this).applicant).uri.Equals(MMTURIs.ChainVelocity)
+                        && ((OMA)this).arguments.Count == 1
+                        && ((OMA)this).arguments.ElementAt(0).GetType().Equals(typeof(OMA))
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)((OMA)this).arguments.ElementAt(0)).applicant).uri.Equals(MMTURIs.Record)
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.Count == 2
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).name.Equals("tuple_list")
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).name.Equals("ID");                    
+        }
+
     }
 
     public class OMA : MMTTerm
     {
         public MMTTerm applicant;
         public List<MMTTerm> arguments;
-        public string kind = "OMA";
 
         public OMA(MMTTerm applicant, List<MMTTerm> arguments)
         {
             this.applicant = applicant;
             this.arguments = arguments;
+            this.kind = "OMA";
         }
 
         public override bool Equals(object obj)
@@ -111,7 +140,6 @@ public static class JSONManager
 
     public class RECARG : MMTTerm
     {
-        public string kind = "RECARG";
         public string name;
         public MMTTerm value;
 
@@ -119,6 +147,7 @@ public static class JSONManager
         {
             this.name = name;
             this.value = value;
+            this.kind = "RECARG";
         }
 
         public override bool Equals(object obj)
@@ -140,11 +169,11 @@ public static class JSONManager
     public class OMS : MMTTerm
     {
         public string uri;
-        public string kind = "OMS";
 
         public OMS(string uri)
         {
             this.uri = uri;
+            this.kind = "OMS";
         }
 
         public override bool Equals(object obj)
@@ -166,11 +195,11 @@ public static class JSONManager
     {
         [JsonProperty("string")]
         public string s;
-        public string kind = "OMSTR";
 
         public OMSTR(string s)
         {
             this.s = s;
+            this.kind = "OMSTR";
         }
 
         public override bool Equals(object obj)
@@ -193,11 +222,11 @@ public static class JSONManager
     {
         [JsonProperty("float")]
         public float f;
-        public string kind = "OMF";
 
         public OMF(float f)
         {
             this.f = f;
+            this.kind = "OMF";
         }
 
         public override bool Equals(object obj)

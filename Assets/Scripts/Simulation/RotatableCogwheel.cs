@@ -10,6 +10,7 @@ public class RotatableCogwheel : MonoBehaviour, Rotatable, Interlockable
     private bool rotationActive = false;
     private Vector3 positionBeforeSimulation;
     private Quaternion rotationBeforeSimulation;
+    private CogwheelFact associatedFact;
 
     private bool knowledgeBasedSimulation;
 
@@ -33,6 +34,16 @@ public class RotatableCogwheel : MonoBehaviour, Rotatable, Interlockable
 
     public Transform getRootTransform() {
         return this.transform.root;
+    }
+
+    public void setAssociatedFact(CogwheelFact fact)
+    {
+        this.associatedFact = fact;
+    }
+
+    public CogwheelFact getAssociatedFact()
+    {
+        return this.associatedFact;
     }
 
     public void activatePhysics()

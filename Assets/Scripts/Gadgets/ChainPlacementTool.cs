@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -260,7 +261,18 @@ public class ChainPlacementTool : MonoBehaviour
                         lineRenderer.positionCount = chainShape.Count;
                         lineRenderer.SetPositions(chainShape.ToArray());
 
-                        createChain(Chain, chainShape);
+                        GameObject newChain = createChain(Chain, chainShape);
+
+                        int chnId = GameState.Facts.Count;
+
+                        int[] cogIds = Chain.Select(tpl1 => tpl1.Item1.GetComponent<RotatableCogwheel>().getAssociatedFact().Id).ToArray(); //Select(fact => fact.Id).ToArray()
+                        bool[] orientatins = Chain.Select(tpl1 => tpl1.Item2).ToArray();
+
+                        ChainFact newFact = new ChainFact(chnId, cogIds, orientatins);
+                        newFact.Representation = newChain;
+                        GameState.Facts.Insert(chnId, newFact);
+                        UnityEngine.Debug.Log("Successfully added new ChainFact with backendUri: " + newFact.backendURI);
+
                         deactivate();
 
                     }
@@ -285,7 +297,21 @@ public class ChainPlacementTool : MonoBehaviour
                         lineRenderer.positionCount = chainShape.Count;
                         lineRenderer.SetPositions(chainShape.ToArray());
 
-                        createChain(Chain, chainShape);
+                        GameObject newChain = createChain(Chain, chainShape);
+
+                                               
+                        int chnId = GameState.Facts.Count;
+
+                        int[] cogIds = Chain.Select(tpl1 => tpl1.Item1.GetComponent<RotatableCogwheel>().getAssociatedFact().Id).ToArray(); //Select(fact => fact.Id).ToArray()
+                        bool[] orientatins = Chain.Select(tpl1 => tpl1.Item2).ToArray();
+
+                        ChainFact newFact = new ChainFact(chnId, cogIds, orientatins);
+                        newFact.Representation = newChain;
+                        GameState.Facts.Insert(chnId, newFact);
+                        UnityEngine.Debug.Log("Successfully added new ChainFact with backendUri: " + newFact.backendURI);
+                        
+
+
                         deactivate();
                     }
                     else
@@ -721,9 +747,10 @@ public class ChainPlacementTool : MonoBehaviour
     }
 
 
-    private void createChain(List<Tuple<GameObject, bool>> Chain, List<Vector3> chainShape)
+    private GameObject createChain(List<Tuple<GameObject, bool>> Chain, List<Vector3> chainShape)
     {
         GameObject chain = Instantiate(chainPrefab);
         chain.GetComponent<Chain>().createChain(Chain, chainShape);
+        return chain;
     }
 }

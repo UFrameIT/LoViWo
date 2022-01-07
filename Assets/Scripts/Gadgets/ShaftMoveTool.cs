@@ -72,6 +72,15 @@ public class ShaftMoveTool : MonoBehaviour
                     movingObject.transform.position = otherCogwheel.transform.position;
                     movingObject.transform.up = otherCogwheel.transform.up;
                 }
+                //If Collision with ShaftHolder
+                else if (Hit.collider.gameObject.layer == LayerMask.NameToLayer("ShaftHolder"))
+                {
+                    GameObject shaftHolder = Hit.collider.gameObject;
+                    this.lastCollidedObject = shaftHolder;
+
+                    movingObject.transform.position = shaftHolder.transform.position;
+                    movingObject.transform.up = shaftHolder.transform.up;
+                }
                 else
                 {
                     this.lastCollidedObject = Hit.collider.gameObject;

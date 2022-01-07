@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class ChainObject : MonoBehaviour, Chain
+public class ChainObject : MonoBehaviour, Chain, Interlockable
 {
+    private List<Interlockable> interlockingObjects = new List<Interlockable>();
+
     private List<Tuple<GameObject, bool>> cogwheels;
     private List<Vector3> chainShape;
     private float pathLength;
@@ -95,10 +97,61 @@ public class ChainObject : MonoBehaviour, Chain
         pathLength = getPathLength();
 
         createSegments(2.5f);
+
+        foreach (Tuple<GameObject, bool> in_cog in in_cogwheels)
+        {
+            RotatableCogwheel cog = in_cog.Item1.GetComponentInChildren<RotatableCogwheel>();
+            if (cog != null)
+            {
+                this.addInterlockingPart(cog);
+                cog.addInterlockingPart(this);
+            }
+            else
+            {
+                UnityEngine.Debug.Log("chain unsuccessfully added interlocking");
+            }
+        }
+
     }
 
     public void move(float distance)
     {
+        foreach (GameObject segment in this.segments)
+        {
+            segment.GetComponent<ChainSegment>().move(distance);
+        }
+    }
 
+    public void stop_moving()
+    {
+        foreach (GameObject segment in this.segments)
+        {
+            segment.GetComponent<ChainSegment>().stop();
+        }
+    }
+
+    public void addInterlockingPart(Interlockable part)
+    {
+        interlockingObjects.Add(part);
+    }
+
+    public List<Interlockable> getInterlockingParts()
+    {
+        return this.interlockingObjects;
+    }
+
+    public Transform getRootTransform()
+    {
+        return this.transform.root;
+    }
+
+    public void activatePhysics()
+    {
+       
+    }
+
+    public void deactivatePhysics()
+    {
+       
     }
 }

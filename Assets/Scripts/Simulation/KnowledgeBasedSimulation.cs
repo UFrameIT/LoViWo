@@ -16,7 +16,10 @@ public static class KnowledgeBasedSimulation
         {
             if (GameState.ServerRunning)
             {
+                // CogChainEqsysFact chnEqsysFact = addChnEqsysFact();// test for ChainEqsys Logic
+                TestEqsysFact TestEqsys = addTestEqsysFact(knownAvMap);
                 CogwheelEqsysFact eqsysFact = addEqsysFact();
+                CogChainEqsysFact chnEqsysFact = addChnEqsysFact(knownAvMap);
                 List<SimplifiedFact> response = listSimplifiedFacts();
 
                 if (response != null)
@@ -58,6 +61,9 @@ public static class KnowledgeBasedSimulation
             if (eqsysFactForSimulation != null)
             {
                 //Prepare Data (parse equations) for gls-solver
+
+                Debug.Log("eqsysFactForSimulation: " + eqsysFactForSimulation);
+
                 Tuple<List<List<double>>, List<double>, List<MMTTerm>> glsTuple = eqsysFactForSimulation.parseEquationSystem();
 
                 if (glsTuple == null)
@@ -69,9 +75,9 @@ public static class KnowledgeBasedSimulation
                 {
                     List<List<double>> AData = glsTuple.Item1;
                     List<double> bData = glsTuple.Item2;
-                    List<MMTTerm> variables = glsTuple.Item3;
+                    List <MMTTerm> variables = glsTuple.Item3;
 
-                    int numberOfVariables = bData.Count;
+                    int numberOfVariables = AData[0].Count;
                     addKnownEqsysValues(AData, bData, variables, knownAvMap);
 
                     Matrix<double> A = Matrix<double>.Build.DenseOfRows(AData);
@@ -154,6 +160,26 @@ public static class KnowledgeBasedSimulation
         return eqsys;
     }
 
+    private static CogChainEqsysFact addChnEqsysFact(Dictionary<Fact, float> knownAvMap)
+    {
+        int eqsysFactId = GameState.Facts.Count;
+        int[] cogIds = GameState.Facts.FindAll(fact => fact.GetType().Equals(typeof(CogwheelFact))).Select(fact => fact.Id).ToArray();
+        int[] chnIds = GameState.Facts.FindAll(fact => fact.GetType().Equals(typeof(ChainFact))).Select(fact => fact.Id).ToArray();
+        CogChainEqsysFact eqsys = new CogChainEqsysFact(eqsysFactId, cogIds, chnIds, knownAvMap);
+        GameState.Facts.Insert(eqsysFactId, eqsys);
+        return eqsys;
+    }
+
+    private static TestEqsysFact addTestEqsysFact(Dictionary<Fact, float> knownAvMap)
+    {
+        int eqsysFactId = GameState.Facts.Count;
+        int[] cogIds = GameState.Facts.FindAll(fact => fact.GetType().Equals(typeof(CogwheelFact))).Select(fact => fact.Id).ToArray();
+        int[] chnIds = GameState.Facts.FindAll(fact => fact.GetType().Equals(typeof(ChainFact))).Select(fact => fact.Id).ToArray();
+        TestEqsysFact eqsys = new TestEqsysFact(eqsysFactId, cogIds, chnIds, knownAvMap);
+        GameState.Facts.Insert(eqsysFactId, eqsys);
+        return eqsys;
+    }
+
     private static List<SimplifiedFact> listSimplifiedFacts() {
         UnityWebRequest request = UnityWebRequest.Get(GameSettings.ServerAdress + "/fact/list");
         request.method = UnityWebRequest.kHttpVerbGET;
@@ -209,11 +235,16 @@ public static class KnowledgeBasedSimulation
         {
             foreach (Fact fact in GameState.Facts) {
                 if (fact.GetType().Equals(typeof(CogwheelFact))) {
+                    Debug.Log("getNewlyDiscoveredAvsMap: encountered CogwheelFact in GameState.Facts.");
+                    /*
                     MMTTerm knownAvVariable = variables.Find(variable => variable.isSimplifiedCogwheelAvTerm()
                                                                         && ((OMF)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(0)).value).f.Equals(((CogwheelFact)fact).Radius)
                                                                         && ((OMF)((OMA)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(3)).value).arguments.ElementAt(0)).f.Equals(((CogwheelFact)fact).Point.x)
                                                                         && ((OMF)((OMA)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(3)).value).arguments.ElementAt(1)).f.Equals(((CogwheelFact)fact).Point.y)
                                                                         && ((OMF)((OMA)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(3)).value).arguments.ElementAt(2)).f.Equals(((CogwheelFact)fact).Point.z));
+                    */
+                    MMTTerm knownAvVariable = variables.Find(variable => variable.isSimplifiedCogwheelAvTerm()
+                                                                        && ((OMF)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(7)).value).f.Equals((float)((CogwheelFact)fact).Id));
                     //If an element was found
                     if (knownAvVariable != null) {
                         double newlyDiscoveredAv = glsSolution.ElementAt(variables.IndexOf(knownAvVariable));
@@ -221,6 +252,26 @@ public static class KnowledgeBasedSimulation
                         discoveredAvsMap.Add(fact, (float)newlyDiscoveredAv);
                     }
                 }
+                //ToDo
+                else if (fact.GetType().Equals(typeof(ChainFact)))
+                {
+                    Debug.Log("getNewlyDiscoveredAvsMap: encountered ChainFact in GameState.Facts.");
+                    MMTTerm knownCvVariable;
+                    knownCvVariable = variables.Find(variable => variable.isSimplifiedChainCvTerm()
+                                                                        && ((OMF)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(1)).value).f.Equals((float)((ChainFact)fact).Id));
+                    if (knownCvVariable != null)
+                    {
+                        Debug.Log("knownCvVariable not null.");
+                        double newlyDiscoveredCv = glsSolution.ElementAt(variables.IndexOf(knownCvVariable));
+                        //Now we know that the Fact = fact should rotate with angularVelocity = newlyDiscoveredAv
+                        discoveredAvsMap.Add(fact, (float)newlyDiscoveredCv);
+                    }
+                    else
+                    {
+                        Debug.Log("knownCvVariable null.");
+                    }
+                }
+                
             }
         }
         else {

@@ -13,7 +13,7 @@ public class TestTool : MonoBehaviour
     private bool circleToolActive = false;
     private bool tangentToolActive = false;
     private bool xyzToolActive = false;
-    private bool miscTestsToolActive = false;
+    private bool miscTestsToolActive = true;
 
     private Ray ray;
     private RaycastHit hit;
@@ -50,10 +50,17 @@ public class TestTool : MonoBehaviour
                 CheckMouseButtons();
             }
         }
+
+        if (Input.GetKey(KeyCode.T) && miscTestsToolActive)
+        {
+            miscTestsTool();
+        }
+
     }
 
     void CheckMouseButtons()
     {
+
 
         // If a Cogwheel is clicked on...
         if (Input.GetMouseButtonDown(0))
@@ -218,27 +225,6 @@ public class TestTool : MonoBehaviour
 
                 }
 
-                if (miscTestsToolActive == true)
-                {
-                    Cog3 = Cog2;
-                    Cog2 = Cog1;
-                    Cog1 = hit.collider.gameObject;
-
-
-                    if (Cog1 != null && Cog2 != null && Cog3 != null && Cog1 != Cog2 && Cog2 != Cog3 && Cog1 != Cog3)
-                    {
-                        Transform trans1 = Cog1.transform;
-                        Transform trans2 = Cog2.transform;
-                        Transform trans3 = Cog3.transform;
-
-                        float r2 = Cog2.GetComponent<Cogwheel>().getRadius();
-
-                        miscTestsTool(trans1.position, trans3.position, trans2, r2, false);
-
-                    }
-
-                }
-
             }
 
         }
@@ -320,7 +306,7 @@ public class TestTool : MonoBehaviour
         transform1.rotation = temp_rotation;
     }
 
-    private void miscTestsTool(Vector3 start, Vector3 stop, Transform cog_transform, float cog_radius, bool clockwise)
+    private void miscTestsTool()
     {
         /*
         print("angle: " + angle);
@@ -340,13 +326,7 @@ public class TestTool : MonoBehaviour
         lineRenderer.SetPosition(1, origin);
         */
 
-        List<Vector3> points = get_arc_points(start, stop, cog_transform, cog_radius, clockwise);
-
-        lineRenderer.positionCount = points.Count;
-
-        Vector3[] array = points.ToArray();
-
-        lineRenderer.SetPositions(array);
+        print(GameSettings.archivesPath);
 
     }
 

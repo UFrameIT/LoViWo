@@ -121,7 +121,8 @@ public class CogwheelFact : Fact
             new OMF(this.Radius),
             new OMF(this.InsideRadius),
             new OMF(this.OutsideRadius),
-            new OMA(new OMS(MMTURIs.Tuple), tupleArguments)
+            new OMA(new OMS(MMTURIs.Tuple), tupleArguments),
+            new OMF((float)this.Id)
         };
 
         MMTTerm tp = new OMS(MMTURIs.Cogwheel);
@@ -234,6 +235,415 @@ public class CogwheelEqsysFact : Fact
         return hashcode;
     }
 }
+
+
+
+public class ChainFact : Fact
+{
+    public int[] CogwheelIds;
+    public bool[] CogwheelOrientations;
+
+    public ChainFact(int i, int[] ids, bool[] orientations)
+    {
+        this.Id = i;
+        this.CogwheelIds = ids;
+        this.CogwheelOrientations = orientations;
+
+        List<int> cogwheelIdList = new List<int>(this.CogwheelIds);
+        List<bool> cogwheelOrientations = new List<bool>(this.CogwheelOrientations);
+        List<MMTTerm> listArguments = new List<MMTTerm>();
+        
+        List<MMTTerm> tuple_list = new List<MMTTerm>();
+
+        cogwheelIdList
+            .Select(cogwheelId =>
+                new OMS((GameState.Facts.Find(x => x.Id == cogwheelId) as CogwheelFact).backendURI))
+            .ToList()
+            .ForEach(oms => listArguments.Add(oms));
+
+        listArguments.Zip(orientations, (first, second) => new Tuple<MMTTerm, bool>(first, second))
+            .Select(tpl =>
+                new OMA (new OMS(MMTURIs.Tuple), new List<MMTTerm> { tpl.Item1, tpl.Item2 ? new OMS(MMTURIs.Convex) : new OMS(MMTURIs.Concarve) }))
+            .ToList()
+            .ForEach(tpl => tuple_list.Add(tpl));
+
+
+
+        List<MMTTerm> chainOfArgs = new List<MMTTerm>
+        {
+            new OMA(new OMS(MMTURIs.ListOf), tuple_list),
+            new OMF((float)this.Id)
+        };
+
+
+        MMTTerm tp = new OMS(MMTURIs.Chain);
+        MMTTerm df = new OMA(new OMS(MMTURIs.ChainOf), chainOfArgs);
+
+        MMTSymbolDeclaration mmtDecl = new MMTSymbolDeclaration(this.Label, tp, df);
+        string body = MMTSymbolDeclaration.ToJson(mmtDecl);
+
+        AddFactResponse res = AddFactResponse.sendAdd(GameSettings.ServerAdress + "/fact/add", body);
+        this.backendURI = res.uri;
+        Debug.Log(this.backendURI);
+    }
+
+    public override Boolean hasDependentFacts()
+    {
+        return false;
+    }
+
+    public override int[] getDependentFactIds()
+    {
+        return this.CogwheelIds;
+    }
+
+    public override bool Equals(System.Object obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            ChainFact p = (ChainFact)obj;
+            return this.CogwheelIds.Equals(p.CogwheelIds) && this.CogwheelOrientations.Equals(p.CogwheelOrientations);
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        int hashcode = 1;
+        new List<int>(this.CogwheelIds).ForEach(x => hashcode ^= x);
+        return hashcode;
+    }
+}
+
+
+
+public class CogChainEqsysFact : Fact
+{
+    public int[] CogwheelIds;
+    public int[] ChainIds;
+
+    public CogChainEqsysFact(int i, int[] cogIds, int[] chainIds, Dictionary<Fact, float> knownAvMap)
+    {
+        this.Id = i;
+        this.CogwheelIds = cogIds;
+        this.ChainIds = chainIds;
+
+        List<MMTTerm> typeArguments = new List<MMTTerm>
+        {
+            new OMS(MMTURIs.Prop)
+        };
+
+        List<int> cogwheelIdList = new List<int>(this.CogwheelIds);
+        List<MMTTerm> cogListArguments = new List<MMTTerm>();
+        cogwheelIdList
+            .Select(cogwheelId =>
+                new OMS((GameState.Facts.Find(x => x.Id == cogwheelId) as CogwheelFact).backendURI))
+            .ToList()
+            .ForEach(oms => cogListArguments.Add(oms));
+
+        List<int> chainlIdList = new List<int>(this.ChainIds);
+        List<MMTTerm> chainListArguments = new List<MMTTerm>();
+        chainlIdList
+            .Select(chainId =>
+                new OMS((GameState.Facts.Find(x => x.Id == chainId) as ChainFact).backendURI))
+            .ToList()
+            .ForEach(oms => chainListArguments.Add(oms));
+
+        List<MMTTerm> knownAvListArguments = new List<MMTTerm>();
+        foreach(KeyValuePair<Fact, float> entry in knownAvMap)
+        {
+            Fact fact = entry.Key;
+            float av = entry.Value;
+            if (fact.GetType().Equals(typeof(CogwheelFact)))
+            {
+                List<MMTTerm> tupleArguments = new List<MMTTerm>
+                {
+                    new OMS((fact as CogwheelFact).backendURI),
+                    new OMF(av)
+                };
+                    
+                
+                MMTTerm fixedAvTuple = new OMA(new OMS(MMTURIs.Tuple), tupleArguments);
+                knownAvListArguments.Add(fixedAvTuple);
+            }
+        }
+
+        MMTTerm cogList;
+        cogList = new OMA(new OMS(MMTURIs.ListOf), cogListArguments);
+        /*
+        if (!(cogListArguments.Count == 0))
+        {
+            cogList = new OMA(new OMS(MMTURIs.ListOf), cogListArguments);
+        }
+        else
+        {
+            cogList = new OMS(MMTURIs.Nil);
+        }
+        */
+
+        MMTTerm chainList;
+        if (!(chainListArguments.Count == 0))
+        {
+            chainList = new OMA(new OMS(MMTURIs.ListOf), chainListArguments);
+            Debug.Log("chainListArguments.Count > 0 in chneqsys");
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.Chain)
+            };
+            chainList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+            Debug.Log("chainListArguments.Count = 0 in chneqsys");
+        }
+
+        MMTTerm knownAvList;
+        knownAvList = new OMA(new OMS(MMTURIs.ListOf), knownAvListArguments);
+        /*
+        if (!(knownAvListArguments.Count == 0))
+        {
+            knownAvList = new OMA(new OMS(MMTURIs.ListOf), knownAvListArguments);
+        }
+        else
+        {
+            knownAvList = new OMS(MMTURIs.Nil);
+        }
+        */
+
+
+        List<MMTTerm> eqsysArguments = new List<MMTTerm>
+        {
+            cogList,
+            chainList,
+            knownAvList
+        };
+
+        MMTTerm tp = new OMA(new OMS(MMTURIs.List), typeArguments);
+        MMTTerm df = new OMA(new OMS(MMTURIs.CogChainEquationSystem), eqsysArguments);
+
+        MMTSymbolDeclaration mmtDecl = new MMTSymbolDeclaration(this.Label, tp, df);
+        string body = MMTSymbolDeclaration.ToJson(mmtDecl);
+
+        AddFactResponse res = AddFactResponse.sendAdd(GameSettings.ServerAdress + "/fact/add", body);
+        this.backendURI = res.uri;
+        Debug.Log(this.backendURI);
+    }
+
+    public override Boolean hasDependentFacts()
+    {
+        return true;
+    }
+
+    public override int[] getDependentFactIds()
+    {
+        return this.CogwheelIds;
+    }
+
+    public override bool Equals(System.Object obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            CogwheelEqsysFact p = (CogwheelEqsysFact)obj;
+            return this.CogwheelIds.Equals(p.CogwheelIds);
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        int hashcode = 1;
+        new List<int>(this.CogwheelIds).ForEach(x => hashcode ^= x);
+        return hashcode;
+    }
+}
+
+
+public class TestEqsysFact : Fact
+{
+    public int[] CogwheelIds;
+    public int[] ChainIds;
+
+    public TestEqsysFact(int i, int[] cogIds, int[] chainIds, Dictionary<Fact, float> knownAvMap)
+    {
+        this.Id = i;
+        this.CogwheelIds = cogIds;
+        this.ChainIds = chainIds;
+
+        List<MMTTerm> tupletypeArguments = new List<MMTTerm>
+        {
+           new OMS(MMTURIs.RealLit),
+           new OMS(MMTURIs.RealLit)
+        };
+        List<MMTTerm> typeArguments = new List<MMTTerm>
+        {
+            //new OMA(new OMS(MMTURIs.Product), tupletypeArguments)
+            new OMS(MMTURIs.Cogwheel)
+        };
+
+        List<int> cogwheelIdList = new List<int>(this.CogwheelIds);
+        List<MMTTerm> cogListArguments = new List<MMTTerm>();
+        cogwheelIdList
+            .Select(cogwheelId =>
+                new OMS((GameState.Facts.Find(x => x.Id == cogwheelId) as CogwheelFact).backendURI))
+            .ToList()
+            .ForEach(oms => cogListArguments.Add(oms));
+
+        List<int> chainlIdList = new List<int>(this.ChainIds);
+        List<MMTTerm> chainListArguments = new List<MMTTerm>();
+        chainlIdList
+            .Select(chainId =>
+                new OMS((GameState.Facts.Find(x => x.Id == chainId) as ChainFact).backendURI))
+            .ToList()
+            .ForEach(oms => chainListArguments.Add(oms));
+
+        List<MMTTerm> knownAvListArguments = new List<MMTTerm>();
+        foreach (KeyValuePair<Fact, float> entry in knownAvMap)
+        {
+            Fact fact = entry.Key;
+            float av = entry.Value;
+            if (fact.GetType().Equals(typeof(CogwheelFact)))
+            {
+                List<MMTTerm> tupleArguments = new List<MMTTerm>
+                {
+                    new OMS((fact as CogwheelFact).backendURI),
+                    new OMF(av)
+                };
+
+
+                MMTTerm fixedAvTuple = new OMA(new OMS(MMTURIs.Tuple), tupleArguments);
+                knownAvListArguments.Add(fixedAvTuple);
+            }
+        }
+
+        MMTTerm cogList;
+        cogList = new OMA(new OMS(MMTURIs.ListOf), cogListArguments);
+        /*
+        if (!(cogListArguments.Count == 0))
+        {
+            cogList = new OMA(new OMS(MMTURIs.ListOf), cogListArguments);
+        }
+        else
+        {
+            cogList = new OMS(MMTURIs.Nil);
+        }
+        */
+
+        MMTTerm chainList;
+        if (!(chainListArguments.Count == 0))
+        {
+            chainList = new OMA(new OMS(MMTURIs.ListOf), chainListArguments);
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.Chain)
+            };
+            chainList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+        }
+
+        MMTTerm knownAvList;
+        knownAvList = new OMA(new OMS(MMTURIs.ListOf), knownAvListArguments);
+        /*
+        if (!(knownAvListArguments.Count == 0))
+        {
+            knownAvList = new OMA(new OMS(MMTURIs.ListOf), knownAvListArguments);
+        }
+        else
+        {
+            knownAvList = new OMS(MMTURIs.Nil);
+        }
+        */
+
+        
+        /*List<MMTTerm> arguments = new List<MMTTerm>
+        {
+            cogList,
+            chainList
+        };*/
+
+        List<MMTTerm> arguments;
+        if (chainListArguments.Count > 0 )
+        {
+            arguments = new List<MMTTerm>
+            {
+                chainListArguments[0],
+            };
+            Debug.Log("chainListArguments.Count > 0");
+        }
+        else
+        {           
+            arguments = new List<MMTTerm>();
+            Debug.Log("chainListArguments.Count = 0");         
+        }
+        
+        /*List<MMTTerm> numList = new List<MMTTerm>
+        {
+            new OMA (new OMS(MMTURIs.Tuple), new List<MMTTerm>{ new OMF(1.0f), new OMF(1.5f)}),
+            new OMA (new OMS(MMTURIs.Tuple), new List<MMTTerm>{ new OMF(2.0f), new OMF(2.5f)}),
+            new OMA (new OMS(MMTURIs.Tuple), new List<MMTTerm>{ new OMF(3.0f), new OMF(3.5f)}),
+            new OMA (new OMS(MMTURIs.Tuple), new List<MMTTerm>{ new OMF(4.0f), new OMF(4.5f)})
+        };
+        List<MMTTerm> arguments = new List<MMTTerm>
+        {
+            new OMA(new OMS(MMTURIs.ListOf), numList),
+            new OMF(2.0f)
+        };*/
+        
+
+
+        MMTTerm tp = new OMA(new OMS(MMTURIs.List), typeArguments);
+        //MMTTerm df = new OMA(new OMS("http://mathhub.info/LoViVo?Test?Chain_List_Cogs_test"), arguments);
+        MMTTerm df = new OMA(new OMS("http://mathhub.info/LoViVo?Test?chain_test"), arguments);
+
+        MMTSymbolDeclaration mmtDecl = new MMTSymbolDeclaration(this.Label, tp, df);
+        string body = MMTSymbolDeclaration.ToJson(mmtDecl);
+
+        AddFactResponse res = AddFactResponse.sendAdd(GameSettings.ServerAdress + "/fact/add", body);
+        this.backendURI = res.uri;
+        Debug.Log(this.backendURI);
+    }
+
+    public override Boolean hasDependentFacts()
+    {
+        return true;
+    }
+
+    public override int[] getDependentFactIds()
+    {
+        return this.CogwheelIds;
+    }
+
+    public override bool Equals(System.Object obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            CogwheelEqsysFact p = (CogwheelEqsysFact)obj;
+            return this.CogwheelIds.Equals(p.CogwheelIds);
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        int hashcode = 1;
+        new List<int>(this.CogwheelIds).ForEach(x => hashcode ^= x);
+        return hashcode;
+    }
+}
+
 
 /*
 public class OnLineFact : Fact

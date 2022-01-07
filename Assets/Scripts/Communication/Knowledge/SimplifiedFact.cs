@@ -76,7 +76,14 @@ public class SEqsysFact : SSymbolFact
 
             if (!equationsHaveTwoElements || !equationsAreNormalized)
             {
-                Debug.Log("SEqsysFact.ParseEquationSystem: Some equations either don't have 2 elements OR are not normalized.");
+                if (!equationsHaveTwoElements)
+                {
+                    Debug.Log("SEqsysFact.ParseEquationSystem: Some equations don't have 2 elements");
+                }
+                if (!equationsAreNormalized)
+                {
+                    Debug.Log("SEqsysFact.ParseEquationSystem: Some equations are not normalized");
+                }
                 return null;
             }
             else {
@@ -177,9 +184,149 @@ public class SEqsysFact : SSymbolFact
 
         bool noErrors = true;
         List<MMTTerm> plusTerms = new List<MMTTerm>();
-        getPlusTerms(plusTerms, newTerm);
+        List<MMTTerm> minusTerms = new List<MMTTerm>();
+        getPlusMinusTerms(plusTerms, minusTerms, newTerm);
 
         foreach (MMTTerm plusTerm in plusTerms) {
+            noErrors &= processPlusMinusTerm(multPairs, variables, plusTerm, true);
+        }
+        foreach (MMTTerm minusTerm in minusTerms)
+        {
+            noErrors &= processPlusMinusTerm(multPairs, variables, minusTerm, false);
+        }
+
+        newADataRow = new List<double>(new double[variables.Count]);
+
+        foreach (KeyValuePair<MMTTerm, OMF> multPair in multPairs) {
+            newADataRow[variables.IndexOf(multPair.Key)] = multPair.Value.f;
+        }
+
+        AData.Add(newADataRow);
+        return noErrors;
+    }
+
+    private void getPlusMinusTerms(List<MMTTerm> plusTerms, List<MMTTerm> minusTerms, MMTTerm newTerm) {
+        if (newTerm.GetType().Equals(typeof(OMA))
+                && ((OMA)newTerm).applicant.GetType().Equals(typeof(OMS))
+                && ((OMS)((OMA)newTerm).applicant).uri.Equals(MMTURIs.Addition))
+        {
+            //plus_real_lit is a function with two input parameters
+            getPlusMinusTerms(plusTerms, minusTerms, ((OMA)newTerm).arguments.ElementAt(0));
+            getPlusMinusTerms(plusTerms, minusTerms, ((OMA)newTerm).arguments.ElementAt(1));
+        }
+        else if (newTerm.GetType().Equals(typeof(OMA))
+                && ((OMA)newTerm).applicant.GetType().Equals(typeof(OMS))
+                && ((OMS)((OMA)newTerm).applicant).uri.Equals(MMTURIs.Minus))
+        {
+            getPlusMinusTerms(minusTerms, plusTerms, ((OMA)newTerm).arguments.ElementAt(0)); //In the case of a subtraction we switch plusTerms and ninusTerms
+                                                                                        //this way all summands that together make up the subtrahend of our subtraction are gathered in minusTerms
+                                                                                        //and if we have a subtraction in our subtrahend(so minus minus)
+                                                                                        //that doubely negated subtrahend will end up as part of our plusTerms
+        }
+        else
+        {
+            plusTerms.Add(newTerm);
+        }
+    }
+
+    private bool processPlusMinusTerm(Dictionary<MMTTerm, OMF> multPairs, List<MMTTerm> variables, MMTTerm term, bool plus)
+    {
+        //case: Times_real_lit of arguments
+        //If the plusTerm is an OMA(OMS(times_real_lit), arguments), we know that one or both of the arguments
+        //has to be a Variable, otherwise times_real_lit would have been simplified on the MMT-side
+        if (term.GetType().Equals(typeof(OMA))
+                    && ((OMA)term).applicant.GetType().Equals(typeof(OMS))
+                    && ((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.Multiplication))
+        {
+            if (!(((OMA)term).arguments.ElementAt(0).GetType().Equals(typeof(OMF)) ^ ((OMA)term).arguments.ElementAt(1).GetType().Equals(typeof(OMF))))
+            {
+                Debug.Log("SimplifiedFact.addToMatrixA: Corrupt simplified times_real_lit term.");
+                return false;
+            }
+            else
+            {
+                OMF multiplier;
+                MMTTerm multiplicand;
+                //Element at Index = 0 is OMF
+                if (((OMA)term).arguments.ElementAt(0).GetType().Equals(typeof(OMF)))
+                {
+                    multiplier = (OMF)((OMA)term).arguments.ElementAt(0);
+                    multiplicand = ((OMA)term).arguments.ElementAt(1);
+                }
+                //Element at Index = 1 is OMF
+                else
+                {
+                    multiplier = (OMF)((OMA)term).arguments.ElementAt(1);
+                    multiplicand = ((OMA)term).arguments.ElementAt(0);
+                }
+
+                if (!(variables.Contains(multiplicand)))
+                {
+                    variables.Add(multiplicand);
+                }
+
+                if (!plus)
+                {
+                    multiplier = new OMF(-1.0f * multiplier.f);
+                }
+                multPairs.Add(multiplicand, multiplier);
+            }
+        }
+        else if (term.GetType().Equals(typeof(OMA))            // case: Term a angular velocity
+                    && ((OMA)term).applicant.GetType().Equals(typeof(OMS))
+                    && ((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.AngularVelocity))   
+        {
+            OMF multiplier;
+            if (plus)
+            {
+                multiplier = new OMF(1.0f);
+            }
+            else
+            {
+                multiplier = new OMF(-1.0f);
+            }
+            multPairs.Add(term, multiplier);
+
+            if (!(variables.Contains(term)))
+            {
+                variables.Add(term);
+            }
+        }
+        else if (term.GetType().Equals(typeof(OMA))            // case: Term just a chain velocity
+                    && ((OMA)term).applicant.GetType().Equals(typeof(OMS))
+                    && ((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.ChainVelocity))
+        {
+            OMF multiplier;
+            if (plus)
+            {
+                multiplier = new OMF(1.0f);
+            }
+            else
+            {
+                multiplier = new OMF(-1.0f);
+            }
+            multPairs.Add(term, multiplier);
+
+            if (!(variables.Contains(term)))
+            {
+                variables.Add(term);
+            }
+        }
+        return true;
+    }
+    /*
+    private bool addToMatrixA(List<List<double>> AData, List<MMTTerm> variables, MMTTerm newTerm)
+    {
+
+        List<double> newADataRow;
+        Dictionary<MMTTerm, OMF> multPairs = new Dictionary<MMTTerm, OMF>();
+
+        bool noErrors = true;
+        List<MMTTerm> plusTerms = new List<MMTTerm>();
+        getPlusTerms(plusTerms, newTerm);
+
+        foreach (MMTTerm plusTerm in plusTerms)
+        {
             //case: Times_real_lit of arguments
             //If the plusTerm is an OMA(OMS(times_real_lit), arguments), we know that one or both of the arguments
             //has to be a Variable, otherwise times_real_lit would have been simplified on the MMT-side
@@ -193,7 +340,8 @@ public class SEqsysFact : SSymbolFact
                     Debug.Log("SimplifiedFact.addToMatrixA: Corrupt simplified times_real_lit term.");
                     break;
                 }
-                else {
+                else
+                {
                     OMF multiplier;
                     MMTTerm multiplicand;
                     //Element at Index = 0 is OMF
@@ -209,7 +357,8 @@ public class SEqsysFact : SSymbolFact
                         multiplicand = ((OMA)plusTerm).arguments.ElementAt(0);
                     }
 
-                    if (!(variables.Contains(multiplicand))) {
+                    if (!(variables.Contains(multiplicand)))
+                    {
                         variables.Add(multiplicand);
                     }
 
@@ -219,7 +368,8 @@ public class SEqsysFact : SSymbolFact
         }
 
         newADataRow = new List<double>(new double[variables.Count]);
-        foreach (KeyValuePair<MMTTerm, OMF> multPair in multPairs) {
+        foreach (KeyValuePair<MMTTerm, OMF> multPair in multPairs)
+        {
             newADataRow[variables.IndexOf(multPair.Key)] = multPair.Value.f;
         }
 
@@ -227,7 +377,8 @@ public class SEqsysFact : SSymbolFact
         return noErrors;
     }
 
-    private void getPlusTerms(List<MMTTerm> plusTerms, MMTTerm newTerm) {
+    private void getPlusTerms(List<MMTTerm> plusTerms, MMTTerm newTerm)
+    {
         if (newTerm.GetType().Equals(typeof(OMA))
                 && ((OMA)newTerm).applicant.GetType().Equals(typeof(OMS))
                 && ((OMS)((OMA)newTerm).applicant).uri.Equals(MMTURIs.Addition))
@@ -241,4 +392,5 @@ public class SEqsysFact : SSymbolFact
             plusTerms.Add(newTerm);
         }
     }
+    */
 }

@@ -70,6 +70,13 @@ public class ShaftHolderMoveTool : MonoBehaviour
 
                     movingObject.transform.position = Hit.point + Hit.normal * (initialStandTransform.localScale.y + radius + shaftHolderBorderWidth);
                     movingObject.transform.right = Hit.normal;
+                    movingObject.transform.rotation = Quaternion.LookRotation(Vector3.left, Vector3.back);
+
+                    float height = movingObject.GetComponentInChildren<ShaftHolder>().height;
+                    this.movingObject.transform.GetChild(0).localScale = new Vector3(initialStandTransform.localScale.x, height - radius - shaftHolderBorderWidth, initialStandTransform.localScale.z);
+                    this.movingObject.transform.GetChild(0).localPosition = new Vector3(-(this.movingObject.transform.GetChild(0).localScale.y / 2 + radius + shaftHolderBorderWidth), initialStandTransform.localPosition.y, initialStandTransform.localPosition.z);
+                    this.movingObject.transform.GetChild(1).localPosition = new Vector3((-(shaftHolderBorderWidth + radius + this.movingObject.transform.GetChild(0).localScale.y - this.movingObject.transform.GetChild(1).localScale.x / 2)), initialBottomTransform.localPosition.y, initialBottomTransform.localPosition.z);
+
                 }
                 //If Collision with Shaft
                 else if(Hit.collider.gameObject.layer == LayerMask.NameToLayer("Shaft"))

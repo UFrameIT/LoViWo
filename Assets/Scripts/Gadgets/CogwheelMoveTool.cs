@@ -148,6 +148,16 @@ public class CogwheelMoveTool : MonoBehaviour
 
                     movingObject.transform.up = shaft.transform.up;
                     movingObject.transform.position = shaft.transform.position + projectedPoint;
+
+                    //temporary modification to make placing cogwheels in the same plane across different shafts easier
+
+                    if (shaft.transform.up == Vector3.back)
+                    {
+                        Vector3 pos = movingObject.transform.position;
+                        pos.z = Mathf.Round(pos.z);
+                        movingObject.transform.position = pos;
+                    }
+                    
                 }
                 //Else: Follow cursor
                 else
@@ -200,6 +210,8 @@ public class CogwheelMoveTool : MonoBehaviour
             newFact.Representation = movingObject;
             GameState.Facts.Insert(cogId, newFact);
             UnityEngine.Debug.Log("Successfully added new CogwheelFact with backendUri: " + newFact.backendURI);
+
+            movingObject.gameObject.GetComponent<RotatableCogwheel>().setAssociatedFact(newFact);
 
             Stop();
         }

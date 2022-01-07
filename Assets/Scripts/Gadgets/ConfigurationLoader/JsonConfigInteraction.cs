@@ -219,7 +219,7 @@ public class JsonConfigInteraction : MonoBehaviour
             shaftHolder.transform.position = new Vector3(shhObject.position.x, shhObject.position.y, shhObject.position.z);
             shaftHolder.transform.eulerAngles = new Vector3(shhObject.rotation.x, shhObject.rotation.y, shhObject.rotation.z);
             //After the generateMesh-Call, the head of the shaftHolder has the following properties: width = (2*radius + 2*borderWidth), height = (2*radius + 2*borderWidth), depth = thickness
-            shaftHolder.GetComponentInChildren<ShaftHolder>().generateMesh(shhObject.radius, shhObject.thickness);
+            shaftHolder.GetComponentInChildren<ShaftHolder>().generateMesh(shhObject.radius, shhObject.thickness, shhObject.height);
 
             Transform stand = shaftHolder.transform.GetChild(0);
             Transform bottom = shaftHolder.transform.GetChild(1);

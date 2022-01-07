@@ -8,6 +8,7 @@ public class CreateShaftHolder : MonoBehaviour, CreateModel
     public GameObject shaftHolderPrefab;
     public InputField radiusInput;
     public InputField thicknessInput;
+    public InputField heightInput;
 
     public void setGeneratorPrefab(GameObject prefab) {
         this.shaftHolderPrefab = prefab;
@@ -16,9 +17,11 @@ public class CreateShaftHolder : MonoBehaviour, CreateModel
     public void createShaftHolder() {
         float radius;
         float thickness;
+        float height;
 
         if (float.TryParse(radiusInput.text, out radius) &&
-            float.TryParse(thicknessInput.text, out thickness))
+            float.TryParse(thicknessInput.text, out thickness) &&
+            float.TryParse(heightInput.text, out height))
         {
             float diameter = radius * 2.0f;
             float shaftHolderBorderWidth = 1.0f;
@@ -26,7 +29,7 @@ public class CreateShaftHolder : MonoBehaviour, CreateModel
             GameObject shaftHolder = Instantiate(shaftHolderPrefab);
             shaftHolder.gameObject.layer = LayerMask.NameToLayer("CurrentlyEdited");
             //After the generateMesh-Call, the head of the shaftHolder has the following properties: width = (2*radius + 2*borderWidth), height = (2*radius + 2*borderWidth), depth = thickness
-            shaftHolder.GetComponentInChildren<ShaftHolder>().generateMesh(radius, thickness);
+            shaftHolder.GetComponentInChildren<ShaftHolder>().generateMesh(radius, thickness, height);
 
             Transform stand = shaftHolder.transform.GetChild(0);
             Transform bottom = shaftHolder.transform.GetChild(1);

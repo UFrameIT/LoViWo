@@ -56,6 +56,7 @@ public class ShaftHolderObject : SceneObject
 {
     public float radius;
     public float thickness;
+    public float height;
 }
 
 public class Vector3Object

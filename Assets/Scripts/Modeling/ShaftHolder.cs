@@ -8,6 +8,7 @@ public class ShaftHolder : MonoBehaviour
 {
     public float innerRadius;
     public float thickness;
+    public float height;
 
     private float borderWidth = 1.0f;
     private Mesh mesh;
@@ -15,10 +16,11 @@ public class ShaftHolder : MonoBehaviour
     //Every 0.5° of the inner circle, there starts a new triangle
     private float angleAccuracy = 0.5f;
 
-    public void generateMesh(float innerRadius, float thickness)
+    public void generateMesh(float innerRadius, float thickness, float height)
     {
         this.innerRadius = Mathf.Abs(innerRadius);
         this.thickness = Mathf.Abs(thickness);
+        this.height = Mathf.Abs(height);
 
         CreateShaftHolder();
     }
@@ -312,6 +314,7 @@ public class ShaftHolder : MonoBehaviour
         mesh.vertices = verticeList.ToArray();
         mesh.triangles = triangleList.ToArray();
         GetComponent<MeshFilter>().mesh = mesh;
+        GetComponent<MeshCollider>().sharedMesh = mesh;
         mesh.RecalculateNormals();
 
         // Use this to save the Mesh, created from Mesh API
