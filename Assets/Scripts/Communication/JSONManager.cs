@@ -25,6 +25,12 @@ public class MMTURICollection
     public string ChainVelocity = "http://mathhub.info/LoViVo?Chain?chain_velovity";
     public string CogChainEquationSystem = "http://mathhub.info/LoViVo?Chain?eqsys2";
 
+    public string Shaft = "http://mathhub.info/LoViVo?Shaft?shaft";
+    public string ShaftOf = "http://mathhub.info/LoViVo?Shaft?create_shaft";
+    public string Motor = "http://mathhub.info/LoViVo?Motor?motor";
+    public string MotorOf = "http://mathhub.info/LoViVo?Motor?create_motor";
+    public string GearboxEquationSystem = "http://mathhub.info/LoViVo?Gearbox?gearbox_eqsys";
+
     public string TestEquationSystem = "http://mathhub.info/LoViVo?Test?TestEqsys";
 
     public string Record = "http://gl.mathhub.info/MMT/LFX/Records?Symbols?Recexp";

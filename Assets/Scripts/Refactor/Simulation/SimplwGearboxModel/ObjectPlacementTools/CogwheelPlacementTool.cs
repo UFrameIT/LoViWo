@@ -1,9 +1,9 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
 
-public class CogwheelMoveTool : MonoBehaviour
+public class CogwheelPlacementTool : MonoBehaviour
 {
     public RaycastHit Hit;
     private Camera Cam;
@@ -23,7 +23,7 @@ public class CogwheelMoveTool : MonoBehaviour
 
     void Start()
     {
-        this.layerMask = LayerMask.GetMask("Player","CurrentlyEdited");
+        this.layerMask = LayerMask.GetMask("Player", "CurrentlyEdited");
         //Ignore player and current moving object
         this.layerMask = ~this.layerMask;
         Cam = Camera.main;
@@ -32,7 +32,8 @@ public class CogwheelMoveTool : MonoBehaviour
         CommunicationEvents.openUIEvent.AddListener(Cancel);
         CommunicationEvents.closeUIEvent.AddListener(Cancel);
 
-        if (debug && debugMaterial != null && lineRenderer != null) {
+        if (debug && debugMaterial != null && lineRenderer != null)
+        {
             this.lineRenderer.enabled = true;
             this.lineRenderer.material = debugMaterial;
             this.lineRenderer.startWidth = 0.095f;
@@ -41,28 +42,33 @@ public class CogwheelMoveTool : MonoBehaviour
         }
     }
 
-    void Activate(GameObject obj) {
+    void Activate(GameObject obj)
+    {
         this.movingObject = obj;
         this.movingActive = true;
 
-        if (debuggingActive) {
+        if (debuggingActive)
+        {
             this.lineRenderer.positionCount = 4;
 
             Vector3 nullVector = new Vector3(0, 0, 0);
-            for (int i = 0; i < this.lineRenderer.positionCount; i++) {
+            for (int i = 0; i < this.lineRenderer.positionCount; i++)
+            {
                 this.linePositions.Add(nullVector);
             }
         }
     }
 
     //Stop Moving AND destroy moving GameObject
-    void Cancel() {
+    void Cancel()
+    {
         Destroy(movingObject);
         Stop();
     }
 
     //Stop Moving without destroying moving GameObject
-    void Stop() {
+    void Stop()
+    {
         movingObject = null;
         movingActive = false;
 
@@ -78,7 +84,8 @@ public class CogwheelMoveTool : MonoBehaviour
         Ray ray = Cam.ScreenPointToRay(Input.mousePosition);
         RaycastHit tempHit;
 
-        if (movingActive) {
+        if (movingActive)
+        {
 
             if (Physics.Raycast(ray, out tempHit, float.MaxValue, this.layerMask))
             {
@@ -91,7 +98,7 @@ public class CogwheelMoveTool : MonoBehaviour
 
                     if ((Hit.collider.gameObject.transform.parent != null
                             && Hit.collider.gameObject.transform.parent.GetComponentInChildren<Cogwheel>() != null
-                            && Math.Abs(Hit.collider.gameObject.transform.parent.GetComponentInChildren<Cogwheel>().getModule() - this.movingObject.GetComponentInChildren<Cogwheel>().getModule()) < 0.001f )
+                            && Math.Abs(Hit.collider.gameObject.transform.parent.GetComponentInChildren<Cogwheel>().getModule() - this.movingObject.GetComponentInChildren<Cogwheel>().getModule()) < 0.001f)
                         ||
                         (Hit.collider.gameObject.GetComponentInChildren<Cogwheel>() != null
                         && Math.Abs(Hit.collider.gameObject.GetComponentInChildren<Cogwheel>().getModule() - this.movingObject.GetComponentInChildren<Cogwheel>().getModule()) < 0.001f))
@@ -115,7 +122,7 @@ public class CogwheelMoveTool : MonoBehaviour
                         movingObject.transform.position = otherPosition + ((1 + movingObjectPitchDiameter / otherPitchDiameter) * (otherCogwheel.transform.rotation * otherRelativeVectors[0]));
 
                         //In our created Cogwheels the right-vector and forward-vector are switched. So the right-vector is actually
-                        //the vector that points to the initial gap at 0°
+                        //the vector that points to the initial gap at 0�
                         //If we want the Right-Vector of movingObject to look at the otherObject's position,
                         //the forward-vector must be Vector3.Cross(up, left)
 
@@ -140,7 +147,8 @@ public class CogwheelMoveTool : MonoBehaviour
                     }
                 }
                 //If Collision with Shaft
-                else if (Hit.collider.gameObject.layer == LayerMask.NameToLayer("Shaft")) {
+                else if (Hit.collider.gameObject.layer == LayerMask.NameToLayer("Shaft"))
+                {
                     GameObject shaft = Hit.collider.gameObject;
                     this.lastCollidedObject = shaft;
 
@@ -157,7 +165,7 @@ public class CogwheelMoveTool : MonoBehaviour
                         pos.z = Mathf.Round(pos.z);
                         movingObject.transform.position = pos;
                     }
-                    
+
                 }
                 //Else: Follow cursor
                 else
@@ -177,12 +185,16 @@ public class CogwheelMoveTool : MonoBehaviour
             }
         }
     }
-    
+
     //Check if left Mouse-Button was pressed and handle it
     void CheckMouseButtons()
     {
         if (Input.GetMouseButtonDown(0))
         {
+            if (lastCollidedObject != null && lastCollidedObject.GetComponentInChildren<RefactorShaft>() != null)
+            {
+                lastCollidedObject.GetComponentInChildren<RefactorShaft>().addConnectedObject(this.movingObject);
+            }
             if (lastCollidedObject != null && lastCollidedObject.GetComponentInChildren<Connectable>() != null)
             {
                 lastCollidedObject.GetComponentInChildren<Connectable>().addConnectedPart(this.movingObject.GetComponentInChildren<Rotatable>());
@@ -201,19 +213,18 @@ public class CogwheelMoveTool : MonoBehaviour
             }
             movingObject.gameObject.tag = tagLayerName;
 
-            //Create new CogwheelFact and add to global FactList
-            int cogId = GameState.Facts.Count;
-            float radius = movingObject.GetComponentInChildren<Cogwheel>().getRadius();
-            float insideRadius = movingObject.GetComponentInChildren<Cogwheel>().getInsideRadius();
-            float outsideRadius = movingObject.GetComponentInChildren<Cogwheel>().getOutsideRadius();
-            CogwheelFact newFact = new CogwheelFact(cogId, movingObject.transform.position, movingObject.transform.up, radius, insideRadius, outsideRadius, GameState.Facts);
-            newFact.Representation = movingObject;
-            GameState.Facts.Insert(cogId, newFact);
-            UnityEngine.Debug.Log("Successfully added new CogwheelFact with backendUri: " + newFact.backendURI);
-
-            movingObject.gameObject.GetComponent<RotatableCogwheel>().setAssociatedFact(newFact);
+            //Create new Cogwheel Simulated Object
+            createSimulatedCogwheel(movingObject);
 
             Stop();
         }
+    }
+
+    private void createSimulatedCogwheel(GameObject movingObject)
+    {
+        int id = GameState.simulationHandler.getNextId();
+        SimulatedObject simCogwheel = new SimulatedCogwheel(id);
+        simCogwheel.addObjectRepresentation(movingObject);
+        GameState.simulationHandler.activeSimAddSimObject(simCogwheel);
     }
 }

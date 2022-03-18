@@ -100,7 +100,7 @@ public class CogwheelFact : Fact
     public float OutsideRadius;
 
 
-    public CogwheelFact(int i, Vector3 P, Vector3 N, float R, float iR, float oR)
+    public CogwheelFact(int i, Vector3 P, Vector3 N, float R, float iR, float oR, List<Fact> facts)
     {
         this.Id = i;
         this.Point = P;
@@ -170,7 +170,7 @@ public class CogwheelEqsysFact : Fact
 {
     public int[] CogwheelIds;
     
-    public CogwheelEqsysFact(int i, int[] ids)
+    public CogwheelEqsysFact(int i, int[] ids, List<Fact> facts)
     {
         this.Id = i;
         this.CogwheelIds = ids;
@@ -184,7 +184,7 @@ public class CogwheelEqsysFact : Fact
         List<MMTTerm> listArguments = new List<MMTTerm>();
         cogwheelIdList
             .Select(cogwheelId =>
-                new OMS((GameState.Facts.Find(x => x.Id == cogwheelId) as CogwheelFact).backendURI))
+                new OMS((facts.Find(x => x.Id == cogwheelId) as CogwheelFact).backendURI))
             .ToList()
             .ForEach(oms => listArguments.Add(oms));
 
@@ -243,7 +243,7 @@ public class ChainFact : Fact
     public int[] CogwheelIds;
     public bool[] CogwheelOrientations;
 
-    public ChainFact(int i, int[] ids, bool[] orientations)
+    public ChainFact(int i, int[] ids, bool[] orientations, List<Fact> facts)
     {
         this.Id = i;
         this.CogwheelIds = ids;
@@ -257,7 +257,7 @@ public class ChainFact : Fact
 
         cogwheelIdList
             .Select(cogwheelId =>
-                new OMS((GameState.Facts.Find(x => x.Id == cogwheelId) as CogwheelFact).backendURI))
+                new OMS((facts.Find(x => x.Id == cogwheelId) as CogwheelFact).backendURI))
             .ToList()
             .ForEach(oms => listArguments.Add(oms));
 
@@ -326,7 +326,7 @@ public class CogChainEqsysFact : Fact
     public int[] CogwheelIds;
     public int[] ChainIds;
 
-    public CogChainEqsysFact(int i, int[] cogIds, int[] chainIds, Dictionary<Fact, float> knownAvMap)
+    public CogChainEqsysFact(int i, int[] cogIds, int[] chainIds, Dictionary<Fact, float> knownAvMap, List<Fact> facts)
     {
         this.Id = i;
         this.CogwheelIds = cogIds;
@@ -341,7 +341,7 @@ public class CogChainEqsysFact : Fact
         List<MMTTerm> cogListArguments = new List<MMTTerm>();
         cogwheelIdList
             .Select(cogwheelId =>
-                new OMS((GameState.Facts.Find(x => x.Id == cogwheelId) as CogwheelFact).backendURI))
+                new OMS((facts.Find(x => x.Id == cogwheelId) as CogwheelFact).backendURI))
             .ToList()
             .ForEach(oms => cogListArguments.Add(oms));
 
@@ -349,7 +349,7 @@ public class CogChainEqsysFact : Fact
         List<MMTTerm> chainListArguments = new List<MMTTerm>();
         chainlIdList
             .Select(chainId =>
-                new OMS((GameState.Facts.Find(x => x.Id == chainId) as ChainFact).backendURI))
+                new OMS((facts.Find(x => x.Id == chainId) as ChainFact).backendURI))
             .ToList()
             .ForEach(oms => chainListArguments.Add(oms));
 
@@ -471,7 +471,7 @@ public class TestEqsysFact : Fact
     public int[] CogwheelIds;
     public int[] ChainIds;
 
-    public TestEqsysFact(int i, int[] cogIds, int[] chainIds, Dictionary<Fact, float> knownAvMap)
+    public TestEqsysFact(int i, int[] cogIds, int[] chainIds, Dictionary<Fact, float> knownAvMap, List<Fact> facts)
     {
         this.Id = i;
         this.CogwheelIds = cogIds;
@@ -492,7 +492,7 @@ public class TestEqsysFact : Fact
         List<MMTTerm> cogListArguments = new List<MMTTerm>();
         cogwheelIdList
             .Select(cogwheelId =>
-                new OMS((GameState.Facts.Find(x => x.Id == cogwheelId) as CogwheelFact).backendURI))
+                new OMS((facts.Find(x => x.Id == cogwheelId) as CogwheelFact).backendURI))
             .ToList()
             .ForEach(oms => cogListArguments.Add(oms));
 
@@ -500,7 +500,7 @@ public class TestEqsysFact : Fact
         List<MMTTerm> chainListArguments = new List<MMTTerm>();
         chainlIdList
             .Select(chainId =>
-                new OMS((GameState.Facts.Find(x => x.Id == chainId) as ChainFact).backendURI))
+                new OMS((facts.Find(x => x.Id == chainId) as ChainFact).backendURI))
             .ToList()
             .ForEach(oms => chainListArguments.Add(oms));
 
@@ -640,6 +640,139 @@ public class TestEqsysFact : Fact
     {
         int hashcode = 1;
         new List<int>(this.CogwheelIds).ForEach(x => hashcode ^= x);
+        return hashcode;
+    }
+}
+
+public class ShaftFact : Fact
+{
+    public int[] CogwheelIds;
+
+
+    public ShaftFact(int i, int[] ids, List<Fact> facts)
+    {
+        this.Id = i;
+        this.CogwheelIds = ids;
+
+        List<int> cogwheelIdList = new List<int>(this.CogwheelIds);
+        List<MMTTerm> cogListArguments = new List<MMTTerm>();
+        cogwheelIdList
+            .Select(cogwheelId =>
+                new OMS((facts.Find(x => x.Id == cogwheelId) as CogwheelFact).backendURI))
+            .ToList()
+            .ForEach(oms => cogListArguments.Add(oms));
+
+        List<MMTTerm> shaftOfArgs = new List<MMTTerm>
+        {
+            new OMA(new OMS(MMTURIs.ListOf), cogListArguments),
+            new OMF((float)this.Id)
+        };
+
+        MMTTerm tp = new OMS(MMTURIs.Shaft);
+        MMTTerm df = new OMA(new OMS(MMTURIs.ShaftOf), shaftOfArgs);
+
+        MMTSymbolDeclaration mmtDecl = new MMTSymbolDeclaration(this.Label, tp, df);
+        string body = MMTSymbolDeclaration.ToJson(mmtDecl);
+
+        AddFactResponse res = AddFactResponse.sendAdd(GameSettings.ServerAdress + "/fact/add", body);
+        this.backendURI = res.uri;
+        Debug.Log(this.backendURI);
+    }
+
+    public override Boolean hasDependentFacts()
+    {
+        return true;
+    }
+
+    public override int[] getDependentFactIds()
+    {
+        return this.CogwheelIds;
+    }
+
+    public override bool Equals(System.Object obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            ChainFact p = (ChainFact)obj;
+            return this.CogwheelIds.Equals(p.CogwheelIds);
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        int hashcode = 1;
+        new List<int>(this.CogwheelIds).ForEach(x => hashcode ^= x);
+        return hashcode;
+    }
+}
+
+public class MotorFact : Fact
+{
+    public int connectedShaftId;
+    public float driveSpeed;
+
+
+    public MotorFact(int id, int shaft_id, float vel, List<Fact> facts)
+    {
+        this.Id = id;
+        this.connectedShaftId = shaft_id;
+        this.driveSpeed = vel;
+
+        OMS connectedShaft = new OMS((facts.Find(x => x.Id == connectedShaftId) as ShaftFact).backendURI);
+
+        List<MMTTerm> motorOfArgs = new List<MMTTerm>
+        {
+            connectedShaft,
+            new OMF(this.driveSpeed),
+            new OMF((float)this.Id)
+        };
+
+        MMTTerm tp = new OMS(MMTURIs.Motor);
+        MMTTerm df = new OMA(new OMS(MMTURIs.MotorOf), motorOfArgs);
+
+        MMTSymbolDeclaration mmtDecl = new MMTSymbolDeclaration(this.Label, tp, df);
+        string body = MMTSymbolDeclaration.ToJson(mmtDecl);
+
+        AddFactResponse res = AddFactResponse.sendAdd(GameSettings.ServerAdress + "/fact/add", body);
+        this.backendURI = res.uri;
+        Debug.Log(this.backendURI);
+    }
+
+    public override Boolean hasDependentFacts()
+    {
+        return true;
+    }
+
+    public override int[] getDependentFactIds()
+    {
+        int[] dependantFacts = {this.connectedShaftId};
+        return dependantFacts;
+    }
+
+    public override bool Equals(System.Object obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            MotorFact p = (MotorFact)obj;
+            return this.connectedShaftId.Equals(p.connectedShaftId) && this.driveSpeed.Equals(p.driveSpeed);
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        int hashcode = 1;
+        hashcode ^= this.connectedShaftId;
+        hashcode ^= (int)this.driveSpeed;
         return hashcode;
     }
 }

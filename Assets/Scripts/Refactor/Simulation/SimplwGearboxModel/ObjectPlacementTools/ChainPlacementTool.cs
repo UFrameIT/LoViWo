@@ -77,7 +77,7 @@ public class ChainPlacementTool : MonoBehaviour
     void CheckMouseButtons()
     {
         /*
-         * (large chunk of logic still in here  at the moment. might be better if moved into seperate funktions)
+         * (large chunk of logic still in here  at the moment. might be better if moved into seperate functions)
          * 
          * general logic:
          * 1. select cogwheels:
@@ -96,7 +96,7 @@ public class ChainPlacementTool : MonoBehaviour
         {
             if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Cogwheel"))
             {
-                
+
                 GameObject Cog = hit.collider.gameObject;
 
 
@@ -203,7 +203,7 @@ public class ChainPlacementTool : MonoBehaviour
                                 chainShape.Add(tpl1.Item2);
 
 
-                                
+
                                 Transform cog_transform = Chain[i].Item1.transform;
                                 float cog_radius = Chain[i].Item1.GetComponent<Cogwheel>().getRadius();
 
@@ -213,8 +213,8 @@ public class ChainPlacementTool : MonoBehaviour
                                 List<Vector3> arcPoints = get_arc_points(start, stop, cog_transform, cog_radius, clockwise ^ Chain[i].Item2);
                                 chainShape.InsertRange(chainShape.Count - 2, arcPoints);
 
-                           
-                                
+
+
                             }
                             else
                             {
@@ -223,12 +223,12 @@ public class ChainPlacementTool : MonoBehaviour
                                 int type = get_tangent_type(clockwise, Chain[i].Item2, Chain[i + 1].Item2);
 
                                 Tuple<Vector3, Vector3> tpl1 = CogwheelTangentPoints(Chain[i].Item1.transform, Chain[i].Item1.GetComponent<Cogwheel>().getRadius(), Chain[i + 1].Item1.transform, Chain[i + 1].Item1.GetComponent<Cogwheel>().getRadius(), type);
-                                
+
                                 chainShape.Add(tpl1.Item1);
 
                                 chainShape.Add(tpl1.Item2);
 
-                                
+
                                 // add arc points
                                 if (i > 0)
                                 {
@@ -240,14 +240,14 @@ public class ChainPlacementTool : MonoBehaviour
 
                                     List<Vector3> arcPoints = get_arc_points(start, stop, cog_transform, cog_radius, clockwise ^ Chain[i].Item2);
                                     chainShape.InsertRange(chainShape.Count - 2, arcPoints);
-                                    
+
 
                                 }
-                                
+
                             }
 
                         }
-                        
+
                         Transform cog_trans = Chain[0].Item1.transform;
                         float cog_rad = Chain[0].Item1.GetComponent<Cogwheel>().getRadius();
 
@@ -263,6 +263,9 @@ public class ChainPlacementTool : MonoBehaviour
 
                         GameObject newChain = createChain(Chain, chainShape);
 
+                        createSimultedChain(newChain);
+
+                        /*
                         int chnId = GameState.Facts.Count;
 
                         int[] cogIds = Chain.Select(tpl1 => tpl1.Item1.GetComponent<RotatableCogwheel>().getAssociatedFact().Id).ToArray(); //Select(fact => fact.Id).ToArray()
@@ -272,13 +275,15 @@ public class ChainPlacementTool : MonoBehaviour
                         newFact.Representation = newChain;
                         GameState.Facts.Insert(chnId, newFact);
                         UnityEngine.Debug.Log("Successfully added new ChainFact with backendUri: " + newFact.backendURI);
+                        */
+
 
                         deactivate();
 
                     }
                     else if (Chain.Count == 2)
                     {
-                        
+
                         int type = get_tangent_type(true, true, true);
 
                         Tuple<Vector3, Vector3> tpl1 = CogwheelTangentPoints(Chain[0].Item1.transform, Chain[0].Item1.GetComponent<Cogwheel>().getRadius(), Chain[1].Item1.transform, Chain[1].Item1.GetComponent<Cogwheel>().getRadius(), type);
@@ -299,7 +304,9 @@ public class ChainPlacementTool : MonoBehaviour
 
                         GameObject newChain = createChain(Chain, chainShape);
 
-                                               
+                        createSimultedChain(newChain);
+
+                        /*
                         int chnId = GameState.Facts.Count;
 
                         int[] cogIds = Chain.Select(tpl1 => tpl1.Item1.GetComponent<RotatableCogwheel>().getAssociatedFact().Id).ToArray(); //Select(fact => fact.Id).ToArray()
@@ -309,7 +316,7 @@ public class ChainPlacementTool : MonoBehaviour
                         newFact.Representation = newChain;
                         GameState.Facts.Insert(chnId, newFact);
                         UnityEngine.Debug.Log("Successfully added new ChainFact with backendUri: " + newFact.backendURI);
-                        
+                        */
 
 
                         deactivate();
@@ -752,5 +759,13 @@ public class ChainPlacementTool : MonoBehaviour
         GameObject chain = Instantiate(chainPrefab);
         chain.GetComponent<Chain>().createChain(Chain, chainShape);
         return chain;
+    }
+
+    private void createSimultedChain(GameObject objectRepresentation)
+    {
+        int id = GameState.simulationHandler.getNextId();
+        SimulatedObject simChain = new SimulatedChain(id);
+        simChain.addObjectRepresentation(objectRepresentation);
+        GameState.simulationHandler.activeSimAddSimObject(simChain);
     }
 }

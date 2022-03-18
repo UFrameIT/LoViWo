@@ -11,4 +11,9 @@ public static class GameState
     //Caching last result
     public static Tuple<List<Fact>,List<SimplifiedFact>> LastKBSimulationResult = 
         new Tuple<List<Fact>, List<SimplifiedFact>>(new List<Fact>(),null);
+
+
+
+    //(Refactor) active SimulationHandler
+    public static SimulationHandler simulationHandler;
 }

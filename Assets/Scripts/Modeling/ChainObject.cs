@@ -154,4 +154,9 @@ public class ChainObject : MonoBehaviour, Chain, Interlockable
     {
        
     }
+
+    public List<Tuple<GameObject, bool>> getCogwheels()
+    {
+        return cogwheels;
+    }
 }

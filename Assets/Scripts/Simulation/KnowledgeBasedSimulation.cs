@@ -17,8 +17,6 @@ public static class KnowledgeBasedSimulation
             if (GameState.ServerRunning)
             {
                 // CogChainEqsysFact chnEqsysFact = addChnEqsysFact();// test for ChainEqsys Logic
-                TestEqsysFact TestEqsys = addTestEqsysFact(knownAvMap);
-                CogwheelEqsysFact eqsysFact = addEqsysFact();
                 CogChainEqsysFact chnEqsysFact = addChnEqsysFact(knownAvMap);
                 List<SimplifiedFact> response = listSimplifiedFacts();
 
@@ -155,7 +153,7 @@ public static class KnowledgeBasedSimulation
     private static CogwheelEqsysFact addEqsysFact() {
         int eqsysFactId = GameState.Facts.Count;
         int[] cogIds = GameState.Facts.FindAll(fact => fact.GetType().Equals(typeof(CogwheelFact))).Select(fact => fact.Id).ToArray();
-        CogwheelEqsysFact eqsys = new CogwheelEqsysFact(eqsysFactId, cogIds);
+        CogwheelEqsysFact eqsys = new CogwheelEqsysFact(eqsysFactId, cogIds, GameState.Facts);
         GameState.Facts.Insert(eqsysFactId, eqsys);
         return eqsys;
     }
@@ -165,7 +163,7 @@ public static class KnowledgeBasedSimulation
         int eqsysFactId = GameState.Facts.Count;
         int[] cogIds = GameState.Facts.FindAll(fact => fact.GetType().Equals(typeof(CogwheelFact))).Select(fact => fact.Id).ToArray();
         int[] chnIds = GameState.Facts.FindAll(fact => fact.GetType().Equals(typeof(ChainFact))).Select(fact => fact.Id).ToArray();
-        CogChainEqsysFact eqsys = new CogChainEqsysFact(eqsysFactId, cogIds, chnIds, knownAvMap);
+        CogChainEqsysFact eqsys = new CogChainEqsysFact(eqsysFactId, cogIds, chnIds, knownAvMap, GameState.Facts);
         GameState.Facts.Insert(eqsysFactId, eqsys);
         return eqsys;
     }
@@ -175,7 +173,7 @@ public static class KnowledgeBasedSimulation
         int eqsysFactId = GameState.Facts.Count;
         int[] cogIds = GameState.Facts.FindAll(fact => fact.GetType().Equals(typeof(CogwheelFact))).Select(fact => fact.Id).ToArray();
         int[] chnIds = GameState.Facts.FindAll(fact => fact.GetType().Equals(typeof(ChainFact))).Select(fact => fact.Id).ToArray();
-        TestEqsysFact eqsys = new TestEqsysFact(eqsysFactId, cogIds, chnIds, knownAvMap);
+        TestEqsysFact eqsys = new TestEqsysFact(eqsysFactId, cogIds, chnIds, knownAvMap, GameState.Facts);
         GameState.Facts.Insert(eqsysFactId, eqsys);
         return eqsys;
     }
