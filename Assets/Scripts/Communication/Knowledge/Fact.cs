@@ -100,7 +100,7 @@ public class CogwheelFact : Fact
     public float OutsideRadius;
 
 
-    public CogwheelFact(int i, Vector3 P, Vector3 N, float R, float iR, float oR, List<Fact> facts)
+    public CogwheelFact(int i, Vector3 P, Vector3 N, float R, float iR, float oR)
     {
         this.Id = i;
         this.Point = P;
@@ -240,28 +240,26 @@ public class CogwheelEqsysFact : Fact
 
 public class ChainFact : Fact
 {
-    public int[] CogwheelIds;
-    public bool[] CogwheelOrientations;
+    public List<SimulatedCogwheel> cogwheels;
+    public List<bool> cogwheelOrientations;
 
-    public ChainFact(int i, int[] ids, bool[] orientations, List<Fact> facts)
+    public ChainFact(int i, List<SimulatedCogwheel> cogwheels, List<bool> cogwheelOrientations)
     {
         this.Id = i;
-        this.CogwheelIds = ids;
-        this.CogwheelOrientations = orientations;
+        this.cogwheels = cogwheels;
+        this.cogwheelOrientations = cogwheelOrientations;
 
-        List<int> cogwheelIdList = new List<int>(this.CogwheelIds);
-        List<bool> cogwheelOrientations = new List<bool>(this.CogwheelOrientations);
         List<MMTTerm> listArguments = new List<MMTTerm>();
         
         List<MMTTerm> tuple_list = new List<MMTTerm>();
 
-        cogwheelIdList
-            .Select(cogwheelId =>
-                new OMS((facts.Find(x => x.Id == cogwheelId) as CogwheelFact).backendURI))
+        cogwheels
+            .Select(cogwheel =>
+                new OMS(cogwheel.getFactRepresentation().backendURI))
             .ToList()
             .ForEach(oms => listArguments.Add(oms));
 
-        listArguments.Zip(orientations, (first, second) => new Tuple<MMTTerm, bool>(first, second))
+        listArguments.Zip(cogwheelOrientations, (first, second) => new Tuple<MMTTerm, bool>(first, second))
             .Select(tpl =>
                 new OMA (new OMS(MMTURIs.Tuple), new List<MMTTerm> { tpl.Item1, tpl.Item2 ? new OMS(MMTURIs.Convex) : new OMS(MMTURIs.Concarve) }))
             .ToList()
@@ -294,7 +292,8 @@ public class ChainFact : Fact
 
     public override int[] getDependentFactIds()
     {
-        return this.CogwheelIds;
+        int[] dependantFacts = this.cogwheels.Select(cogwheel => cogwheel.getFactRepresentation().Id).ToArray();
+        return dependantFacts;
     }
 
     public override bool Equals(System.Object obj)
@@ -307,14 +306,14 @@ public class ChainFact : Fact
         else
         {
             ChainFact p = (ChainFact)obj;
-            return this.CogwheelIds.Equals(p.CogwheelIds) && this.CogwheelOrientations.Equals(p.CogwheelOrientations);
+            return this.cogwheels.Equals(p.cogwheels) && this.cogwheelOrientations.Equals(p.cogwheelOrientations);
         }
     }
 
     public override int GetHashCode()
     {
         int hashcode = 1;
-        new List<int>(this.CogwheelIds).ForEach(x => hashcode ^= x);
+        new List<int>(this.cogwheels.Select(cogwheel => cogwheel.getFactRepresentation().Id)).ForEach(x => hashcode ^= x);
         return hashcode;
     }
 }
@@ -646,25 +645,13 @@ public class TestEqsysFact : Fact
 
 public class ShaftFact : Fact
 {
-    public int[] CogwheelIds;
-
-
-    public ShaftFact(int i, int[] ids, List<Fact> facts)
+   
+    public ShaftFact(int i)
     {
         this.Id = i;
-        this.CogwheelIds = ids;
-
-        List<int> cogwheelIdList = new List<int>(this.CogwheelIds);
-        List<MMTTerm> cogListArguments = new List<MMTTerm>();
-        cogwheelIdList
-            .Select(cogwheelId =>
-                new OMS((facts.Find(x => x.Id == cogwheelId) as CogwheelFact).backendURI))
-            .ToList()
-            .ForEach(oms => cogListArguments.Add(oms));
 
         List<MMTTerm> shaftOfArgs = new List<MMTTerm>
         {
-            new OMA(new OMS(MMTURIs.ListOf), cogListArguments),
             new OMF((float)this.Id)
         };
 
@@ -681,12 +668,13 @@ public class ShaftFact : Fact
 
     public override Boolean hasDependentFacts()
     {
-        return true;
+        return false;
     }
 
     public override int[] getDependentFactIds()
     {
-        return this.CogwheelIds;
+        int[] ret = { };
+        return ret;
     }
 
     public override bool Equals(System.Object obj)
@@ -699,35 +687,28 @@ public class ShaftFact : Fact
         else
         {
             ChainFact p = (ChainFact)obj;
-            return this.CogwheelIds.Equals(p.CogwheelIds);
+            return this.Id.Equals(p.Id);
         }
     }
 
     public override int GetHashCode()
     {
-        int hashcode = 1;
-        new List<int>(this.CogwheelIds).ForEach(x => hashcode ^= x);
-        return hashcode;
+        return this.Id;
     }
 }
 
 public class MotorFact : Fact
 {
-    public int connectedShaftId;
     public float driveSpeed;
 
 
-    public MotorFact(int id, int shaft_id, float vel, List<Fact> facts)
+    public MotorFact(int id, float vel)
     {
         this.Id = id;
-        this.connectedShaftId = shaft_id;
         this.driveSpeed = vel;
-
-        OMS connectedShaft = new OMS((facts.Find(x => x.Id == connectedShaftId) as ShaftFact).backendURI);
 
         List<MMTTerm> motorOfArgs = new List<MMTTerm>
         {
-            connectedShaft,
             new OMF(this.driveSpeed),
             new OMF((float)this.Id)
         };
@@ -745,12 +726,12 @@ public class MotorFact : Fact
 
     public override Boolean hasDependentFacts()
     {
-        return true;
+        return false;
     }
 
     public override int[] getDependentFactIds()
     {
-        int[] dependantFacts = {this.connectedShaftId};
+        int[] dependantFacts = {};
         return dependantFacts;
     }
 
@@ -764,19 +745,631 @@ public class MotorFact : Fact
         else
         {
             MotorFact p = (MotorFact)obj;
-            return this.connectedShaftId.Equals(p.connectedShaftId) && this.driveSpeed.Equals(p.driveSpeed);
+            return this.Id.Equals(p.Id) && this.driveSpeed.Equals(p.driveSpeed);
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        int hashcode = this.Id;
+        return hashcode;
+    }
+}
+
+public class GearboxEqsysFact : Fact
+{
+    public int[] cogwheelIds;
+    public int[] chainIds;
+    public int[] shaftIds;
+    public int[] motorIds;
+
+    public GearboxEqsysFact(int i, int[] cogIds, int[] chainIds, int[] shaftIds, int[] motorIds, List<Fact> facts)
+    {
+        this.Id = i;
+        this.cogwheelIds = cogIds;
+        this.chainIds = chainIds;
+        this.shaftIds = shaftIds;
+        this.motorIds = motorIds;
+
+        List<MMTTerm> typeArguments = new List<MMTTerm>
+        {
+            new OMS(MMTURIs.Prop)
+        };
+
+        List<int> cogwheelIdList = new List<int>(this.cogwheelIds);
+        List<MMTTerm> cogListArguments = new List<MMTTerm>();
+        cogwheelIdList
+            .Select(cogwheelId =>
+                new OMS((facts.Find(x => x.Id == cogwheelId) as CogwheelFact).backendURI))
+            .ToList()
+            .ForEach(oms => cogListArguments.Add(oms));
+
+        List<int> chainlIdList = new List<int>(this.chainIds);
+        List<MMTTerm> chainListArguments = new List<MMTTerm>();
+        chainlIdList
+            .Select(chainId =>
+                new OMS((facts.Find(x => x.Id == chainId) as ChainFact).backendURI))
+            .ToList()
+            .ForEach(oms => chainListArguments.Add(oms));
+
+        List<int> shaftIdList = new List<int>(this.shaftIds);
+        List<MMTTerm> shaftListArguments = new List<MMTTerm>();
+        shaftIdList
+            .Select(shaftId =>
+                new OMS((facts.Find(x => x.Id == shaftId) as ShaftFact).backendURI))
+            .ToList()
+            .ForEach(oms => shaftListArguments.Add(oms));
+
+        List<int> motorIdList = new List<int>(this.motorIds);
+        List<MMTTerm> motorListArguments = new List<MMTTerm>();
+        motorIdList
+            .Select(motorId =>
+                new OMS((facts.Find(x => x.Id == motorId) as MotorFact).backendURI))
+            .ToList()
+            .ForEach(oms => motorListArguments.Add(oms));
+
+
+        MMTTerm cogList;
+        cogList = new OMA(new OMS(MMTURIs.ListOf), cogListArguments);
+        /*
+        if (!(cogListArguments.Count == 0))
+        {
+            cogList = new OMA(new OMS(MMTURIs.ListOf), cogListArguments);
+        }
+        else
+        {
+            cogList = new OMS(MMTURIs.Nil);
+        }
+        */
+
+        MMTTerm chainList;
+        if (!(chainListArguments.Count == 0))
+        {
+            chainList = new OMA(new OMS(MMTURIs.ListOf), chainListArguments);
+            Debug.Log("chainListArguments.Count > 0 in eqsys");
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.Chain)
+            };
+            chainList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+            Debug.Log("chainListArguments.Count = 0 in eqsys");
+        }
+
+        MMTTerm shaftList;
+        if (!(shaftListArguments.Count == 0))
+        {
+            shaftList = new OMA(new OMS(MMTURIs.ListOf), shaftListArguments);
+            Debug.Log("shaftListArguments.Count > 0 in eqsys");
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.Shaft)
+            };
+            shaftList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+            Debug.Log("shaftListArguments.Count = 0 in eqsys");
+        }
+
+        MMTTerm motorList;
+        if (!(motorListArguments.Count == 0))
+        {
+            motorList = new OMA(new OMS(MMTURIs.ListOf), motorListArguments);
+            Debug.Log("motorListArguments.Count > 0 in eqsys");
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.Motor)
+            };
+            motorList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+            Debug.Log("motorListArguments.Count = 0 in eqsys");
+        }
+
+
+        List<MMTTerm> eqsysArguments = new List<MMTTerm>
+        {
+            cogList,
+            chainList,
+            shaftList,
+            motorList
+        };
+
+        MMTTerm tp = new OMA(new OMS(MMTURIs.List), typeArguments);
+        MMTTerm df = new OMA(new OMS(MMTURIs.GearboxEquationSystem), eqsysArguments);
+
+        MMTSymbolDeclaration mmtDecl = new MMTSymbolDeclaration(this.Label, tp, df);
+        string body = MMTSymbolDeclaration.ToJson(mmtDecl);
+
+        AddFactResponse res = AddFactResponse.sendAdd(GameSettings.ServerAdress + "/fact/add", body);
+        this.backendURI = res.uri;
+        Debug.Log(this.backendURI);
+    }
+
+    public override Boolean hasDependentFacts()
+    {
+        return true;
+    }
+
+    public override int[] getDependentFactIds()
+    {
+        int[] dependantFacts = this.cogwheelIds.Concat(this.chainIds).Concat(this.shaftIds).Concat(this.motorIds).ToArray();
+        return dependantFacts;
+    }
+
+    public override bool Equals(System.Object obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            GearboxEqsysFact p = (GearboxEqsysFact)obj;
+            return this.cogwheelIds.Equals(p.cogwheelIds) 
+                && this.chainIds.Equals(p.chainIds) 
+                && this.shaftIds.Equals(p.shaftIds)
+                && this.motorIds.Equals(p.motorIds);
         }
     }
 
     public override int GetHashCode()
     {
         int hashcode = 1;
-        hashcode ^= this.connectedShaftId;
-        hashcode ^= (int)this.driveSpeed;
+        new List<int>(this.cogwheelIds).ForEach(x => hashcode ^= x);
+        new List<int>(this.chainIds).ForEach(x => hashcode ^= x);
+        new List<int>(this.shaftIds).ForEach(x => hashcode ^= x);
+        new List<int>(this.motorIds).ForEach(x => hashcode ^= x);
         return hashcode;
     }
 }
 
+
+public class CogCogInteractionFact : Fact
+{
+    public CogwheelCogwheelInteraction cogCogInteraction;
+    
+    public CogCogInteractionFact(int id, CogwheelCogwheelInteraction cogCogInteraction)
+    {
+        this.Id = id;
+        this.cogCogInteraction = cogCogInteraction;
+
+        OMS cogwheel1 = new OMS(cogCogInteraction.getCogwheel1().getFactRepresentation().backendURI);
+        OMS cogwheel2 = new OMS(cogCogInteraction.getCogwheel2().getFactRepresentation().backendURI);
+
+        List<MMTTerm> interactionArgs = new List<MMTTerm>
+        {
+            cogwheel1,
+            cogwheel2
+        };
+
+        MMTTerm tp = new OMS(MMTURIs.CogwheelCogwheelInteraction);
+        MMTTerm df = new OMA(new OMS(MMTURIs.DeclareCogwheelCogwheelInteraction), interactionArgs);
+
+        MMTSymbolDeclaration mmtDecl = new MMTSymbolDeclaration(this.Label, tp, df);
+        string body = MMTSymbolDeclaration.ToJson(mmtDecl);
+
+        AddFactResponse res = AddFactResponse.sendAdd(GameSettings.ServerAdress + "/fact/add", body);
+        this.backendURI = res.uri;
+        Debug.Log(this.backendURI);
+    }
+
+    public override Boolean hasDependentFacts()
+    {
+        return true;
+    }
+
+    public override int[] getDependentFactIds()
+    {
+        int[] dependantFacts = { cogCogInteraction.getCogwheel1().getFactRepresentation().Id,
+                                 cogCogInteraction.getCogwheel2().getFactRepresentation().Id};
+        return dependantFacts;
+    }
+
+    public override bool Equals(System.Object obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            CogCogInteractionFact p = (CogCogInteractionFact)obj;
+            return this.cogCogInteraction.Equals(p.cogCogInteraction);
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        int hashcode = this.cogCogInteraction.getId();
+        
+        return hashcode;
+    }
+}
+
+public class CogChainInteractionFact : Fact
+{
+    public CogwheelChainInteraction cogChnInteraction;
+
+    public CogChainInteractionFact(int id, CogwheelChainInteraction cogChnInteraction)
+    {
+        this.Id = id;
+        this.cogChnInteraction = cogChnInteraction;
+
+        OMS cogwheel = new OMS(cogChnInteraction.getCogwheel().getFactRepresentation().backendURI);
+        OMS chain = new OMS(cogChnInteraction.getChain().getFactRepresentation().backendURI);
+
+        List<MMTTerm> interactionArgs = new List<MMTTerm>
+        {
+            cogwheel,
+            chain
+        };
+
+        MMTTerm tp;
+        MMTTerm df;
+        if (cogChnInteraction.getOrientation())
+        {
+            tp = new OMS(MMTURIs.CogwheelChainInteractionCocarve);
+            df = new OMA(new OMS(MMTURIs.DeclareCogwheelChainInteractionCocarve), interactionArgs);
+        }
+        else
+        {
+            tp = new OMS(MMTURIs.CogwheelChainInteractionCovex);
+            df = new OMA(new OMS(MMTURIs.DeclareCogwheelChainInteractionCovex), interactionArgs);
+        }
+       
+        MMTSymbolDeclaration mmtDecl = new MMTSymbolDeclaration(this.Label, tp, df);
+        string body = MMTSymbolDeclaration.ToJson(mmtDecl);
+
+        AddFactResponse res = AddFactResponse.sendAdd(GameSettings.ServerAdress + "/fact/add", body);
+        this.backendURI = res.uri;
+        Debug.Log(this.backendURI);
+    }
+
+    public override Boolean hasDependentFacts()
+    {
+        return true;
+    }
+
+    public override int[] getDependentFactIds()
+    {
+        int[] dependantFacts = { cogChnInteraction.getCogwheel().getFactRepresentation().Id,
+                                 cogChnInteraction.getChain().getFactRepresentation().Id};
+        return dependantFacts;
+    }
+
+    public override bool Equals(System.Object obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            CogChainInteractionFact p = (CogChainInteractionFact)obj;
+            return this.cogChnInteraction.Equals(p.cogChnInteraction);
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        int hashcode = this.cogChnInteraction.getId();
+
+        return hashcode;
+    }
+}
+
+public class ShaftCogInteractionFact : Fact
+{
+    public ShaftCogwheelInteraction sftCogInteraction;
+
+    public ShaftCogInteractionFact(int id, ShaftCogwheelInteraction sftCogInteraction)
+    {
+        this.Id = id;
+        this.sftCogInteraction = sftCogInteraction;
+
+        OMS shaft = new OMS(sftCogInteraction.getShaft().getFactRepresentation().backendURI);
+        OMS cogwheel = new OMS(sftCogInteraction.getCogwheel().getFactRepresentation().backendURI);
+
+        List<MMTTerm> interactionArgs = new List<MMTTerm>
+        {
+            shaft,
+            cogwheel
+        };
+
+        MMTTerm tp = new OMS(MMTURIs.ShaftCogwheelInterlocking);
+        MMTTerm df = new OMA(new OMS(MMTURIs.DeclareShaftCogwheelInterlocking), interactionArgs);
+        
+        MMTSymbolDeclaration mmtDecl = new MMTSymbolDeclaration(this.Label, tp, df);
+        string body = MMTSymbolDeclaration.ToJson(mmtDecl);
+
+        AddFactResponse res = AddFactResponse.sendAdd(GameSettings.ServerAdress + "/fact/add", body);
+        this.backendURI = res.uri;
+        Debug.Log(this.backendURI);
+    }
+
+    public override Boolean hasDependentFacts()
+    {
+        return true;
+    }
+
+    public override int[] getDependentFactIds()
+    {
+        int[] dependantFacts = { sftCogInteraction.getShaft().getFactRepresentation().Id,
+                                 sftCogInteraction.getCogwheel().getFactRepresentation().Id};
+        return dependantFacts;
+    }
+
+    public override bool Equals(System.Object obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            ShaftCogInteractionFact p = (ShaftCogInteractionFact)obj;
+            return this.sftCogInteraction.Equals(p.sftCogInteraction);
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        int hashcode = this.sftCogInteraction.getId();
+
+        return hashcode;
+    }
+}
+
+public class MotorShaftInteractionFact : Fact
+{
+    public MotorShaftInteraction motorShaftInteraction;
+
+    public MotorShaftInteractionFact(int id, MotorShaftInteraction motorShaftInteraction)
+    {
+        this.Id = id;
+        this.motorShaftInteraction = motorShaftInteraction;
+
+        OMS motor = new OMS(motorShaftInteraction.getMotor().getFactRepresentation().backendURI);
+        OMS shaft = new OMS(motorShaftInteraction.getShaft().getFactRepresentation().backendURI);
+
+        List<MMTTerm> interactionArgs = new List<MMTTerm>
+        {
+            motor,
+            shaft
+        };
+
+        MMTTerm tp = new OMS(MMTURIs.MotorShaftInterlocking);
+        MMTTerm df = new OMA(new OMS(MMTURIs.DeclareMotorShaftInterlocking), interactionArgs);
+
+        MMTSymbolDeclaration mmtDecl = new MMTSymbolDeclaration(this.Label, tp, df);
+        string body = MMTSymbolDeclaration.ToJson(mmtDecl);
+
+        AddFactResponse res = AddFactResponse.sendAdd(GameSettings.ServerAdress + "/fact/add", body);
+        this.backendURI = res.uri;
+        Debug.Log(this.backendURI);
+    }
+
+    public override Boolean hasDependentFacts()
+    {
+        return true;
+    }
+
+    public override int[] getDependentFactIds()
+    {
+        int[] dependantFacts = { motorShaftInteraction.getMotor().getFactRepresentation().Id,
+                                 motorShaftInteraction.getShaft().getFactRepresentation().Id};
+        return dependantFacts;
+    }
+
+    public override bool Equals(System.Object obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            MotorShaftInteractionFact p = (MotorShaftInteractionFact)obj;
+            return this.motorShaftInteraction.Equals(p.motorShaftInteraction);
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        int hashcode = this.motorShaftInteraction.getId();
+
+        return hashcode;
+    }
+}
+
+
+
+public class GearboxEqsys2Fact : Fact
+{
+    public List<CogwheelCogwheelInteraction> cogCogInteractions;
+    public List<CogwheelChainInteraction> cogChainInteractions;
+    public List<ShaftCogwheelInteraction> shaftCogInteractions;
+    public List<MotorShaftInteraction> motorShaftInteractions;
+
+    public GearboxEqsys2Fact(int i, List<CogwheelCogwheelInteraction> cogCogInteractions, List<CogwheelChainInteraction> cogChainInteractions,
+                             List<ShaftCogwheelInteraction> shaftCogInteractions, List<MotorShaftInteraction> motorShaftInteractions)
+    {
+        this.Id = i;
+        this.cogCogInteractions = cogCogInteractions;
+        this.cogChainInteractions = cogChainInteractions;
+        this.shaftCogInteractions = shaftCogInteractions;
+        this.motorShaftInteractions = motorShaftInteractions;
+
+        List<MMTTerm> typeArguments = new List<MMTTerm>
+        {
+            new OMS(MMTURIs.Prop)
+        };
+
+        List<MMTTerm> cogCogInteractionListArguments = 
+            cogCogInteractions.Select(interaction => new OMS(interaction.getInteractionFact().backendURI))
+            .Cast<MMTTerm>().ToList();
+
+        List<MMTTerm> cogChainConvInteractonListArguments = 
+            cogChainInteractions.Where(interaction => interaction.getOrientation())
+            .Select(interaction => new OMS(interaction.getInteractionFact().backendURI))
+            .Cast<MMTTerm>().ToList();
+
+        List<MMTTerm> cogChainConcInteractonListArguments = 
+            cogChainInteractions.Where(interaction => !interaction.getOrientation())
+            .Select(interaction => new OMS(interaction.getInteractionFact().backendURI))
+            .Cast<MMTTerm>().ToList();
+
+        List<MMTTerm> shaftCogInteractionListArguments = 
+            shaftCogInteractions.Select(interaction => new OMS(interaction.getInteractionFact().backendURI))
+            .Cast<MMTTerm>().ToList();
+
+        List<MMTTerm> motorShaftInteractionListArguments =
+            motorShaftInteractions.Select(interaction => new OMS(interaction.getInteractionFact().backendURI))
+            .Cast<MMTTerm>().ToList();
+
+
+        MMTTerm cogCogInteractionList;
+        if (!(cogCogInteractionListArguments.Count == 0))
+        {
+            cogCogInteractionList = new OMA(new OMS(MMTURIs.ListOf), cogCogInteractionListArguments);
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.CogwheelCogwheelInteraction)
+            };
+            cogCogInteractionList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+        }
+
+        MMTTerm cogChainConvInteractionList;
+        if (!(cogChainConvInteractonListArguments.Count == 0))
+        {
+            cogChainConvInteractionList = new OMA(new OMS(MMTURIs.ListOf), cogChainConvInteractonListArguments);
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.CogwheelChainInteractionCovex)
+            };
+            cogChainConvInteractionList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+        }
+
+        MMTTerm cogChainConcInteractionList;
+        if (!(cogChainConcInteractonListArguments.Count == 0))
+        {
+            cogChainConcInteractionList = new OMA(new OMS(MMTURIs.ListOf), cogChainConcInteractonListArguments);
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.CogwheelChainInteractionCocarve)
+            };
+            cogChainConcInteractionList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+        }
+
+        MMTTerm shaftCogInteractionList;
+        if (!(shaftCogInteractionListArguments.Count == 0))
+        {
+            shaftCogInteractionList = new OMA(new OMS(MMTURIs.ListOf), shaftCogInteractionListArguments);
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.ShaftCogwheelInterlocking)
+            };
+            shaftCogInteractionList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+        }
+
+        MMTTerm motorShaftInteractionList;
+        if (!(motorShaftInteractionListArguments.Count == 0))
+        {
+            motorShaftInteractionList = new OMA(new OMS(MMTURIs.ListOf), motorShaftInteractionListArguments);
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.MotorShaftInterlocking)
+            };
+            motorShaftInteractionList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+        }
+
+
+        List<MMTTerm> eqsysArguments = new List<MMTTerm>
+        {
+            cogCogInteractionList,
+            cogChainConvInteractionList,
+            cogChainConcInteractionList,
+            shaftCogInteractionList,
+            motorShaftInteractionList
+        };
+
+        MMTTerm tp = new OMA(new OMS(MMTURIs.List), typeArguments);
+        MMTTerm df = new OMA(new OMS(MMTURIs.GearboxEquationSystem2), eqsysArguments);
+
+        MMTSymbolDeclaration mmtDecl = new MMTSymbolDeclaration(this.Label, tp, df);
+        string body = MMTSymbolDeclaration.ToJson(mmtDecl);
+
+        AddFactResponse res = AddFactResponse.sendAdd(GameSettings.ServerAdress + "/fact/add", body);
+        this.backendURI = res.uri;
+        Debug.Log(this.backendURI);
+    }
+
+    public override Boolean hasDependentFacts()
+    {
+        return true;
+    }
+
+    public override int[] getDependentFactIds()
+    {
+        int[] dependantFacts = this.cogCogInteractions.Select(interaction => interaction.getInteractionFact().Id).ToArray();
+        dependantFacts.Concat(this.cogChainInteractions.Select(interaction => interaction.getInteractionFact().Id).ToArray());
+        dependantFacts.Concat(this.shaftCogInteractions.Select(interaction => interaction.getInteractionFact().Id).ToArray());
+        dependantFacts.Concat(this.motorShaftInteractions.Select(interaction => interaction.getInteractionFact().Id).ToArray());
+        return dependantFacts;
+    }
+
+    public override bool Equals(System.Object obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            GearboxEqsys2Fact p = (GearboxEqsys2Fact)obj;
+            return this.cogCogInteractions.Equals(p.cogCogInteractions)
+                && this.cogChainInteractions.Equals(p.cogChainInteractions)
+                && this.shaftCogInteractions.Equals(p.shaftCogInteractions)
+                && this.motorShaftInteractions.Equals(p.motorShaftInteractions);
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        int hashcode = 1;
+        this.cogCogInteractions.ForEach(x => hashcode ^= x.getInteractionFact().Id);
+        this.cogChainInteractions.ForEach(x => hashcode ^= x.getInteractionFact().Id);
+        this.shaftCogInteractions.ForEach(x => hashcode ^= x.getInteractionFact().Id);
+        this.motorShaftInteractions.ForEach(x => hashcode ^= x.getInteractionFact().Id);
+        return hashcode;
+    }
+}
 
 /*
 public class OnLineFact : Fact

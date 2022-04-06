@@ -132,7 +132,7 @@ public class JsonConfigInteraction : MonoBehaviour
             float radius = cogwheel.GetComponentInChildren<Cogwheel>().getRadius();
             float insideRadius = cogwheel.GetComponentInChildren<Cogwheel>().getInsideRadius();
             float outsideRadius = cogwheel.GetComponentInChildren<Cogwheel>().getOutsideRadius();
-            CogwheelFact newFact = new CogwheelFact(cogId, cogwheel.transform.position, cogwheel.transform.up, radius, insideRadius, outsideRadius, GameState.Facts);
+            CogwheelFact newFact = new CogwheelFact(cogId, cogwheel.transform.position, cogwheel.transform.up, radius, insideRadius, outsideRadius);
             newFact.Representation = cogwheel;
             GameState.Facts.Insert(cogId, newFact);
             UnityEngine.Debug.Log("Successfully added new CogwheelFact with backendUri: " + newFact.backendURI);

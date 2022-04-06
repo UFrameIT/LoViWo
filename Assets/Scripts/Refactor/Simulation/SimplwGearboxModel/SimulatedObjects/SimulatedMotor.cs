@@ -7,10 +7,14 @@ public class SimulatedMotor : SimulatedObject
     public SimulatedMotor(int id) : base(id)
     {
         this.valuesOfInterest = new List<ValueOfInterest>();
-        valuesOfInterest.Add(new ValueOfInterest("angularVelocity"));
     }
 
-    public override void applyVluesOfInterest(Dictionary<ValueOfInterest, float> input)
+    public override void applyValuesOfInterest(Dictionary<ValueOfInterest, float> input)
+    {
+
+    }
+
+    public override void unapplyValuesOfInterest()
     {
 
     }

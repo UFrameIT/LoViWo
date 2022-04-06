@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
+using static JSONManager;
 
 public class MotorPlacementTool : MonoBehaviour
 {
@@ -93,11 +95,17 @@ public class MotorPlacementTool : MonoBehaviour
         }
     }
 
-    void createSimulatedMotor(GameObject movingObject)
+    private SimulatedMotor createSimulatedMotor(GameObject movingObject)
     {
         int id = GameState.simulationHandler.getNextId();
-        SimulatedObject simMotor = new SimulatedMotor(id);
+        SimulatedMotor simMotor = new SimulatedMotor(id);
         simMotor.addObjectRepresentation(movingObject);
+        movingObject.GetComponentInChildren<RefactorMotor>().addSimulatedObject(simMotor);
         GameState.simulationHandler.activeSimAddSimObject(simMotor);
+        MotorFact motorFact = new MotorFact(id, 30.0f);
+        simMotor.addFactRepresentation(motorFact);
+        
+
+        return simMotor;
     }
 }

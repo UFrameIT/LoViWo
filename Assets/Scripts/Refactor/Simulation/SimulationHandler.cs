@@ -26,6 +26,17 @@ public class SimulationHandler : MonoBehaviour
         this.nextId++;
     }
 
+    public void activeSimAddInteraction(Interaction interaction)
+    {
+        activeSimulation.addInteraction(interaction);
+        this.nextId++;
+    }
+
+    public void activeSimAddEqsys()
+    {
+        this.nextId++;
+    }
+
     public void activeSimulationStartSimulation()
     {
         activeSimulation.startSimulation();

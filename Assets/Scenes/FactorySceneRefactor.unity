@@ -1555,6 +1555,49 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 273729172}
   m_CullTransparentMesh: 0
+--- !u!1 &289008714
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 289008715}
+  - component: {fileID: 289008716}
+  m_Layer: 0
+  m_Name: FrameLimiter
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &289008715
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 289008714}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 629645471}
+  m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &289008716
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 289008714}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c9a1ddf9a0760949b64dd15bc7a6d71, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &302437816
 GameObject:
   m_ObjectHideFlags: 0
@@ -3202,6 +3245,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 429563992}
+  - {fileID: 289008715}
   m_Father: {fileID: 0}
   m_RootOrder: 5
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -7361,7 +7405,7 @@ MonoBehaviour:
   parentCanvas: {fileID: 429563993}
   prefab: {fileID: 8535824967183777097, guid: d2a18eb34dd3f754d95c7c8c8b4dc0e0, type: 3}
   panelTitle: Cogwheel
-  generatorPrefab: {fileID: 652212249053607688, guid: a0a7a151db478af43acc112832da27d5,
+  generatorPrefab: {fileID: 652212249053607688, guid: 4f65cc2f96071f44e9d4dae00447584f,
     type: 3}
 --- !u!114 &1573617719
 MonoBehaviour:

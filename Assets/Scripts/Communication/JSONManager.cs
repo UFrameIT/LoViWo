@@ -18,6 +18,9 @@ public class MMTURICollection
     public string Tuple = "http://gl.mathhub.info/MMT/LFX/Sigma?Symbols?Tuple";
     public string Prop = "http://mathhub.info/MitM/Foundation?Logic?prop";
 
+    public string CogwheelCogwheelInteraction = "http://mathhub.info/LoViVo?Cogwheel3D?cog_cog_interlocking";
+    public string DeclareCogwheelCogwheelInteraction = "http://mathhub.info/LoViVo?Cogwheel3D?declare_cog_cog_interlocking";
+
     public string Chain = "http://mathhub.info/LoViVo?Chain?chain";
     public string ChainOf = "http://mathhub.info/LoViVo?Chain?chainOf";
     public string Convex = "http://mathhub.info/LoViVo?Chain?convex";
@@ -25,16 +28,32 @@ public class MMTURICollection
     public string ChainVelocity = "http://mathhub.info/LoViVo?Chain?chain_velovity";
     public string CogChainEquationSystem = "http://mathhub.info/LoViVo?Chain?eqsys2";
 
+    public string CogwheelChainInteractionCovex = "http://mathhub.info/LoViVo?Chain?cog_chain_interlocking_conv";
+    public string DeclareCogwheelChainInteractionCovex = "http://mathhub.info/LoViVo?Chain?declare_cog_chain_interlocking_conv";
+    public string CogwheelChainInteractionCocarve = "http://mathhub.info/LoViVo?Chain?cog_chain_interlocking_conc";
+    public string DeclareCogwheelChainInteractionCocarve = "http://mathhub.info/LoViVo?Chain?declare_cog_chain_interlocking_conc";
+
+
     public string Shaft = "http://mathhub.info/LoViVo?Shaft?shaft";
     public string ShaftOf = "http://mathhub.info/LoViVo?Shaft?create_shaft";
+    public string ShaftAngularVelocity = "http://mathhub.info/LoViVo?Shaft?shaft_angular_velocity";
+
+    public string ShaftCogwheelInterlocking = "http://mathhub.info/LoViVo?Shaft?shaft_cog_interlocking";
+    public string DeclareShaftCogwheelInterlocking = "http://mathhub.info/LoViVo?Shaft?declare_shaft_cog_interlocking";
+
     public string Motor = "http://mathhub.info/LoViVo?Motor?motor";
     public string MotorOf = "http://mathhub.info/LoViVo?Motor?create_motor";
+
+    public string MotorShaftInterlocking = "http://mathhub.info/LoViVo?Motor?Motor_shaft_interlocking";
+    public string DeclareMotorShaftInterlocking = "http://mathhub.info/LoViVo?Motor?declare_motor_shaft_interlocking";
+
     public string GearboxEquationSystem = "http://mathhub.info/LoViVo?Gearbox?gearbox_eqsys";
+    public string GearboxEquationSystem2 = "http://mathhub.info/LoViVo?Gearbox?gearbox_eqsys2";
 
     public string TestEquationSystem = "http://mathhub.info/LoViVo?Test?TestEqsys";
 
     public string Record = "http://gl.mathhub.info/MMT/LFX/Records?Symbols?Recexp";
-    public string AngularVelocity = "http://mathhub.info/LoViVo?Cogwheel3D?angular_velocity";
+    public string CogwheelAngularVelocity = "http://mathhub.info/LoViVo?Cogwheel3D?angular_velocity";
     public string Addition = "http://mathhub.info/MitM/Foundation?RealLiterals?plus_real_lit";
     public string Multiplication = "http://mathhub.info/MitM/Foundation?RealLiterals?times_real_lit";
     public string Minus = "http://mathhub.info/MitM/Foundation?RealLiterals?minus_real_lit";
@@ -78,7 +97,7 @@ public static class JSONManager
         {
             return this.GetType().Equals(typeof(OMA))
                         && ((OMA)this).applicant.GetType().Equals(typeof(OMS))
-                        && ((OMS)((OMA)this).applicant).uri.Equals(MMTURIs.AngularVelocity)
+                        && ((OMS)((OMA)this).applicant).uri.Equals(MMTURIs.CogwheelAngularVelocity)
                         && ((OMA)this).arguments.Count == 1
                         && ((OMA)this).arguments.ElementAt(0).GetType().Equals(typeof(OMA))
                         && ((OMA)((OMA)this).arguments.ElementAt(0)).applicant.GetType().Equals(typeof(OMS))
@@ -112,6 +131,20 @@ public static class JSONManager
                         && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).name.Equals("tuple_list")
                         && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1).GetType().Equals(typeof(RECARG))
                         && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).name.Equals("ID");                    
+        }
+
+        public bool isSimplifiedShaftAvTerm()
+        {
+            return this.GetType().Equals(typeof(OMA))
+                        && ((OMA)this).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)this).applicant).uri.Equals(MMTURIs.ShaftAngularVelocity)
+                        && ((OMA)this).arguments.Count == 1
+                        && ((OMA)this).arguments.ElementAt(0).GetType().Equals(typeof(OMA))
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)((OMA)this).arguments.ElementAt(0)).applicant).uri.Equals(MMTURIs.Record)
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.Count == 1
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).name.Equals("ID");
         }
 
     }

@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
+using static JSONManager;
 
 public class ShaftPlacementTool : MonoBehaviour
 {
@@ -16,7 +18,7 @@ public class ShaftPlacementTool : MonoBehaviour
 
     void Start()
     {
-        this.layerMask = LayerMask.GetMask("Player", "CurrentlyEdited");
+        this.layerMask = LayerMask.GetMask("Player", "CurrentlyEdited", "SimulatedObjects");
         //Ignore player and current moving object
         this.layerMask = ~this.layerMask;
         Cam = Camera.main;
@@ -105,22 +107,32 @@ public class ShaftPlacementTool : MonoBehaviour
     //Check if left Mouse-Button was pressed and handle it
     void CheckMouseButtons()
     {
+
         if (Input.GetMouseButtonDown(0))
         {
+            SimulatedShaft simShaft = createSimulatedShaft(movingObject);
+
             if (lastCollidedObject != null && getUpperParent(lastCollidedObject).GetComponentInChildren<Connectable>() != null)
             {
                 getUpperParent(lastCollidedObject).GetComponentInChildren<Connectable>().addConnectedPart(this.movingObject.GetComponentInChildren<Rotatable>());
             }
             if (lastCollidedObject != null && getUpperParent(lastCollidedObject).GetComponentInChildren<RefactorMotor>() != null)
             {
-                getUpperParent(lastCollidedObject).GetComponentInChildren<RefactorMotor>().addConnecedShaft(this.movingObject);
+                RefactorMotor motor = getUpperParent(lastCollidedObject).GetComponentInChildren<RefactorMotor>();
+                motor.addConnecedShaft(this.movingObject);
+                createMotorInteraction((SimulatedMotor)motor.getSimulatedObject(), simShaft);
                 Debug.Log("added shaft to generator");
+            }
+            if (lastCollidedObject != null && getUpperParent(lastCollidedObject).GetComponentInChildren<RefactorCogwheel>() != null)
+            {
+                RefactorCogwheel cogwheel = getUpperParent(lastCollidedObject).GetComponentInChildren<RefactorCogwheel>();
+                createShaftInteraction(simShaft, (SimulatedCogwheel)cogwheel.getSimulatedObject());
+                Debug.Log("added shaft cogwheel Interaction");
             }
 
             string tagLayerName = "Shaft";
             movingObject.gameObject.layer = LayerMask.NameToLayer(tagLayerName);
             movingObject.gameObject.tag = tagLayerName;
-            createSimulatedShaft(movingObject);
             Stop();
         }
     }
@@ -134,11 +146,34 @@ public class ShaftPlacementTool : MonoBehaviour
     }
 
 
-    void createSimulatedShaft(GameObject movingObject)
+    private SimulatedShaft createSimulatedShaft(GameObject movingObject)
     {
         int id = GameState.simulationHandler.getNextId();
-        SimulatedObject simShaft = new SimulatedShaft(id);
+        SimulatedShaft simShaft = new SimulatedShaft(id);
         simShaft.addObjectRepresentation(movingObject);
         GameState.simulationHandler.activeSimAddSimObject(simShaft);
+        movingObject.GetComponentInChildren<RefactorShaft>().addSimulatedObject(simShaft);
+
+        ShaftFact shaftFact = new ShaftFact(id);
+
+        simShaft.addFactRepresentation(shaftFact);
+        simShaft.getValuesOfInterest().First().setRelevantFactAndValue((Fact)shaftFact, MMTURIs.ShaftAngularVelocity);
+        simShaft.getObjectRepresentation().GetComponentInChildren<RefactorShaft>().addAssociatedFact(shaftFact);
+
+        return simShaft;
+    }
+
+    private void createShaftInteraction(SimulatedShaft simShaft, SimulatedCogwheel simCogwheel)
+    {
+        int id = GameState.simulationHandler.getNextId();
+        ShaftCogwheelInteraction interaction = new ShaftCogwheelInteraction(id, simCogwheel, simShaft);
+        GameState.simulationHandler.activeSimAddInteraction(interaction);
+    }
+
+    private void createMotorInteraction(SimulatedMotor simMotor, SimulatedShaft simShaft)
+    {
+        int id = GameState.simulationHandler.getNextId();
+        MotorShaftInteraction interaction = new MotorShaftInteraction(id, simMotor, simShaft);
+        GameState.simulationHandler.activeSimAddInteraction(interaction);
     }
 }

@@ -268,7 +268,8 @@ public class ChainPlacementToolOld : MonoBehaviour
                         int[] cogIds = Chain.Select(tpl1 => tpl1.Item1.GetComponent<RotatableCogwheel>().getAssociatedFact().Id).ToArray(); //Select(fact => fact.Id).ToArray()
                         bool[] orientatins = Chain.Select(tpl1 => tpl1.Item2).ToArray();
 
-                        ChainFact newFact = new ChainFact(chnId, cogIds, orientatins, GameState.Facts);
+                        // ChainFact newFact = new ChainFact(chnId, cogIds, orientatins, GameState.Facts);
+                        ChainFact newFact = null;
                         newFact.Representation = newChain;
                         GameState.Facts.Insert(chnId, newFact);
                         UnityEngine.Debug.Log("Successfully added new ChainFact with backendUri: " + newFact.backendURI);
@@ -305,7 +306,8 @@ public class ChainPlacementToolOld : MonoBehaviour
                         int[] cogIds = Chain.Select(tpl1 => tpl1.Item1.GetComponent<RotatableCogwheel>().getAssociatedFact().Id).ToArray(); //Select(fact => fact.Id).ToArray()
                         bool[] orientatins = Chain.Select(tpl1 => tpl1.Item2).ToArray();
 
-                        ChainFact newFact = new ChainFact(chnId, cogIds, orientatins, GameState.Facts);
+                        //ChainFact newFact = new ChainFact(chnId, cogIds, orientatins, GameState.Facts);
+                        ChainFact newFact = null;
                         newFact.Representation = newChain;
                         GameState.Facts.Insert(chnId, newFact);
                         UnityEngine.Debug.Log("Successfully added new ChainFact with backendUri: " + newFact.backendURI);

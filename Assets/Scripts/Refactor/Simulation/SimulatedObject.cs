@@ -44,5 +44,7 @@ public abstract class SimulatedObject
         return valuesOfInterest;
     }
 
-    public abstract void applyVluesOfInterest(Dictionary<ValueOfInterest, float> input);
+    public abstract void applyValuesOfInterest(Dictionary<ValueOfInterest, float> input);
+
+    public abstract void unapplyValuesOfInterest();
 }

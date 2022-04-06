@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System;
+using System.Linq;
+using static JSONManager;
 
 public class CogwheelPlacementTool : MonoBehaviour
 {
@@ -23,7 +25,7 @@ public class CogwheelPlacementTool : MonoBehaviour
 
     void Start()
     {
-        this.layerMask = LayerMask.GetMask("Player", "CurrentlyEdited");
+        this.layerMask = LayerMask.GetMask("Player", "CurrentlyEdited", "SimulatedObjects");
         //Ignore player and current moving object
         this.layerMask = ~this.layerMask;
         Cam = Camera.main;
@@ -191,9 +193,21 @@ public class CogwheelPlacementTool : MonoBehaviour
     {
         if (Input.GetMouseButtonDown(0))
         {
+            Tuple<List<RefactorCogwheel>, List<RefactorCogwheel>> IntersectingAndInterlockingCogwheels 
+                = movingObject.GetComponentInChildren<RefactorCogwheel>().getIntersectingAndInterlockingCogwheels();
+            if (IntersectingAndInterlockingCogwheels.Item1.Count > 0)
+            {
+                return;
+            }
+            //Create new Cogwheel Simulated Object
+            SimulatedCogwheel simCogwheel = createSimulatedCogwheel(movingObject);
+            createCogwheelInteractions(simCogwheel, IntersectingAndInterlockingCogwheels.Item2);
+
             if (lastCollidedObject != null && lastCollidedObject.GetComponentInChildren<RefactorShaft>() != null)
             {
-                lastCollidedObject.GetComponentInChildren<RefactorShaft>().addConnectedObject(this.movingObject);
+                RefactorShaft shaft = lastCollidedObject.GetComponentInChildren<RefactorShaft>();
+                shaft.addConnectedObject(this.movingObject);
+                createShaftInteraction((SimulatedShaft)shaft.getSimulatedObject(), simCogwheel);
             }
             if (lastCollidedObject != null && lastCollidedObject.GetComponentInChildren<Connectable>() != null)
             {
@@ -211,20 +225,55 @@ public class CogwheelPlacementTool : MonoBehaviour
             {
                 t.gameObject.layer = LayerMask.NameToLayer(tagLayerName);
             }
+            if (movingObject.GetComponentInChildren<OutsideRadiusCollider>() != null && movingObject.GetComponentInChildren<InsideRadiusCollider>() != null)
+            {
+                movingObject.GetComponentInChildren<OutsideRadiusCollider>().gameObject.layer = LayerMask.NameToLayer("SimulatedObjects");
+                movingObject.GetComponentInChildren<InsideRadiusCollider>().gameObject.layer = LayerMask.NameToLayer("SimulatedObjects");
+            }
             movingObject.gameObject.tag = tagLayerName;
-
-            //Create new Cogwheel Simulated Object
-            createSimulatedCogwheel(movingObject);
-
+            
             Stop();
         }
     }
 
-    private void createSimulatedCogwheel(GameObject movingObject)
+    private SimulatedCogwheel createSimulatedCogwheel(GameObject movingObject)
     {
         int id = GameState.simulationHandler.getNextId();
-        SimulatedObject simCogwheel = new SimulatedCogwheel(id);
+        SimulatedCogwheel simCogwheel = new SimulatedCogwheel(id);
         simCogwheel.addObjectRepresentation(movingObject);
+        movingObject.GetComponentInChildren<RefactorCogwheel>().setSimulatedObject(simCogwheel);
         GameState.simulationHandler.activeSimAddSimObject(simCogwheel);
+
+        float radius = simCogwheel.getObjectRepresentation().GetComponentInChildren<Cogwheel>().getRadius();
+        float insideRadius = simCogwheel.getObjectRepresentation().GetComponentInChildren<Cogwheel>().getInsideRadius();
+        float outsideRadius = simCogwheel.getObjectRepresentation().GetComponentInChildren<Cogwheel>().getOutsideRadius();
+        Vector3 pos = simCogwheel.getObjectRepresentation().transform.position;
+        Vector3 up = simCogwheel.getObjectRepresentation().transform.up;
+
+        CogwheelFact factRepresentation = new CogwheelFact(id, pos, up, radius, insideRadius, outsideRadius);
+        simCogwheel.addFactRepresentation(factRepresentation);
+        simCogwheel.getValuesOfInterest().First().setRelevantFactAndValue((Fact)factRepresentation, MMTURIs.CogwheelAngularVelocity);
+        simCogwheel.getObjectRepresentation().GetComponentInChildren<RotatableCogwheel>().setAssociatedFact(factRepresentation);
+
+        return simCogwheel;
     }
+
+    private void createCogwheelInteractions(SimulatedCogwheel simCogwheel, List<RefactorCogwheel> InterlockingCogwheels)
+    {
+        List<CogwheelCogwheelInteraction> interactions = new List<CogwheelCogwheelInteraction>();
+        foreach (RefactorCogwheel interlocking in InterlockingCogwheels)
+        {
+            int id = GameState.simulationHandler.getNextId();
+            SimulatedCogwheel simCog2 = (SimulatedCogwheel)interlocking.getSimulatedObject();
+            CogwheelCogwheelInteraction interaction = new CogwheelCogwheelInteraction(id, simCogwheel, simCog2);
+            GameState.simulationHandler.activeSimAddInteraction(interaction);
+        }
+    }
+    private void createShaftInteraction(SimulatedShaft simShaft, SimulatedCogwheel simCogwheel)
+    {
+        int id = GameState.simulationHandler.getNextId();
+        ShaftCogwheelInteraction interaction = new ShaftCogwheelInteraction(id, simCogwheel, simShaft);
+        GameState.simulationHandler.activeSimAddInteraction(interaction);
+    }
+
 }

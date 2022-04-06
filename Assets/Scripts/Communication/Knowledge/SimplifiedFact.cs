@@ -274,7 +274,8 @@ public class SEqsysFact : SSymbolFact
         }
         else if (term.GetType().Equals(typeof(OMA))            // case: Term a angular velocity
                     && ((OMA)term).applicant.GetType().Equals(typeof(OMS))
-                    && ((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.AngularVelocity))   
+                    && (((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.CogwheelAngularVelocity)
+                         || ((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.ShaftAngularVelocity)))   
         {
             OMF multiplier;
             if (plus)
@@ -292,7 +293,7 @@ public class SEqsysFact : SSymbolFact
                 variables.Add(term);
             }
         }
-        else if (term.GetType().Equals(typeof(OMA))            // case: Term just a chain velocity
+        else if (term.GetType().Equals(typeof(OMA))            // case: Term a chain velocity
                     && ((OMA)term).applicant.GetType().Equals(typeof(OMS))
                     && ((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.ChainVelocity))
         {
@@ -312,6 +313,7 @@ public class SEqsysFact : SSymbolFact
                 variables.Add(term);
             }
         }
+
         return true;
     }
     /*

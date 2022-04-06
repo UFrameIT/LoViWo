@@ -3,19 +3,29 @@ using System.Linq;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Networking;
+using static JSONManager;
 
 public abstract class Simulation
 {
     protected List<SimulatedObject> simulatedObjects;
 
+    protected List<Interaction> interactions;
+
     public Simulation()
     {
         simulatedObjects = new List<SimulatedObject>();
+        interactions = new List<Interaction>();
     }
 
     public void addSimulatedObject(SimulatedObject simulatedObject)
     {
         simulatedObjects.Add(simulatedObject);
+    }
+
+    public void addInteraction(Interaction interaction)
+    {
+        interactions.Add(interaction);
     }
 
     public abstract void startSimulation();
@@ -30,16 +40,73 @@ public class GearboxSimulation : Simulation
     public GearboxSimulation()
     {
         this.simulatedObjects = new List<SimulatedObject>();
+
+        this.interactions = new List<Interaction>();
     }
 
     public override void  startSimulation()
     {
-        simObsCreateFacts();
+
+        List<SimulatedObject> simCogwheels = simulatedObjects.Where(simObj => simObj.GetType().Equals(typeof(SimulatedCogwheel))).ToList();
+        List<SimulatedObject> simChains = simulatedObjects.Where(simObj => simObj.GetType().Equals(typeof(SimulatedChain))).ToList();
+        List<SimulatedObject> simShafts = simulatedObjects.Where(simObj => simObj.GetType().Equals(typeof(SimulatedShaft))).ToList();
+        List<SimulatedObject> simMotors = simulatedObjects.Where(simObj => simObj.GetType().Equals(typeof(SimulatedMotor))).ToList();
+
+        List<CogwheelCogwheelInteraction> cogCogInteractions = interactions
+                                                .Where(interaction => interaction.GetType().Equals(typeof(CogwheelCogwheelInteraction)))
+                                                .Cast<CogwheelCogwheelInteraction>().ToList();
+        Debug.Log("cogCogInteractions count: " + cogCogInteractions.Count);
+        List<CogwheelChainInteraction> cogChainInteractions = interactions
+                                                .Where(interaction => interaction.GetType().Equals(typeof(CogwheelChainInteraction)))
+                                                .Cast<CogwheelChainInteraction>().ToList();
+        Debug.Log("cogChainInteractions count: " + cogChainInteractions.Count);
+        List<ShaftCogwheelInteraction> shaftCogInteractions = interactions
+                                                .Where(interaction => interaction.GetType().Equals(typeof(ShaftCogwheelInteraction)))
+                                                .Cast<ShaftCogwheelInteraction>().ToList();
+        Debug.Log("shaftCogInteractions count: " + shaftCogInteractions.Count);
+        List<MotorShaftInteraction> motorShaftInteractions = interactions
+                                                .Where(interaction => interaction.GetType().Equals(typeof(MotorShaftInteraction)))
+                                                .Cast<MotorShaftInteraction>().ToList();
+        Debug.Log("motorShaftInteractions count: " + motorShaftInteractions.Count);
+
+        List<Fact> facts = getExistingFacts();
+        List<ValueOfInterest> valuesOfInterest = simulatedObjects.Select(simObj => simObj.getValuesOfInterest()).ToList().SelectMany(i => i).ToList();
+
+        int eqsysId = GameState.simulationHandler.getNextId();
+        GameState.simulationHandler.activeSimAddEqsys();
+        new GearboxEqsys2Fact(eqsysId, cogCogInteractions, cogChainInteractions, shaftCogInteractions, motorShaftInteractions);
+
+
+        List<SimplifiedFact> sfacts = listSimplifiedFacts();
+
+        Dictionary<ValueOfInterest, float> newlyDiscoveredVoiMap = KnowlegeBasedSimulationRefactor.knowledgeBasedSimulation(facts, valuesOfInterest, sfacts);
+
+        foreach (KeyValuePair<ValueOfInterest, float> voiVal in newlyDiscoveredVoiMap)
+        {
+            Debug.Log(voiVal.Key.getName() + ": " + voiVal.Value);
+        }
+
+        foreach (SimulatedObject simObj in simulatedObjects)
+        {
+            Dictionary<ValueOfInterest, float> valueOfIntrestValues = new Dictionary<ValueOfInterest, float>();
+            List<ValueOfInterest> vois = simObj.getValuesOfInterest();
+            foreach(ValueOfInterest voi in vois)
+            {
+                if (newlyDiscoveredVoiMap.ContainsKey(voi))
+                {
+                    valueOfIntrestValues.Add(voi, newlyDiscoveredVoiMap[voi]);
+                }
+            }
+            simObj.applyValuesOfInterest(valueOfIntrestValues);
+        }
     }
 
     public override void stopSimulation()
     {
-
+        foreach (SimulatedObject simObj in simulatedObjects)
+        {
+            simObj.unapplyValuesOfInterest();
+        }
     }
 
     private List<Fact> getExistingFacts()
@@ -56,74 +123,25 @@ public class GearboxSimulation : Simulation
         return existingFacts;
     }
 
-    private void simObsCreateFacts()
+
+    private static List<SimplifiedFact> listSimplifiedFacts()
     {
-        //order in which facts are created is important
-        //some facts need other facts as input. therfre these facts need to already exist
-        List<SimulatedObject> simCogwheels = simulatedObjects.Where(simObj => simObj.GetType().Equals(typeof(SimulatedCogwheel))).ToList();
-        List<SimulatedObject> simChains = simulatedObjects.Where(simObj => simObj.GetType().Equals(typeof(SimulatedChain))).ToList();
-        List<SimulatedObject> simShafts = simulatedObjects.Where(simObj => simObj.GetType().Equals(typeof(SimulatedShaft))).ToList();
-        List<SimulatedObject> simMotors = simulatedObjects.Where(simObj => simObj.GetType().Equals(typeof(SimulatedMotor))).ToList();
-
-
-        foreach (SimulatedObject simCogwheel in simCogwheels)
+        UnityWebRequest request = UnityWebRequest.Get(GameSettings.ServerAdress + "/fact/list");
+        request.method = UnityWebRequest.kHttpVerbGET;
+        AsyncOperation op = request.SendWebRequest();
+        while (!op.isDone) { }
+        if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
-            int cogId = simCogwheel.getId();
-            Debug.Log(simCogwheel.getObjectRepresentation());
-            float radius = simCogwheel.getObjectRepresentation().GetComponentInChildren<Cogwheel>().getRadius();
-            float insideRadius = simCogwheel.getObjectRepresentation().GetComponentInChildren<Cogwheel>().getInsideRadius();
-            float outsideRadius = simCogwheel.getObjectRepresentation().GetComponentInChildren<Cogwheel>().getOutsideRadius();
-            Vector3 pos = simCogwheel.getObjectRepresentation().transform.position;
-            Vector3 up = simCogwheel.getObjectRepresentation().transform.up;
-
-            CogwheelFact cogwheelFact = new CogwheelFact(cogId, pos, up, radius, insideRadius, outsideRadius, getExistingFacts());
-
-            simCogwheel.addFactRepresentation(cogwheelFact);
-            simCogwheel.getObjectRepresentation().GetComponentInChildren<RotatableCogwheel>().setAssociatedFact(cogwheelFact);
+            Debug.LogWarning(request.error);
+            return null;
         }
-
-        foreach (SimulatedObject simChain in simChains)
+        else
         {
-            int chnId = simChain.getId();
-
-            List<Tuple<GameObject, bool>> chain = simChain.getObjectRepresentation().GetComponentInChildren<ChainObject>().getCogwheels();
-
-            int[] cogIds = chain.Select(tpl1 => tpl1.Item1.GetComponent<RotatableCogwheel>().getAssociatedFact().Id).ToArray(); //Select(fact => fact.Id).ToArray()
-            bool[] orientatins = chain.Select(tpl1 => tpl1.Item2).ToArray();
-
-            ChainFact chainFact = new ChainFact(chnId, cogIds, orientatins, getExistingFacts());
-
-            simChain.addFactRepresentation(chainFact);
-        }
-
-        foreach (SimulatedObject simShaft in simShafts)
-        {
-            int shftId = simShaft.getId();
-
-            List<GameObject> connectedCogwheels = simShaft.getObjectRepresentation().GetComponentInChildren<RefactorShaft>().getConnectedObjects();
-            debugLogList(connectedCogwheels);
-            int[] cogIds = connectedCogwheels.Select(cog => cog.GetComponentInChildren<RotatableCogwheel>().getAssociatedFact().Id).ToArray();
-
-            ShaftFact shaftFact = new ShaftFact(shftId, cogIds, getExistingFacts());
-
-            simShaft.addFactRepresentation(shaftFact);
-            Debug.Log(simShaft.getObjectRepresentation());
-            simShaft.getObjectRepresentation().GetComponentInChildren<RefactorShaft>().addAssociatedFact(shaftFact);
-        }
-
-        foreach (SimulatedObject simMotor in simMotors)
-        {
-            int motorId = simMotor.getId();
-
-            GameObject connectedShaft = simMotor.getObjectRepresentation().GetComponentInChildren<RefactorMotor>().getConnecedShaft();
-            int shaftId = connectedShaft.GetComponent<RefactorShaft>().getAssociatedFact().Id;
-
-            MotorFact motorFact = new MotorFact(motorId, shaftId, 30.0f, getExistingFacts());
-
-            simMotor.addFactRepresentation(motorFact);
+            string response = request.downloadHandler.text;
+            Debug.Log("KnowledgeBasedSimulation: Json-Response from /fact/list-endpoint: " + response);
+            return SimplifiedFact.FromJSON(response);
         }
     }
-
 
     private void debugLogList(List<GameObject> input)
     {

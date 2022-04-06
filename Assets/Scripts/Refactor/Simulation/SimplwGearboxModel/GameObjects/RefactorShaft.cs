@@ -8,6 +8,8 @@ public class RefactorShaft : MonoBehaviour, Rotatable, Connectable
     private List<GameObject> connectedObjects = new List<GameObject>();
     private Fact associatedFact;
 
+    private SimulatedObject simulatedObject;
+
     private float angularVelocity;
     private bool rotationActive = false;
 
@@ -75,5 +77,15 @@ public class RefactorShaft : MonoBehaviour, Rotatable, Connectable
         {
             connectedObject.stopRotation();
         }
+    }
+
+    public void addSimulatedObject(SimulatedObject simulatedObject)
+    {
+        this.simulatedObject = simulatedObject;
+    }
+
+    public SimulatedObject getSimulatedObject()
+    {
+        return this.simulatedObject;
     }
 }
