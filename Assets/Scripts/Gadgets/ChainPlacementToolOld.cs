@@ -270,7 +270,7 @@ public class ChainPlacementToolOld : MonoBehaviour
 
                         // ChainFact newFact = new ChainFact(chnId, cogIds, orientatins, GameState.Facts);
                         ChainFact newFact = null;
-                        newFact.Representation = newChain;
+                        //newFact.Representation = newChain;
                         GameState.Facts.Insert(chnId, newFact);
                         UnityEngine.Debug.Log("Successfully added new ChainFact with backendUri: " + newFact.backendURI);
 
@@ -308,7 +308,7 @@ public class ChainPlacementToolOld : MonoBehaviour
 
                         //ChainFact newFact = new ChainFact(chnId, cogIds, orientatins, GameState.Facts);
                         ChainFact newFact = null;
-                        newFact.Representation = newChain;
+                        //newFact.Representation = newChain;
                         GameState.Facts.Insert(chnId, newFact);
                         UnityEngine.Debug.Log("Successfully added new ChainFact with backendUri: " + newFact.backendURI);
                         

@@ -12,7 +12,8 @@ public static class CommunicationEvents
     public class SimulationEvent : UnityEvent<bool, KnowledgeBasedBehaviour, float> {}
 
     public class EquationSystemEvent : UnityEvent<string[], int, int, string> {}
-    
+    public class EquationSystemsEvent : UnityEvent<List<string[]>, List<int>, List<int>, List<string>> {}
+
     public static SignalEvent closeUIEvent = new SignalEvent();
     public static SignalEvent openUIEvent = new SignalEvent();
     public static SignalEvent openPanelEvent = new SignalEvent();
@@ -25,4 +26,5 @@ public static class CommunicationEvents
     public static SignalEvent generatorOffEvent = new SignalEvent();
 
     public static EquationSystemEvent showEquationSystemEvent = new EquationSystemEvent();
+    public static EquationSystemsEvent showEquationSystemsEvent = new EquationSystemsEvent();
 }

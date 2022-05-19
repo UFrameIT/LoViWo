@@ -451,7 +451,7 @@ public class CogChainEqsysFact : Fact
         }
         else
         {
-            CogwheelEqsysFact p = (CogwheelEqsysFact)obj;
+            CogChainEqsysFact p = (CogChainEqsysFact)obj;
             return this.CogwheelIds.Equals(p.CogwheelIds);
         }
     }

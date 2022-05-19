@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using static JSONManager;
 
+/**
+ * 
+ * 
+ */
 public class ValueOfInterest
 {
     private string name;
-    private Fact relevantFact;
+    private Fact relevantFact;    //Fact representing the Objec to which this value of interest applies
     private string relevantValue; //MMTURI
 
     public ValueOfInterest(string name)

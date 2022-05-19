@@ -46,46 +46,47 @@ public class GearboxSimulation : Simulation
 
     public override void  startSimulation()
     {
-
-        List<SimulatedObject> simCogwheels = simulatedObjects.Where(simObj => simObj.GetType().Equals(typeof(SimulatedCogwheel))).ToList();
-        List<SimulatedObject> simChains = simulatedObjects.Where(simObj => simObj.GetType().Equals(typeof(SimulatedChain))).ToList();
-        List<SimulatedObject> simShafts = simulatedObjects.Where(simObj => simObj.GetType().Equals(typeof(SimulatedShaft))).ToList();
-        List<SimulatedObject> simMotors = simulatedObjects.Where(simObj => simObj.GetType().Equals(typeof(SimulatedMotor))).ToList();
-
-        List<CogwheelCogwheelInteraction> cogCogInteractions = interactions
+        //gather the different types of interactions that are relevant for the gearbox-simulation from the list of interactions
+        List<CogwheelCogwheelInteraction> cogCogInteractions = this.interactions
                                                 .Where(interaction => interaction.GetType().Equals(typeof(CogwheelCogwheelInteraction)))
                                                 .Cast<CogwheelCogwheelInteraction>().ToList();
-        Debug.Log("cogCogInteractions count: " + cogCogInteractions.Count);
-        List<CogwheelChainInteraction> cogChainInteractions = interactions
+        List<CogwheelChainInteraction> cogChainInteractions = this.interactions
                                                 .Where(interaction => interaction.GetType().Equals(typeof(CogwheelChainInteraction)))
                                                 .Cast<CogwheelChainInteraction>().ToList();
-        Debug.Log("cogChainInteractions count: " + cogChainInteractions.Count);
-        List<ShaftCogwheelInteraction> shaftCogInteractions = interactions
+        List<ShaftCogwheelInteraction> shaftCogInteractions = this.interactions
                                                 .Where(interaction => interaction.GetType().Equals(typeof(ShaftCogwheelInteraction)))
                                                 .Cast<ShaftCogwheelInteraction>().ToList();
-        Debug.Log("shaftCogInteractions count: " + shaftCogInteractions.Count);
-        List<MotorShaftInteraction> motorShaftInteractions = interactions
+        List<MotorShaftInteraction> motorShaftInteractions = this.interactions
                                                 .Where(interaction => interaction.GetType().Equals(typeof(MotorShaftInteraction)))
                                                 .Cast<MotorShaftInteraction>().ToList();
-        Debug.Log("motorShaftInteractions count: " + motorShaftInteractions.Count);
 
-        List<Fact> facts = getExistingFacts();
-        List<ValueOfInterest> valuesOfInterest = simulatedObjects.Select(simObj => simObj.getValuesOfInterest()).ToList().SelectMany(i => i).ToList();
 
+        //create a new equation-system fact(and therefore add it to the server)
+        //(this equation-system fact 'is created' using the different interactions of our gearbox
+        // and gets simplified by the server into a list of equations that define how the different objects making up the gearbox
+        // are supposed to behave in relation to each other)
         int eqsysId = GameState.simulationHandler.getNextId();
         GameState.simulationHandler.activeSimAddEqsys();
         new GearboxEqsys2Fact(eqsysId, cogCogInteractions, cogChainInteractions, shaftCogInteractions, motorShaftInteractions);
 
-
+        //retrieve a list of all simplified facts in the servers situation-space
         List<SimplifiedFact> sfacts = listSimplifiedFacts();
 
-        Dictionary<ValueOfInterest, float> newlyDiscoveredVoiMap = KnowlegeBasedSimulationRefactor.knowledgeBasedSimulation(facts, valuesOfInterest, sfacts);
+        //take the server response and calcualte from it the values of interest
+        //(the result is a dictionary mapping the Values of interest to their calculated values)
+        List<ValueOfInterest> valuesOfInterest = simulatedObjects.Select(simObj => simObj.getValuesOfInterest()).ToList().SelectMany(i => i).ToList();
+        Dictionary<ValueOfInterest, float> newlyDiscoveredVoiMap = KnowlegeBasedSimulationRefactor.knowledgeBasedSimulation(valuesOfInterest, sfacts);
 
+        //Debug info
         foreach (KeyValuePair<ValueOfInterest, float> voiVal in newlyDiscoveredVoiMap)
         {
             Debug.Log(voiVal.Key.getName() + ": " + voiVal.Value);
         }
 
+
+
+        //apply the results of the knowlege-based-simulation to the simulated objects
+        //(and by extension to the game objects representing them in the game world)
         foreach (SimulatedObject simObj in simulatedObjects)
         {
             Dictionary<ValueOfInterest, float> valueOfIntrestValues = new Dictionary<ValueOfInterest, float>();
@@ -109,6 +110,7 @@ public class GearboxSimulation : Simulation
         }
     }
 
+    /*
     private List<Fact> getExistingFacts()
     {
         List<Fact> existingFacts = new List<Fact>();
@@ -122,19 +124,27 @@ public class GearboxSimulation : Simulation
 
         return existingFacts;
     }
+    */
 
 
+    /*
+     * method for retrieving a list of all simplified facts within the servers situation-space
+     */
     private static List<SimplifiedFact> listSimplifiedFacts()
     {
+        //send hhtp request to get the list of simplified facts from the server
         UnityWebRequest request = UnityWebRequest.Get(GameSettings.ServerAdress + "/fact/list");
         request.method = UnityWebRequest.kHttpVerbGET;
         AsyncOperation op = request.SendWebRequest();
+        //wait for the servers answer
         while (!op.isDone) { }
+        //handle potentioal errors
         if (request.result == UnityWebRequest.Result.ConnectionError || request.result == UnityWebRequest.Result.ProtocolError)
         {
             Debug.LogWarning(request.error);
             return null;
         }
+        //process the response
         else
         {
             string response = request.downloadHandler.text;
@@ -143,6 +153,7 @@ public class GearboxSimulation : Simulation
         }
     }
 
+    /*
     private void debugLogList(List<GameObject> input)
     {
         foreach (object i in input)
@@ -150,4 +161,5 @@ public class GearboxSimulation : Simulation
             Debug.Log(i);
         }
     }
+    */
 }
