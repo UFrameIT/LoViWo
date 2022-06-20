@@ -98,9 +98,10 @@ public class CogwheelFact : Fact
     public float Radius;
     public float InsideRadius;
     public float OutsideRadius;
+    public float friction;
 
 
-    public CogwheelFact(int i, Vector3 P, Vector3 N, float R, float iR, float oR)
+    public CogwheelFact(int i, Vector3 P, Vector3 N, float R, float iR, float oR, float fric)
     {
         this.Id = i;
         this.Point = P;
@@ -108,6 +109,7 @@ public class CogwheelFact : Fact
         this.Radius = R;
         this.InsideRadius = iR;
         this.OutsideRadius = oR;
+        this.friction = fric;
 
         List<MMTTerm> tupleArguments = new List<MMTTerm>
         {
@@ -122,7 +124,8 @@ public class CogwheelFact : Fact
             new OMF(this.InsideRadius),
             new OMF(this.OutsideRadius),
             new OMA(new OMS(MMTURIs.Tuple), tupleArguments),
-            new OMF((float)this.Id)
+            new OMF((float)this.Id),
+            new OMF(this.friction)
         };
 
         MMTTerm tp = new OMS(MMTURIs.Cogwheel);
@@ -939,11 +942,13 @@ public class CogCogInteractionFact : Fact
         this.Id = id;
         this.cogCogInteraction = cogCogInteraction;
 
+        OMF interId = new OMF((float)id);
         OMS cogwheel1 = new OMS(cogCogInteraction.getCogwheel1().getFactRepresentation().backendURI);
         OMS cogwheel2 = new OMS(cogCogInteraction.getCogwheel2().getFactRepresentation().backendURI);
 
         List<MMTTerm> interactionArgs = new List<MMTTerm>
         {
+            interId,
             cogwheel1,
             cogwheel2
         };
@@ -1002,11 +1007,13 @@ public class CogChainInteractionFact : Fact
         this.Id = id;
         this.cogChnInteraction = cogChnInteraction;
 
+        OMF interId = new OMF((float)id);
         OMS cogwheel = new OMS(cogChnInteraction.getCogwheel().getFactRepresentation().backendURI);
         OMS chain = new OMS(cogChnInteraction.getChain().getFactRepresentation().backendURI);
 
         List<MMTTerm> interactionArgs = new List<MMTTerm>
         {
+            interId,
             cogwheel,
             chain
         };
@@ -1016,7 +1023,7 @@ public class CogChainInteractionFact : Fact
         if (cogChnInteraction.getOrientation())
         {
             tp = new OMS(MMTURIs.CogwheelChainInteractionCocarve);
-            df = new OMA(new OMS(MMTURIs.DeclareCogwheelChainInteractionCocarve), interactionArgs);
+            df = new OMA(new OMS(MMTURIs.DeclareCogwheelChainInteractionConcave), interactionArgs);
         }
         else
         {
@@ -1075,11 +1082,13 @@ public class ShaftCogInteractionFact : Fact
         this.Id = id;
         this.sftCogInteraction = sftCogInteraction;
 
+        OMF interId = new OMF((float)id);
         OMS shaft = new OMS(sftCogInteraction.getShaft().getFactRepresentation().backendURI);
         OMS cogwheel = new OMS(sftCogInteraction.getCogwheel().getFactRepresentation().backendURI);
 
         List<MMTTerm> interactionArgs = new List<MMTTerm>
         {
+            interId,
             shaft,
             cogwheel
         };
@@ -1138,11 +1147,13 @@ public class MotorShaftInteractionFact : Fact
         this.Id = id;
         this.motorShaftInteraction = motorShaftInteraction;
 
+        OMF interId = new OMF((float)id);
         OMS motor = new OMS(motorShaftInteraction.getMotor().getFactRepresentation().backendURI);
         OMS shaft = new OMS(motorShaftInteraction.getShaft().getFactRepresentation().backendURI);
 
         List<MMTTerm> interactionArgs = new List<MMTTerm>
         {
+            interId,
             motor,
             shaft
         };
@@ -1209,6 +1220,8 @@ public class GearboxEqsys2Fact : Fact
         this.cogChainInteractions = cogChainInteractions;
         this.shaftCogInteractions = shaftCogInteractions;
         this.motorShaftInteractions = motorShaftInteractions;
+
+        Debug.Log(motorShaftInteractions.Count);
 
         List<MMTTerm> typeArguments = new List<MMTTerm>
         {
@@ -1320,6 +1333,276 @@ public class GearboxEqsys2Fact : Fact
 
         MMTTerm tp = new OMA(new OMS(MMTURIs.List), typeArguments);
         MMTTerm df = new OMA(new OMS(MMTURIs.GearboxEquationSystem2), eqsysArguments);
+
+        MMTSymbolDeclaration mmtDecl = new MMTSymbolDeclaration(this.Label, tp, df);
+        string body = MMTSymbolDeclaration.ToJson(mmtDecl);
+
+        AddFactResponse res = AddFactResponse.sendAdd(GameSettings.ServerAdress + "/fact/add", body);
+        this.backendURI = res.uri;
+        Debug.Log(this.backendURI);
+    }
+
+    public override Boolean hasDependentFacts()
+    {
+        return true;
+    }
+
+    public override int[] getDependentFactIds()
+    {
+        int[] dependantFacts = this.cogCogInteractions.Select(interaction => interaction.getInteractionFact().Id).ToArray();
+        dependantFacts.Concat(this.cogChainInteractions.Select(interaction => interaction.getInteractionFact().Id).ToArray());
+        dependantFacts.Concat(this.shaftCogInteractions.Select(interaction => interaction.getInteractionFact().Id).ToArray());
+        dependantFacts.Concat(this.motorShaftInteractions.Select(interaction => interaction.getInteractionFact().Id).ToArray());
+        return dependantFacts;
+    }
+
+    public override bool Equals(System.Object obj)
+    {
+        //Check for null and compare run-time types.
+        if ((obj == null) || !this.GetType().Equals(obj.GetType()))
+        {
+            return false;
+        }
+        else
+        {
+            GearboxEqsys2Fact p = (GearboxEqsys2Fact)obj;
+            return this.cogCogInteractions.Equals(p.cogCogInteractions)
+                && this.cogChainInteractions.Equals(p.cogChainInteractions)
+                && this.shaftCogInteractions.Equals(p.shaftCogInteractions)
+                && this.motorShaftInteractions.Equals(p.motorShaftInteractions);
+        }
+    }
+
+    public override int GetHashCode()
+    {
+        int hashcode = 1;
+        this.cogCogInteractions.ForEach(x => hashcode ^= x.getInteractionFact().Id);
+        this.cogChainInteractions.ForEach(x => hashcode ^= x.getInteractionFact().Id);
+        this.shaftCogInteractions.ForEach(x => hashcode ^= x.getInteractionFact().Id);
+        this.motorShaftInteractions.ForEach(x => hashcode ^= x.getInteractionFact().Id);
+        return hashcode;
+    }
+}
+
+
+public class GearboxForcesEqsysFact : Fact
+{
+    public List<SimulatedCogwheel> simCogwheels;
+    public List<SimulatedShaft> simShafts;
+    public List<SimulatedChain> simChains;
+    public List<SimulatedMotor> simMotors;
+
+    public List<CogwheelCogwheelInteraction> cogCogInteractions;
+    public List<CogwheelChainInteraction> cogChainInteractions;
+    public List<ShaftCogwheelInteraction> shaftCogInteractions;
+    public List<MotorShaftInteraction> motorShaftInteractions;
+
+    public GearboxForcesEqsysFact(int i, List<SimulatedCogwheel> simCogwheels, List<SimulatedChain> simChains,
+                             List<SimulatedShaft> simShafts, List<SimulatedMotor> simMotors,
+                             List<CogwheelCogwheelInteraction> cogCogInteractions, List<CogwheelChainInteraction> cogChainInteractions,
+                             List<ShaftCogwheelInteraction> shaftCogInteractions, List<MotorShaftInteraction> motorShaftInteractions)
+    {
+        this.Id = i;
+        this.simCogwheels = simCogwheels;
+        this.simShafts = simShafts;
+        this.simChains = simChains;
+        this.simMotors = simMotors;
+
+        this.cogCogInteractions = cogCogInteractions;
+        this.cogChainInteractions = cogChainInteractions;
+        this.shaftCogInteractions = shaftCogInteractions;
+        this.motorShaftInteractions = motorShaftInteractions;
+
+
+        List<MMTTerm> typeArguments = new List<MMTTerm>
+        {
+            new OMS(MMTURIs.Prop)
+        };
+
+        List<MMTTerm> cogwheelListArguments =
+            simCogwheels.Select(cogwheel => new OMS(cogwheel.getFactRepresentation().backendURI))
+            .Cast<MMTTerm>().ToList();
+
+        List<MMTTerm> shaftListArguments =
+            simShafts.Select(shaft => new OMS(shaft.getFactRepresentation().backendURI))
+            .Cast<MMTTerm>().ToList();
+
+        List<MMTTerm> chainListArguments =
+            simChains.Select(chain => new OMS(chain.getFactRepresentation().backendURI))
+            .Cast<MMTTerm>().ToList();
+
+        List<MMTTerm> motorListArguments =
+            simMotors.Select(motor => new OMS(motor.getFactRepresentation().backendURI))
+            .Cast<MMTTerm>().ToList();
+
+
+        List<MMTTerm> cogCogInteractionListArguments =
+            cogCogInteractions.Select(interaction => new OMS(interaction.getInteractionFact().backendURI))
+            .Cast<MMTTerm>().ToList();
+
+        List<MMTTerm> cogChainConvInteractonListArguments =
+            cogChainInteractions.Where(interaction => interaction.getOrientation())
+            .Select(interaction => new OMS(interaction.getInteractionFact().backendURI))
+            .Cast<MMTTerm>().ToList();
+
+        List<MMTTerm> cogChainConcInteractonListArguments =
+            cogChainInteractions.Where(interaction => !interaction.getOrientation())
+            .Select(interaction => new OMS(interaction.getInteractionFact().backendURI))
+            .Cast<MMTTerm>().ToList();
+
+        List<MMTTerm> shaftCogInteractionListArguments =
+            shaftCogInteractions.Select(interaction => new OMS(interaction.getInteractionFact().backendURI))
+            .Cast<MMTTerm>().ToList();
+
+        List<MMTTerm> motorShaftInteractionListArguments =
+            motorShaftInteractions.Select(interaction => new OMS(interaction.getInteractionFact().backendURI))
+            .Cast<MMTTerm>().ToList();
+
+
+        MMTTerm cogwheelsList;
+        if (!(cogwheelListArguments.Count == 0))
+        {
+            cogwheelsList = new OMA(new OMS(MMTURIs.ListOf), cogwheelListArguments);
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.Cogwheel)
+            };
+            cogwheelsList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+        }
+
+        MMTTerm shaftsList;
+        if (!(shaftListArguments.Count == 0))
+        {
+            shaftsList = new OMA(new OMS(MMTURIs.ListOf), shaftListArguments);
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.Shaft)
+            };
+            shaftsList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+        }
+
+        MMTTerm chainsList;
+        if (!(chainListArguments.Count == 0))
+        {
+            chainsList = new OMA(new OMS(MMTURIs.ListOf), chainListArguments);
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.Chain)
+            };
+            chainsList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+        }
+
+        MMTTerm motorList;
+        if (!(motorListArguments.Count == 0))
+        {
+            motorList = new OMA(new OMS(MMTURIs.ListOf), motorListArguments);
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.Motor)
+            };
+            motorList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+        }
+
+
+        MMTTerm cogCogInteractionList;
+        if (!(cogCogInteractionListArguments.Count == 0))
+        {
+            cogCogInteractionList = new OMA(new OMS(MMTURIs.ListOf), cogCogInteractionListArguments);
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.CogwheelCogwheelInteraction)
+            };
+            cogCogInteractionList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+        }
+
+        MMTTerm cogChainConvInteractionList;
+        if (!(cogChainConvInteractonListArguments.Count == 0))
+        {
+            cogChainConvInteractionList = new OMA(new OMS(MMTURIs.ListOf), cogChainConvInteractonListArguments);
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.CogwheelChainInteractionCovex)
+            };
+            cogChainConvInteractionList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+        }
+
+        MMTTerm cogChainConcInteractionList;
+        if (!(cogChainConcInteractonListArguments.Count == 0))
+        {
+            cogChainConcInteractionList = new OMA(new OMS(MMTURIs.ListOf), cogChainConcInteractonListArguments);
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.CogwheelChainInteractionCocarve)
+            };
+            cogChainConcInteractionList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+        }
+
+        MMTTerm shaftCogInteractionList;
+        if (!(shaftCogInteractionListArguments.Count == 0))
+        {
+            shaftCogInteractionList = new OMA(new OMS(MMTURIs.ListOf), shaftCogInteractionListArguments);
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.ShaftCogwheelInterlocking)
+            };
+            shaftCogInteractionList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+        }
+
+        MMTTerm motorShaftInteractionList;
+        if (!(motorShaftInteractionListArguments.Count == 0))
+        {
+            motorShaftInteractionList = new OMA(new OMS(MMTURIs.ListOf), motorShaftInteractionListArguments);
+        }
+        else
+        {
+            List<MMTTerm> NiltypeArguments = new List<MMTTerm>
+            {
+                new OMS(MMTURIs.MotorShaftInterlocking)
+            };
+            motorShaftInteractionList = new OMA(new OMS(MMTURIs.Nil), NiltypeArguments);
+        }
+
+
+        List<MMTTerm> eqsysArguments = new List<MMTTerm>
+        {
+            motorList,
+            cogwheelsList,
+            shaftsList,
+            chainsList,
+
+            cogCogInteractionList,
+            cogChainConvInteractionList,
+            cogChainConcInteractionList,
+            shaftCogInteractionList,
+            motorShaftInteractionList
+        };
+
+        MMTTerm tp = new OMA(new OMS(MMTURIs.List), typeArguments);
+        MMTTerm df = new OMA(new OMS(MMTURIs.GearboxForcesEquationSystem), eqsysArguments);
 
         MMTSymbolDeclaration mmtDecl = new MMTSymbolDeclaration(this.Label, tp, df);
         string body = MMTSymbolDeclaration.ToJson(mmtDecl);

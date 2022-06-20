@@ -20,6 +20,7 @@ public class MMTURICollection
 
     public string CogwheelCogwheelInteraction = "http://mathhub.info/LoViVo?Cogwheel3D?cog_cog_interlocking";
     public string DeclareCogwheelCogwheelInteraction = "http://mathhub.info/LoViVo?Cogwheel3D?declare_cog_cog_interlocking";
+    public string CogwheelCogwheelForce = "http://mathhub.info/LoViVo?Forces?cogwheel_cogwheel_force";
 
     public string Chain = "http://mathhub.info/LoViVo?Chain?chain";
     public string ChainOf = "http://mathhub.info/LoViVo?Chain?chainOf";
@@ -31,7 +32,9 @@ public class MMTURICollection
     public string CogwheelChainInteractionCovex = "http://mathhub.info/LoViVo?Chain?cog_chain_interlocking_conv";
     public string DeclareCogwheelChainInteractionCovex = "http://mathhub.info/LoViVo?Chain?declare_cog_chain_interlocking_conv";
     public string CogwheelChainInteractionCocarve = "http://mathhub.info/LoViVo?Chain?cog_chain_interlocking_conc";
-    public string DeclareCogwheelChainInteractionCocarve = "http://mathhub.info/LoViVo?Chain?declare_cog_chain_interlocking_conc";
+    public string DeclareCogwheelChainInteractionConcave = "http://mathhub.info/LoViVo?Chain?declare_cog_chain_interlocking_conc";
+    public string CogwheelChainForceConvex = "http://mathhub.info/LoViVo?Forces?chain_cogwheel_force_conv";
+    public string CogwheelChainForceConcave = "http://mathhub.info/LoViVo?Forces?chain_cogwheel_force_conc";
 
 
     public string Shaft = "http://mathhub.info/LoViVo?Shaft?shaft";
@@ -40,15 +43,18 @@ public class MMTURICollection
 
     public string ShaftCogwheelInterlocking = "http://mathhub.info/LoViVo?Shaft?shaft_cog_interlocking";
     public string DeclareShaftCogwheelInterlocking = "http://mathhub.info/LoViVo?Shaft?declare_shaft_cog_interlocking";
+    public string ShaftCogwheelTorque = "http://mathhub.info/LoViVo?Forces?shaft_cogwheel_torque";
 
     public string Motor = "http://mathhub.info/LoViVo?Motor?motor";
     public string MotorOf = "http://mathhub.info/LoViVo?Motor?create_motor";
 
     public string MotorShaftInterlocking = "http://mathhub.info/LoViVo?Motor?Motor_shaft_interlocking";
     public string DeclareMotorShaftInterlocking = "http://mathhub.info/LoViVo?Motor?declare_motor_shaft_interlocking";
+    public string MotorShaftTorque = "http://mathhub.info/LoViVo?Forces?motor_shaft_torque";
 
     public string GearboxEquationSystem = "http://mathhub.info/LoViVo?Gearbox?gearbox_eqsys";
     public string GearboxEquationSystem2 = "http://mathhub.info/LoViVo?Gearbox?gearbox_eqsys2";
+    public string GearboxForcesEquationSystem = "http://mathhub.info/LoViVo?Forces?fprces_eqsys";
 
     public string TestEquationSystem = "http://mathhub.info/LoViVo?Test?TestEqsys";
 
@@ -102,7 +108,7 @@ public static class JSONManager
                         && ((OMA)this).arguments.ElementAt(0).GetType().Equals(typeof(OMA))
                         && ((OMA)((OMA)this).arguments.ElementAt(0)).applicant.GetType().Equals(typeof(OMS))
                         && ((OMS)((OMA)((OMA)this).arguments.ElementAt(0)).applicant).uri.Equals(MMTURIs.Record)
-                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.Count == 8
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.Count == 9
                         && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0).GetType().Equals(typeof(RECARG))
                         && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).name.Equals("pitchRadius")
                         && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).value.GetType().Equals(typeof(OMF))
@@ -130,7 +136,7 @@ public static class JSONManager
                         && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0).GetType().Equals(typeof(RECARG))
                         && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).name.Equals("tuple_list")
                         && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1).GetType().Equals(typeof(RECARG))
-                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).name.Equals("ID");                    
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).name.Equals("ID");
         }
 
         public bool isSimplifiedShaftAvTerm()
@@ -147,7 +153,98 @@ public static class JSONManager
                         && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).name.Equals("ID");
         }
 
+        public bool isSimplifiedMotorShaftTorqueTerm()
+        {
+            return this.GetType().Equals(typeof(OMA))
+                        && ((OMA)this).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)this).applicant).uri.Equals(MMTURIs.MotorShaftTorque)
+                        && ((OMA)this).arguments.Count == 1
+                        && ((OMA)this).arguments.ElementAt(0).GetType().Equals(typeof(OMA))
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)((OMA)this).arguments.ElementAt(0)).applicant).uri.Equals(MMTURIs.Record)
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.Count == 3
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).name.Equals("id")
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).name.Equals("mtr")
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(2).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(2)).name.Equals("sft");
+        }
+
+        public bool isSimplifiedShaftCogwheelTorqueTerm()
+        {
+            return this.GetType().Equals(typeof(OMA))
+                        && ((OMA)this).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)this).applicant).uri.Equals(MMTURIs.ShaftCogwheelTorque)
+                        && ((OMA)this).arguments.Count == 1
+                        && ((OMA)this).arguments.ElementAt(0).GetType().Equals(typeof(OMA))
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)((OMA)this).arguments.ElementAt(0)).applicant).uri.Equals(MMTURIs.Record)
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.Count == 3
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).name.Equals("id")
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).name.Equals("sft")
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(2).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(2)).name.Equals("cog");
+        }
+
+        public bool isSimplifiedCogwheelCogwheelForceTerm()
+        {
+            return this.GetType().Equals(typeof(OMA))
+                        && ((OMA)this).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)this).applicant).uri.Equals(MMTURIs.CogwheelCogwheelForce)
+                        && ((OMA)this).arguments.Count == 1
+                        && ((OMA)this).arguments.ElementAt(0).GetType().Equals(typeof(OMA))
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)((OMA)this).arguments.ElementAt(0)).applicant).uri.Equals(MMTURIs.Record)
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.Count == 3
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).name.Equals("id")
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).name.Equals("cog_1")
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(2).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(2)).name.Equals("cog_2");
+        }
+
+        public bool isSimplifiedCogwheelChainConvForceTerm()
+        {
+            return this.GetType().Equals(typeof(OMA))
+                        && ((OMA)this).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)this).applicant).uri.Equals(MMTURIs.CogwheelChainForceConvex) 
+                        && ((OMA)this).arguments.Count == 1
+                        && ((OMA)this).arguments.ElementAt(0).GetType().Equals(typeof(OMA))
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)((OMA)this).arguments.ElementAt(0)).applicant).uri.Equals(MMTURIs.Record)
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.Count == 3
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).name.Equals("id")
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).name.Equals("cog")
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(2).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(2)).name.Equals("chn");
+        }
+
+        public bool isSimplifiedCogwheelChainConcForceTerm()
+        {
+            return this.GetType().Equals(typeof(OMA))
+                        && ((OMA)this).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)this).applicant).uri.Equals(MMTURIs.CogwheelChainForceConcave)
+                        && ((OMA)this).arguments.Count == 1
+                        && ((OMA)this).arguments.ElementAt(0).GetType().Equals(typeof(OMA))
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).applicant.GetType().Equals(typeof(OMS))
+                        && ((OMS)((OMA)((OMA)this).arguments.ElementAt(0)).applicant).uri.Equals(MMTURIs.Record)
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.Count == 3
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(0)).name.Equals("id")
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(1)).name.Equals("cog")
+                        && ((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(2).GetType().Equals(typeof(RECARG))
+                        && ((RECARG)((OMA)((OMA)this).arguments.ElementAt(0)).arguments.ElementAt(2)).name.Equals("chn");
+        }
     }
+
+
 
     public class OMA : MMTTerm
     {

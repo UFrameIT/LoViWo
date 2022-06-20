@@ -100,9 +100,12 @@ public class MotorPlacementTool : MonoBehaviour
         int id = GameState.simulationHandler.getNextId();
         SimulatedMotor simMotor = new SimulatedMotor(id);
         simMotor.addObjectRepresentation(movingObject);
-        movingObject.GetComponentInChildren<RefactorMotor>().addSimulatedObject(simMotor);
+
+        RefactorMotor motor = movingObject.GetComponentInChildren<RefactorMotor>();
+
+        motor.addSimulatedObject(simMotor);
         GameState.simulationHandler.activeSimAddSimObject(simMotor);
-        MotorFact motorFact = new MotorFact(id, 30.0f);
+        MotorFact motorFact = new MotorFact(id, motor.getDrive());
         simMotor.addFactRepresentation(motorFact);
         
 

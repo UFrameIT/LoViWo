@@ -12,9 +12,12 @@ public class SimulatedCogwheel : SimulatedObject
 
     public override void applyValuesOfInterest(Dictionary<ValueOfInterest, float> input)
     {
-        float av = input[this.valuesOfInterest[0]];
+        if (input.ContainsKey(this.valuesOfInterest[0]))
+        {
+            float av = input[this.valuesOfInterest[0]];
 
-        this.getObjectRepresentation().GetComponentInChildren<RotatableCogwheel>().rotate(av, true);
+            this.getObjectRepresentation().GetComponentInChildren<RotatableCogwheel>().rotate(av, true);
+        }
     }
     public override void unapplyValuesOfInterest()
     {

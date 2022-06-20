@@ -11,7 +11,6 @@ public class ValueOfInterest
 {
     private string name;
     private Fact relevantFact;    //Fact representing the Objec to which this value of interest applies
-    private string relevantValue; //MMTURI
 
     public ValueOfInterest(string name)
     {
@@ -23,20 +22,14 @@ public class ValueOfInterest
         return name;
     }
 
-    public void setRelevantFactAndValue(Fact relevantFact, string relevantValue)
+    public void setRelevantFact(Fact relevantFact)
     {
         this.relevantFact = relevantFact;
-        this.relevantValue = relevantValue;
     }
 
     public Fact getRelevantFact()
     {
         return this.relevantFact;
-    }
-
-    public string getRelevantValue()
-    {
-        return this.relevantValue;
     }
 
 }

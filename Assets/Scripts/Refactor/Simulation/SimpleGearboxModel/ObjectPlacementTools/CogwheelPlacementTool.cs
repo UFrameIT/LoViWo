@@ -250,9 +250,9 @@ public class CogwheelPlacementTool : MonoBehaviour
         Vector3 pos = simCogwheel.getObjectRepresentation().transform.position;
         Vector3 up = simCogwheel.getObjectRepresentation().transform.up;
 
-        CogwheelFact factRepresentation = new CogwheelFact(id, pos, up, radius, insideRadius, outsideRadius);
+        CogwheelFact factRepresentation = new CogwheelFact(id, pos, up, radius, insideRadius, outsideRadius, 0.0f);
         simCogwheel.addFactRepresentation(factRepresentation);
-        simCogwheel.getValuesOfInterest().First().setRelevantFactAndValue((Fact)factRepresentation, MMTURIs.CogwheelAngularVelocity);
+        simCogwheel.getValuesOfInterest().First().setRelevantFact((Fact)factRepresentation);
         simCogwheel.getObjectRepresentation().GetComponentInChildren<RotatableCogwheel>().setAssociatedFact(factRepresentation);
 
         return simCogwheel;

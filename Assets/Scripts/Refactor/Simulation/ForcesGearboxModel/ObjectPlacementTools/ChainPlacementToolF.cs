@@ -5,7 +5,7 @@ using UnityEngine;
 using System;
 using static JSONManager;
 
-public class ChainPlacementTool : MonoBehaviour
+public class ChainPlacementToolF : MonoBehaviour
 {
     public GameObject chainPrefab;
 
@@ -267,7 +267,7 @@ public class ChainPlacementTool : MonoBehaviour
 
                         SimulatedChain simChain = createSimultedChain(newChain, Chain);
 
-                        createChainInteractions(simChain, Chain);
+                        createChainForcesInteractions(simChain, Chain);
 
                         /*
                         int chnId = GameState.Facts.Count;
@@ -310,7 +310,7 @@ public class ChainPlacementTool : MonoBehaviour
 
                         SimulatedChain simChain = createSimultedChain(newChain, Chain);
 
-                        createChainInteractions(simChain, Chain);
+                        createChainForcesInteractions(simChain, Chain);
 
                         /*
                         int chnId = GameState.Facts.Count;
@@ -777,24 +777,25 @@ public class ChainPlacementTool : MonoBehaviour
         int[] cogIds = chain.Select(tpl1 => tpl1.Item1.GetComponent<RotatableCogwheel>().getAssociatedFact().Id).ToArray(); //Select(fact => fact.Id).ToArray()
         bool[] orientatins = chain.Select(tpl1 => tpl1.Item2).ToArray();
 
-        List<SimulatedCogwheel> cogwheels = chain.Select(tup => tup.Item1.GetComponentInChildren<RefactorCogwheel>().getSimulatedObject()).Cast<SimulatedCogwheel>().ToList();
+        List<SimulatedCogwheelF> cogwheels = chain.Select(tup => tup.Item1.GetComponentInChildren<RefactorCogwheel>().getSimulatedObject()).Cast<SimulatedCogwheelF>().ToList();
         List<bool> orientations = chain.Select(tup => tup.Item2).ToList();
-        ChainFact chainFact = new ChainFact(id, cogwheels, orientations);
+        ChainFact chainFact = new ChainFact(id, cogwheels.Cast<SimulatedCogwheel>().ToList(), orientations);
 
         simChain.addFactRepresentation(chainFact);
-        simChain.getValuesOfInterest().First().setRelevantFactAndValue((Fact)chainFact, MMTURIs.ChainVelocity);
+        simChain.getValuesOfInterest().First().setRelevantFact((Fact)chainFact);
 
         return simChain;
     }
 
-    private void createChainInteractions(SimulatedChain simChain, List<Tuple<GameObject, bool>> InterlockingCogwheels)
+    private void createChainForcesInteractions(SimulatedChain simChain, List<Tuple<GameObject, bool>> InterlockingCogwheels)
     {
-        List<CogwheelChainInteraction> interactions = new List<CogwheelChainInteraction>();
+        List<CogwheelChainForcesInteraction> interactions = new List<CogwheelChainForcesInteraction>();
         foreach (Tuple<GameObject, bool> interlocking in InterlockingCogwheels)
         {
             int id = GameState.simulationHandler.getNextId();
-            SimulatedCogwheel simCog = (SimulatedCogwheel)interlocking.Item1.GetComponentInChildren<RefactorCogwheel>().getSimulatedObject();
-            CogwheelChainInteraction interaction = new CogwheelChainInteraction(id, simCog, simChain, interlocking.Item2);
+            SimulatedCogwheelF simCog = (SimulatedCogwheelF)interlocking.Item1.GetComponentInChildren<RefactorCogwheel>().getSimulatedObject();
+            CogwheelChainInteraction interaction = new CogwheelChainForcesInteraction(id, simCog, simChain, interlocking.Item2);
+            ((ForcesInteraction)interaction).getValuesOfInterest().First().setRelevantFact(interaction.getInteractionFact());
             GameState.simulationHandler.activeSimAddInteraction(interaction);
         }
     }

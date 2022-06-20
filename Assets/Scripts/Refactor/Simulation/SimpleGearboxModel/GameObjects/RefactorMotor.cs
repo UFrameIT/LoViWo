@@ -7,6 +7,7 @@ public class RefactorMotor : MonoBehaviour
     private GameObject connectedShaft;
     private Fact associatedFact;
     private SimulatedObject simulatedObject;
+    private float drive;
 
     public void addConnecedShaft(GameObject shaft)
     {
@@ -36,6 +37,16 @@ public class RefactorMotor : MonoBehaviour
     public Fact getAssociatedFact()
     {
         return this.associatedFact;
+    }
+
+    public void setDrive(float drive)
+    {
+        this.drive = drive;
+    }
+
+    public float getDrive()
+    {
+        return this.drive;
     }
 
 }

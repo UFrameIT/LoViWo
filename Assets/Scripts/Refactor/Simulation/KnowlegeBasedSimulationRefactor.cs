@@ -68,6 +68,18 @@ public class KnowlegeBasedSimulationRefactor : MonoBehaviour
                 }
                 else
                 {
+                    Debug.Log("glsTuple.Item1.Count" + glsTuple.Item1.Count);
+                    foreach (List<double> l in glsTuple.Item1)
+                    {
+                        string line = "";
+                        foreach (double d in l)
+                        {
+                            line += d + " ";
+                        }
+                        Debug.Log(line);
+                    }
+
+
                     List<List<double>> AData = glsTuple.Item1;
                     List<double> bData = glsTuple.Item2;
                     List<MMTTerm> variables = glsTuple.Item3;
@@ -103,19 +115,17 @@ public class KnowlegeBasedSimulationRefactor : MonoBehaviour
                         AExtendedRanks.Add(AExtendedRank);
                         int numberOfVariables = independentMatrices.Item3[i].Count;
 
+                        string[] eqs = equationsToString(independentMatrices.Item1[i], independentMatrices.Item2[i], independentMatrices.Item3[i], valuesOfIntrest);
 
                         if (ARank != AExtendedRank)
                         {
                             numbersOfSolutions.Add("0");
-                            equationsList.Add(new string[0]);
+                            equationsList.Add(eqs);
 
                             Debug.Log(String.Format("The linear EquationSystem has NO solution. Reason: rank of A and rank of AExtended are not equal. RankA = {0}, RankAExtended = {1}", ARank, AExtendedRank));
                             
                             continue;
-                        }
-
-                        string[] eqs = equationsToString(independentMatrices.Item1[i], independentMatrices.Item2[i], independentMatrices.Item3[i], valuesOfIntrest);                        
-
+                        }                        
 
                         if (ARank < numberOfVariables)
                         {
@@ -146,7 +156,6 @@ public class KnowlegeBasedSimulationRefactor : MonoBehaviour
                             continue;
                         }   
                     }
-                    Debug.Log("test");
                     CommunicationEvents.showEquationSystemsEvent.Invoke(equationsList, ARanks, AExtendedRanks, numbersOfSolutions);
 
                     return discoveredVoiVals;              
@@ -257,6 +266,9 @@ public class KnowlegeBasedSimulationRefactor : MonoBehaviour
                 {
                     //get the value of interest represented by the current variable
                     MMTTerm variable = variables.ElementAt(j);
+                    Debug.Log(variable);
+                    Debug.Log("i: " + i);
+                    Debug.Log("j: " + j);
                     ValueOfInterest voi = variableGetValueOfIntrest(valuesOfInterest, variable);
                     //get the name of said value of interest
                     string voiName = voi.getName();
@@ -307,7 +319,35 @@ public class KnowlegeBasedSimulationRefactor : MonoBehaviour
             float id = ((OMF)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(0)).value).f;
             valueOfInterest = valuesOfInterest.Find(voi => voi.getRelevantFact() != null && ((float)voi.getRelevantFact().Id).Equals(id));
         }
+        else if (variable.isSimplifiedMotorShaftTorqueTerm())
+        {
+            float id = ((OMF)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(0)).value).f;
+            valueOfInterest = valuesOfInterest.Find(voi => voi.getRelevantFact() != null && ((float)voi.getRelevantFact().Id).Equals(id));
+        }
+        else if (variable.isSimplifiedShaftCogwheelTorqueTerm())
+        {
+            float id = ((OMF)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(0)).value).f;
+            valueOfInterest = valuesOfInterest.Find(voi => voi.getRelevantFact() != null && ((float)voi.getRelevantFact().Id).Equals(id));
+        }
+        else if (variable.isSimplifiedCogwheelCogwheelForceTerm())
+        {
+            float id = ((OMF)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(0)).value).f;
+            valueOfInterest = valuesOfInterest.Find(voi => voi.getRelevantFact() != null && ((float)voi.getRelevantFact().Id).Equals(id));
+        }
+        else if (variable.isSimplifiedCogwheelChainConcForceTerm())
+        {
+            Debug.Log("c-chn-c");
+            float id = ((OMF)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(0)).value).f;
+            valueOfInterest = valuesOfInterest.Find(voi => voi.getRelevantFact() != null && ((float)voi.getRelevantFact().Id).Equals(id));
+        }
+        else if (variable.isSimplifiedCogwheelChainConvForceTerm())
+        {
+            Debug.Log("c-chn-v");
+            float id = ((OMF)((RECARG)((OMA)((OMA)variable).arguments.ElementAt(0)).arguments.ElementAt(0)).value).f;
+            valueOfInterest = valuesOfInterest.Find(voi => voi.getRelevantFact() != null && ((float)voi.getRelevantFact().Id).Equals(id));
+        }
 
+        Debug.Log("foo");
         return valueOfInterest;
     }
 

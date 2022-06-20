@@ -5,7 +5,7 @@ using System;
 using System.Linq;
 using static JSONManager;
 
-public class ShaftPlacementTool : MonoBehaviour
+public class ShaftPlacementToolF : MonoBehaviour
 {
     public RaycastHit Hit;
     private Camera Cam;
@@ -23,7 +23,7 @@ public class ShaftPlacementTool : MonoBehaviour
         this.layerMask = ~this.layerMask;
         Cam = Camera.main;
 
-        CommunicationEvents.positionShaftEvent.AddListener(Activate);
+        CommunicationEvents.positionShaftFEvent.AddListener(Activate);
         CommunicationEvents.openUIEvent.AddListener(Cancel);
         CommunicationEvents.closeUIEvent.AddListener(Cancel);
     }
@@ -120,13 +120,13 @@ public class ShaftPlacementTool : MonoBehaviour
             {
                 RefactorMotor motor = getUpperParent(lastCollidedObject).GetComponentInChildren<RefactorMotor>();
                 motor.addConnecedShaft(this.movingObject);
-                createMotorInteraction((SimulatedMotor)motor.getSimulatedObject(), simShaft);
+                createMotorForcesInteraction((SimulatedMotor)motor.getSimulatedObject(), simShaft);
                 Debug.Log("added shaft to generator");
             }
             if (lastCollidedObject != null && getUpperParent(lastCollidedObject).GetComponentInChildren<RefactorCogwheel>() != null)
             {
                 RefactorCogwheel cogwheel = getUpperParent(lastCollidedObject).GetComponentInChildren<RefactorCogwheel>();
-                createShaftInteraction(simShaft, (SimulatedCogwheel)cogwheel.getSimulatedObject());
+                createShaftForcesInteraction(simShaft, (SimulatedCogwheelF)cogwheel.getSimulatedObject());
                 Debug.Log("added shaft cogwheel Interaction");
             }
 
@@ -157,23 +157,25 @@ public class ShaftPlacementTool : MonoBehaviour
         ShaftFact shaftFact = new ShaftFact(id);
 
         simShaft.addFactRepresentation(shaftFact);
-        simShaft.getValuesOfInterest().First().setRelevantFactAndValue((Fact)shaftFact, MMTURIs.ShaftAngularVelocity);
+        simShaft.getValuesOfInterest().First().setRelevantFact((Fact)shaftFact);
         simShaft.getObjectRepresentation().GetComponentInChildren<RefactorShaft>().addAssociatedFact(shaftFact);
 
         return simShaft;
     }
 
-    private void createShaftInteraction(SimulatedShaft simShaft, SimulatedCogwheel simCogwheel)
+    private void createShaftForcesInteraction(SimulatedShaft simShaft, SimulatedCogwheelF simCogwheel)
     {
         int id = GameState.simulationHandler.getNextId();
-        ShaftCogwheelInteraction interaction = new ShaftCogwheelInteraction(id, simCogwheel, simShaft);
+        ShaftCogwheelForcesInteraction interaction = new ShaftCogwheelForcesInteraction(id, simCogwheel, simShaft);
+        ((ForcesInteraction)interaction).getValuesOfInterest().First().setRelevantFact(interaction.getInteractionFact());
         GameState.simulationHandler.activeSimAddInteraction(interaction);
     }
 
-    private void createMotorInteraction(SimulatedMotor simMotor, SimulatedShaft simShaft)
+    private void createMotorForcesInteraction(SimulatedMotor simMotor, SimulatedShaft simShaft)
     {
         int id = GameState.simulationHandler.getNextId();
-        MotorShaftInteraction interaction = new MotorShaftInteraction(id, simMotor, simShaft);
+        MotorShaftForcesInteraction interaction = new MotorShaftForcesInteraction(id, simMotor, simShaft);
+        ((ForcesInteraction)interaction).getValuesOfInterest().First().setRelevantFact(interaction.getInteractionFact());
         GameState.simulationHandler.activeSimAddInteraction(interaction);
     }
 }

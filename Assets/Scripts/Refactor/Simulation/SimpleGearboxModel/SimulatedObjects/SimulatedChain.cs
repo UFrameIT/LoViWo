@@ -12,9 +12,12 @@ public class SimulatedChain : SimulatedObject
 
     public override void applyValuesOfInterest(Dictionary<ValueOfInterest, float> input)
     {
-        float cv = input[this.valuesOfInterest[0]];
+        if (input.ContainsKey(this.valuesOfInterest[0]))
+        {
+            float cv = input[this.valuesOfInterest[0]];
 
-        this.getObjectRepresentation().GetComponentInChildren<ChainObject>().move(cv * ((2.0f * 3.14f) / 360.0f));
+            this.getObjectRepresentation().GetComponentInChildren<ChainObject>().move(cv * ((2.0f * 3.14f) / 360.0f));
+        }
     }
 
     public override void unapplyValuesOfInterest()

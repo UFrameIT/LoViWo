@@ -1063,7 +1063,7 @@ GameObject:
   - component: {fileID: 1756704132705302519}
   - component: {fileID: 1756704132705302518}
   - component: {fileID: 1756704132705302516}
-  - component: {fileID: -5623740097706317662}
+  - component: {fileID: 6250167577441839635}
   m_Layer: 5
   m_Name: ModelingShaftPanel
   m_TagString: Untagged
@@ -1149,7 +1149,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   window: {fileID: 1756704132705302512}
   panelTitle: {fileID: 1756704132913595270}
---- !u!114 &-5623740097706317662
+--- !u!114 &6250167577441839635
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1158,7 +1158,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1756704132705302512}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4271e495d9f3e3d42bbeb6587b55e6ec, type: 3}
+  m_Script: {fileID: 11500000, guid: e1b2ad02697217443a271c3b92a24c13, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   shaftPrefab: {fileID: 0}
@@ -1285,8 +1285,8 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: -5623740097706317662}
-        m_TargetAssemblyTypeName: CreateShaft, Assembly-CSharp
+      - m_Target: {fileID: 6250167577441839635}
+        m_TargetAssemblyTypeName: CreateShaftF, Assembly-CSharp
         m_MethodName: createShaft
         m_Mode: 1
         m_Arguments:

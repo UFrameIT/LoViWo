@@ -14,12 +14,22 @@ public static class CommunicationEvents
     public class EquationSystemEvent : UnityEvent<string[], int, int, string> {}
     public class EquationSystemsEvent : UnityEvent<List<string[]>, List<int>, List<int>, List<string>> {}
 
+    public class CogwheelFEvent : UnityEvent<GameObject, float> { }
+
+    public class SimulationSelectedEvent : UnityEvent<Simulation> { }
+
     public static SignalEvent closeUIEvent = new SignalEvent();
     public static SignalEvent openUIEvent = new SignalEvent();
     public static SignalEvent openPanelEvent = new SignalEvent();
+
     public static AnimationEvent positionCogwheelEvent = new AnimationEvent();
     public static AnimationEvent positionGeneratorEvent = new AnimationEvent();
     public static AnimationEvent positionShaftEvent = new AnimationEvent();
+
+    public static CogwheelFEvent positionCogwheelFEvent = new CogwheelFEvent();
+    public static AnimationEvent positionGeneratorFEvent = new AnimationEvent();
+    public static AnimationEvent positionShaftFEvent = new AnimationEvent();
+
     public static AnimationEvent positionShaftHolderEvent = new AnimationEvent();
 
     public static SimulationEvent generatorOnEvent = new SimulationEvent();
@@ -27,4 +37,6 @@ public static class CommunicationEvents
 
     public static EquationSystemEvent showEquationSystemEvent = new EquationSystemEvent();
     public static EquationSystemsEvent showEquationSystemsEvent = new EquationSystemsEvent();
+
+    public static SimulationSelectedEvent showSimulationObjectsPanelEvent = new SimulationSelectedEvent();
 }

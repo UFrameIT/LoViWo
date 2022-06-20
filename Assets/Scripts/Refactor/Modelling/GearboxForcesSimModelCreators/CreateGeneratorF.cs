@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class CreateGenerator : MonoBehaviour, CreateModel
+public class CreateGeneratorF : MonoBehaviour, CreateModel
 {
     public GameObject generatorPrefab;
     public InputField heightInput;
@@ -37,7 +37,7 @@ public class CreateGenerator : MonoBehaviour, CreateModel
             standPart.position = new Vector3(standPart.position.x, height/2.0f, standPart.position.z);
             standPart.localScale = new Vector3(standPart.localScale.x, height, standPart.localScale.z);
 
-            CommunicationEvents.positionGeneratorEvent.Invoke(generator);
+            CommunicationEvents.positionGeneratorFEvent.Invoke(generator);
         }
         else
             Debug.Log("Input for height could not be parsed correctly OR height isn't >= 10!");

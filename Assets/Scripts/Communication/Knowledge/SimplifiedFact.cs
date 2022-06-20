@@ -205,6 +205,9 @@ public class SEqsysFact : SSymbolFact
         return noErrors;
     }
 
+    /*
+     * recursive method for gathring all summands and all subtrahends out of the left side of a equation
+     */
     private void getPlusMinusTerms(List<MMTTerm> plusTerms, List<MMTTerm> minusTerms, MMTTerm newTerm) {
         if (newTerm.GetType().Equals(typeof(OMA))
                 && ((OMA)newTerm).applicant.GetType().Equals(typeof(OMS))
@@ -229,6 +232,10 @@ public class SEqsysFact : SSymbolFact
         }
     }
 
+
+    /*
+     * 
+     */
     private bool processPlusMinusTerm(Dictionary<MMTTerm, OMF> multPairs, List<MMTTerm> variables, MMTTerm term, bool plus)
     {
         //case: Times_real_lit of arguments
@@ -275,7 +282,13 @@ public class SEqsysFact : SSymbolFact
         else if (term.GetType().Equals(typeof(OMA))            // case: Term a angular velocity
                     && ((OMA)term).applicant.GetType().Equals(typeof(OMS))
                     && (((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.CogwheelAngularVelocity)
-                         || ((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.ShaftAngularVelocity)))   
+                         || ((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.ShaftAngularVelocity)
+                         || ((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.ChainVelocity) 
+                         || ((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.MotorShaftTorque)
+                         || ((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.ShaftCogwheelTorque)
+                         || ((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.CogwheelCogwheelForce)
+                         || ((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.CogwheelChainForceConcave)
+                         || ((OMS)((OMA)term).applicant).uri.Equals(MMTURIs.CogwheelChainForceConvex) ) )   
         {
             OMF multiplier;
             if (plus)
